@@ -138,6 +138,26 @@
     background: #000c; color: #fff; padding: 10px 18px; border-radius: 20px;
     font-size: 13px; z-index: 40; display: none; white-space: nowrap;
   }
+  /* タブレット・PC（広い画面） */
+  @media (min-width: 700px) {
+    header { padding: 10px 16px; gap: 8px; }
+    #projName { font-size: 18px; }
+    .iconBtn { width: 44px; height: 44px; font-size: 19px; border-radius: 12px; }
+    #sideTools { right: 14px; top: 14px; gap: 10px; }
+    #hint { font-size: 13px; left: 14px; bottom: 12px; }
+    footer { padding: 10px 16px; }
+    #playBtn { width: 54px; height: 54px; font-size: 21px; }
+    #addFormBtn { width: 54px; height: 54px; font-size: 24px; }
+    .fchip { min-width: 88px; padding: 8px 14px; }
+    .fchip .fname { font-size: 13px; }
+    .fchip .fmeta { font-size: 11px; }
+    #musicRow { font-size: 13px; }
+    #markBtn { padding: 8px 16px; font-size: 14px; }
+    /* モーダルを下端シートから中央ダイアログに */
+    #overlay { align-items: center; padding: 32px; }
+    #modal { border-radius: 16px; max-height: 85%; padding: 22px 24px 26px; }
+    .btn { font-size: 15px; }
+  }
 </style>
 </head>
 <body>
@@ -974,7 +994,9 @@ function openHelpModal() {
     '<b>■ 保存と共有</b><br>' +
     '・編集内容は<b>自動保存</b>されます<br>' +
     '・☰メニューからJSONファイルの書き出し/読み込みで、他の端末や友達とデータを共有できます<br>' +
-    '・「全隊形を画像で保存」で一覧表をPNG画像として保存できます<br>' +
+    '・「全隊形を画像で保存」で一覧表をPNG画像として保存できます<br><br>' +
+    '<b>■ キーボード（タブレット/PC）</b><br>' +
+    '・スペース=再生/停止　←→=隊形切替　Ctrl+Z=元に戻す　Ctrl+Y=やり直す　Esc=閉じる<br>' +
     '</div>' +
     '<div class="mrow" style="margin-top:12px"><button class="btn primary" id="helpClose">閉じる</button></div>'
   );
@@ -1315,6 +1337,30 @@ document.getElementById("projName").onclick = () => {
   if (name === null) return;
   mutate(() => { state.name = name.trim() || state.name; });
 };
+
+/* キーボードショートカット（タブレット+キーボード / PC） */
+document.addEventListener("keydown", e => {
+  const tag = (e.target.tagName || "").toUpperCase();
+  if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
+  if (overlay.classList.contains("show")) {
+    if (e.key === "Escape") closeModal();
+    return;
+  }
+  const mod = e.ctrlKey || e.metaKey;
+  if (mod && !e.shiftKey && e.key.toLowerCase() === "z") {
+    e.preventDefault(); doUndo();
+  } else if (mod && (e.key.toLowerCase() === "y" || (e.shiftKey && e.key.toLowerCase() === "z"))) {
+    e.preventDefault(); doRedo();
+  } else if (e.key === " ") {
+    e.preventDefault(); document.getElementById("playBtn").click();
+  } else if (e.key === "ArrowLeft" && !playing) {
+    if (curF > 0) { curF--; refreshAll(); }
+  } else if (e.key === "ArrowRight" && !playing) {
+    if (curF < state.formations.length - 1) { curF++; refreshAll(); }
+  } else if (e.key === "Escape" && playing) {
+    stopPlay();
+  }
+});
 
 /* Android 戻るボタン連携 */
 window.appBack = function () {
