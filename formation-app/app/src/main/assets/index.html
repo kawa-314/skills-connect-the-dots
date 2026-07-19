@@ -1,0 +1,1086 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>フォーメーションメーカー</title>
+<style>
+  :root {
+    --bg: #12141a;
+    --panel: #1e222b;
+    --panel2: #2a2f3b;
+    --text: #e8eaf0;
+    --dim: #9aa2b1;
+    --accent: #4f8cff;
+    --accent2: #37c978;
+    --danger: #ff5d6c;
+    --chip: #262b36;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; overflow: hidden; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: "Hiragino Sans", "Noto Sans JP", sans-serif;
+    display: flex; flex-direction: column;
+    touch-action: none;
+  }
+  header {
+    display: flex; align-items: center; gap: 6px;
+    padding: 8px 10px; background: var(--panel);
+    flex: none; z-index: 5;
+  }
+  #projName {
+    flex: 1; font-size: 15px; font-weight: 600;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .iconBtn {
+    border: none; background: var(--panel2); color: var(--text);
+    width: 38px; height: 38px; border-radius: 10px; font-size: 17px;
+    flex: none; display: flex; align-items: center; justify-content: center;
+  }
+  .iconBtn:active { background: #3a4152; }
+  .iconBtn.on { background: var(--accent); color: #fff; }
+  .iconBtn:disabled { opacity: 0.35; }
+  #stageWrap { flex: 1; position: relative; overflow: hidden; }
+  canvas { display: block; width: 100%; height: 100%; touch-action: none; }
+  #sideTools {
+    position: absolute; right: 8px; top: 8px;
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  #hint {
+    position: absolute; left: 8px; bottom: 8px; right: 60px;
+    color: var(--dim); font-size: 11px; pointer-events: none;
+  }
+  footer { flex: none; background: var(--panel); padding: 8px; z-index: 5; }
+  #timelineRow { display: flex; align-items: center; gap: 8px; }
+  #playBtn {
+    width: 46px; height: 46px; border-radius: 50%;
+    border: none; background: var(--accent2); color: #fff; font-size: 18px; flex: none;
+  }
+  #playBtn.playing { background: var(--danger); }
+  #timeline {
+    flex: 1; display: flex; gap: 6px; overflow-x: auto; padding: 2px;
+    scrollbar-width: none;
+  }
+  #timeline::-webkit-scrollbar { display: none; }
+  .fchip {
+    flex: none; min-width: 64px; padding: 6px 10px; border-radius: 10px;
+    background: var(--chip); border: 2px solid transparent; text-align: center;
+  }
+  .fchip.cur { border-color: var(--accent); background: #2b3752; }
+  .fchip .fname { font-size: 12px; font-weight: 600; }
+  .fchip .fmeta { font-size: 10px; color: var(--dim); margin-top: 2px; }
+  .fchip .fnote { color: #ffd76a; }
+  #addFormBtn {
+    flex: none; width: 46px; height: 46px; border-radius: 10px; border: none;
+    background: var(--panel2); color: var(--text); font-size: 20px;
+  }
+  /* modal */
+  #overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.55);
+    display: none; align-items: flex-end; justify-content: center; z-index: 20;
+  }
+  #overlay.show { display: flex; }
+  #modal {
+    background: var(--panel); width: 100%; max-width: 560px;
+    max-height: 82%; overflow-y: auto;
+    border-radius: 16px 16px 0 0; padding: 16px 16px 24px;
+  }
+  #modal h2 { font-size: 16px; margin-bottom: 12px; }
+  #modal h3 { font-size: 13px; color: var(--dim); margin: 14px 0 6px; }
+  .mrow { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; flex-wrap: wrap; }
+  .btn {
+    border: none; border-radius: 10px; padding: 10px 14px;
+    background: var(--panel2); color: var(--text); font-size: 14px;
+  }
+  .btn:active { background: #3a4152; }
+  .btn.primary { background: var(--accent); color: #fff; }
+  .btn.green { background: var(--accent2); color: #fff; }
+  .btn.danger { background: #59303a; color: #ffb3ba; }
+  .btn.wide { width: 100%; text-align: left; margin-bottom: 8px; }
+  input[type=text], input[type=number], textarea, select {
+    background: var(--panel2); border: 1px solid #3a4152; color: var(--text);
+    border-radius: 8px; padding: 9px 10px; font-size: 14px;
+  }
+  input[type=number] { width: 76px; }
+  textarea { width: 100%; min-height: 84px; }
+  .drow {
+    display: flex; align-items: center; gap: 8px; padding: 6px 0;
+    border-bottom: 1px solid #2a2f3b;
+  }
+  .swatch {
+    width: 30px; height: 30px; border-radius: 50%; flex: none;
+    border: 2px solid #fff3;
+  }
+  .drow input[type=text] { flex: 1; min-width: 0; }
+  .drow .selBox { width: 20px; height: 20px; flex: none; }
+  .palette { display: flex; gap: 6px; flex-wrap: wrap; margin: 8px 0; }
+  .palette .swatch.sel { border-color: #fff; }
+  .toolGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .helpText { font-size: 13px; line-height: 1.75; color: var(--text); }
+  .helpText b { color: var(--accent); }
+  .projRow { display: flex; gap: 8px; align-items: center; padding: 8px 0; border-bottom: 1px solid #2a2f3b; }
+  .projRow .pname { flex: 1; font-size: 14px; }
+  .projRow .pdate { font-size: 11px; color: var(--dim); }
+  #toast {
+    position: fixed; left: 50%; bottom: 90px; transform: translateX(-50%);
+    background: #000c; color: #fff; padding: 10px 18px; border-radius: 20px;
+    font-size: 13px; z-index: 40; display: none; white-space: nowrap;
+  }
+</style>
+</head>
+<body>
+<header>
+  <div id="projName">新しい作品</div>
+  <button class="iconBtn" id="undoBtn" title="元に戻す">↩</button>
+  <button class="iconBtn" id="redoBtn" title="やり直す">↪</button>
+  <button class="iconBtn" id="dancersBtn" title="メンバー">👥</button>
+  <button class="iconBtn" id="toolsBtn" title="整列ツール">⊞</button>
+  <button class="iconBtn" id="menuBtn" title="メニュー">☰</button>
+</header>
+
+<div id="stageWrap">
+  <canvas id="cv"></canvas>
+  <div id="sideTools">
+    <button class="iconBtn" id="fitBtn" title="全体表示">⤢</button>
+    <button class="iconBtn" id="snapBtn" title="グリッド吸着">🧲</button>
+    <button class="iconBtn" id="ghostBtn" title="前の隊形を表示">👣</button>
+    <button class="iconBtn" id="multiBtn" title="複数選択">☑</button>
+  </div>
+  <div id="hint"></div>
+</div>
+
+<footer>
+  <div id="timelineRow">
+    <button id="playBtn">▶</button>
+    <div id="timeline"></div>
+    <button id="addFormBtn" title="隊形を追加">＋</button>
+  </div>
+</footer>
+
+<div id="overlay"><div id="modal"></div></div>
+<div id="toast"></div>
+<input type="file" id="fileInput" accept=".json,application/json,text/plain,*/*" style="display:none">
+
+<script>
+"use strict";
+/* ================= 基本データ ================= */
+const PALETTE = ["#4f8cff","#ff5d6c","#37c978","#ffb340","#b57bff","#3ecfe0",
+                 "#ff7ab0","#a4d144","#ff8a5c","#8ea0ff","#e6c94d","#7fe0b0"];
+const LS_PROJECTS = "fm_projects_v1";
+const LS_CURRENT  = "fm_current_v1";
+
+let state = null;          // 現在の作品データ
+let curProjId = null;
+let curF = 0;              // 現在の隊形index
+let selected = new Set();  // 選択中ダンサーid
+let multiMode = false;
+let snapOn = true;
+let ghostOn = true;
+let undoStack = [], redoStack = [];
+let playing = false, playReq = 0;
+let playPos = null;        // 再生中の補間位置 {did:[x,y]}
+let playInfo = "";
+
+function uid() { return Math.random().toString(36).slice(2, 9); }
+
+function newProject(name) {
+  const d1 = { id: uid(), name: "メンバー1", color: PALETTE[0] };
+  const d2 = { id: uid(), name: "メンバー2", color: PALETTE[1] };
+  const d3 = { id: uid(), name: "メンバー3", color: PALETTE[2] };
+  const st = {
+    ver: 1, name: name || "新しい作品",
+    stage: { w: 12, d: 8 },
+    bpm: 120,
+    dancers: [d1, d2, d3],
+    formations: [{
+      id: uid(), name: "隊形 1", note: "", counts: 8,
+      pos: { [d1.id]: [5, 4], [d2.id]: [6, 3], [d3.id]: [7, 4] }
+    }]
+  };
+  return st;
+}
+
+/* ================= 保存/読込 ================= */
+function loadProjects() {
+  try { return JSON.parse(localStorage.getItem(LS_PROJECTS)) || {}; }
+  catch (e) { return {}; }
+}
+function saveNow() {
+  if (!state || !curProjId) return;
+  const all = loadProjects();
+  all[curProjId] = { name: state.name, updated: Date.now(), data: state };
+  localStorage.setItem(LS_PROJECTS, JSON.stringify(all));
+  localStorage.setItem(LS_CURRENT, curProjId);
+}
+function openProject(id) {
+  const all = loadProjects();
+  if (!all[id]) return false;
+  stopPlay();
+  curProjId = id;
+  state = all[id].data;
+  curF = 0; selected.clear(); undoStack = []; redoStack = [];
+  localStorage.setItem(LS_CURRENT, id);
+  refreshAll(); fitView();
+  return true;
+}
+function createProject(st) {
+  stopPlay();
+  curProjId = uid();
+  state = st;
+  curF = 0; selected.clear(); undoStack = []; redoStack = [];
+  saveNow(); refreshAll(); fitView();
+}
+
+/* ================= undo/redo ================= */
+function pushUndo() {
+  undoStack.push(JSON.stringify({ s: state, f: curF }));
+  if (undoStack.length > 60) undoStack.shift();
+  redoStack = [];
+  updateUndoBtns();
+}
+function doUndo() {
+  if (!undoStack.length) return;
+  redoStack.push(JSON.stringify({ s: state, f: curF }));
+  const p = JSON.parse(undoStack.pop());
+  state = p.s; curF = Math.min(p.f, state.formations.length - 1);
+  selected.clear(); saveNow(); refreshAll();
+}
+function doRedo() {
+  if (!redoStack.length) return;
+  undoStack.push(JSON.stringify({ s: state, f: curF }));
+  const p = JSON.parse(redoStack.pop());
+  state = p.s; curF = Math.min(p.f, state.formations.length - 1);
+  selected.clear(); saveNow(); refreshAll();
+}
+function updateUndoBtns() {
+  document.getElementById("undoBtn").disabled = !undoStack.length;
+  document.getElementById("redoBtn").disabled = !redoStack.length;
+}
+// 変更操作ラッパー
+function mutate(fn) {
+  if (playing) return;
+  pushUndo(); fn(); saveNow(); refreshAll();
+}
+
+/* ================= ビュー(canvas) ================= */
+const cv = document.getElementById("cv");
+const ctx = cv.getContext("2d");
+let view = { scale: 40, ox: 0, oy: 0 };  // px/m, オフセットpx
+const DPR = window.devicePixelRatio || 1;
+
+function resizeCanvas() {
+  const r = cv.parentElement.getBoundingClientRect();
+  cv.width = r.width * DPR; cv.height = r.height * DPR;
+  render();
+}
+window.addEventListener("resize", () => { resizeCanvas(); fitView(); });
+
+function fitView() {
+  const r = cv.parentElement.getBoundingClientRect();
+  const m = 30;
+  const s = Math.min((r.width - m * 2) / state.stage.w, (r.height - m * 2 - 20) / state.stage.d);
+  view.scale = Math.max(8, s);
+  view.ox = (r.width - state.stage.w * view.scale) / 2;
+  view.oy = (r.height - 20 - state.stage.d * view.scale) / 2;
+  render();
+}
+function w2s(x, y) { return [view.ox + x * view.scale, view.oy + y * view.scale]; }
+function s2w(px, py) { return [(px - view.ox) / view.scale, (py - view.oy) / view.scale]; }
+
+function dancerById(id) { return state.dancers.find(d => d.id === id); }
+function curForm() { return state.formations[curF]; }
+function shortName(n) {
+  n = (n || "").trim();
+  if (n.length <= 3) return n;
+  const m = n.match(/(\d+)\s*$/);          // 「メンバー12」→「12」のように末尾の番号を優先
+  if (m) return m[1].slice(0, 3);
+  return n.slice(0, 3);
+}
+
+// 汎用: 任意のctxへ1隊形を描画（PNG書き出しと共用）
+function drawFormation(c, form, sc, ox, oy, opts) {
+  opts = opts || {};
+  const W = state.stage.w, D = state.stage.d;
+  // ステージ
+  c.fillStyle = opts.light ? "#f5f6fa" : "#1b2029";
+  c.fillRect(ox, oy, W * sc, D * sc);
+  c.strokeStyle = opts.light ? "#c8ccd8" : "#39404f";
+  c.lineWidth = 1;
+  // 1mグリッド
+  c.beginPath();
+  for (let x = 1; x < W; x++) { c.moveTo(ox + x * sc, oy); c.lineTo(ox + x * sc, oy + D * sc); }
+  for (let y = 1; y < D; y++) { c.moveTo(ox, oy + y * sc); c.lineTo(ox + W * sc, oy + y * sc); }
+  c.stroke();
+  // センターライン
+  c.strokeStyle = opts.light ? "#9aa2b8" : "#4c5568";
+  c.setLineDash([6, 5]);
+  c.beginPath();
+  c.moveTo(ox + W / 2 * sc, oy); c.lineTo(ox + W / 2 * sc, oy + D * sc);
+  c.stroke(); c.setLineDash([]);
+  // 枠
+  c.strokeStyle = opts.light ? "#7d8598" : "#5b6479";
+  c.lineWidth = 2;
+  c.strokeRect(ox, oy, W * sc, D * sc);
+  // ダンサー
+  const rad = Math.max(7, Math.min(0.35 * sc, 26));
+  for (const d of state.dancers) {
+    const p = form.pos[d.id]; if (!p) continue;
+    const px = ox + p[0] * sc, py = oy + p[1] * sc;
+    c.beginPath(); c.arc(px, py, rad, 0, Math.PI * 2);
+    c.fillStyle = d.color; c.fill();
+    if (selected.has(d.id) && opts.sel) {
+      c.lineWidth = 3; c.strokeStyle = "#ffffff"; c.stroke();
+    }
+    c.fillStyle = "#fff";
+    c.font = "bold " + Math.max(9, rad * 0.72) + "px sans-serif";
+    c.textAlign = "center"; c.textBaseline = "middle";
+    c.fillText(shortName(d.name), px, py);
+  }
+}
+
+function render() {
+  const w = cv.width, h = cv.height;
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  ctx.clearRect(0, 0, w, h);
+  if (!state) return;
+  const sc = view.scale, ox = view.ox, oy = view.oy;
+  const W = state.stage.w, D = state.stage.d;
+  const form = curForm();
+
+  // 背景ステージ（現在の隊形 or 再生位置）
+  const posOf = id => (playing && playPos && playPos[id]) ? playPos[id] : form.pos[id];
+
+  // ステージ本体はdrawFormationの前半と同じ描き方をするため一旦ダミーformで枠のみ
+  drawFormation(ctx, { pos: {} }, sc, ox, oy, {});
+
+  // 客席ラベル
+  ctx.fillStyle = "#9aa2b1";
+  ctx.font = "12px sans-serif";
+  ctx.textAlign = "center"; ctx.textBaseline = "top";
+  ctx.fillText("▼ 客席（正面） ▼", ox + W / 2 * sc, oy + D * sc + 6);
+  ctx.textBaseline = "bottom";
+  ctx.fillText("奥（バック）", ox + W / 2 * sc, oy - 6);
+
+  const rad = Math.max(10, Math.min(0.35 * sc, 30));
+
+  // ゴースト（前の隊形）と移動矢印
+  if (ghostOn && !playing && curF > 0) {
+    const prev = state.formations[curF - 1];
+    for (const d of state.dancers) {
+      const pp = prev.pos[d.id], cp = form.pos[d.id];
+      if (!pp) continue;
+      const [gx, gy] = w2s(pp[0], pp[1]);
+      ctx.globalAlpha = 0.28;
+      ctx.beginPath(); ctx.arc(gx, gy, rad, 0, Math.PI * 2);
+      ctx.fillStyle = d.color; ctx.fill();
+      ctx.globalAlpha = 1;
+      if (cp && (Math.abs(cp[0] - pp[0]) > 0.05 || Math.abs(cp[1] - pp[1]) > 0.05)) {
+        const [cx2, cy2] = w2s(cp[0], cp[1]);
+        const ang = Math.atan2(cy2 - gy, cx2 - gx);
+        const ex = cx2 - Math.cos(ang) * (rad + 4), ey = cy2 - Math.sin(ang) * (rad + 4);
+        ctx.strokeStyle = "#8891a5"; ctx.lineWidth = 1.5; ctx.setLineDash([5, 4]);
+        ctx.beginPath(); ctx.moveTo(gx, gy); ctx.lineTo(ex, ey); ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.beginPath();
+        ctx.moveTo(ex, ey);
+        ctx.lineTo(ex - Math.cos(ang - 0.4) * 9, ey - Math.sin(ang - 0.4) * 9);
+        ctx.lineTo(ex - Math.cos(ang + 0.4) * 9, ey - Math.sin(ang + 0.4) * 9);
+        ctx.closePath(); ctx.fillStyle = "#8891a5"; ctx.fill();
+      }
+    }
+  }
+
+  // ダンサー本体
+  for (const d of state.dancers) {
+    const p = posOf(d.id); if (!p) continue;
+    const [px, py] = w2s(p[0], p[1]);
+    ctx.beginPath(); ctx.arc(px, py, rad, 0, Math.PI * 2);
+    ctx.fillStyle = d.color; ctx.fill();
+    if (selected.has(d.id)) { ctx.lineWidth = 3; ctx.strokeStyle = "#ffffff"; ctx.stroke(); }
+    ctx.fillStyle = "#fff";
+    ctx.font = "bold " + Math.max(10, rad * 0.66) + "px sans-serif";
+    ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    ctx.fillText(shortName(d.name), px, py);
+    // フルネームを下に
+    if (rad * 0.66 < 22 && sc > 24) {
+      ctx.fillStyle = "#c6ccd9"; ctx.font = "10px sans-serif";
+      ctx.textBaseline = "top";
+      ctx.fillText(d.name, px, py + rad + 3);
+    }
+  }
+
+  // ヒント表示
+  const hint = document.getElementById("hint");
+  if (playing) hint.textContent = playInfo;
+  else hint.textContent = form.name + (form.note ? "　📝 " + form.note : "") +
+    (multiMode ? "　［複数選択モード］" : "");
+}
+
+/* ================= ポインタ操作 ================= */
+let pointers = new Map();
+let dragId = null, dragMoved = false, dragUndoPushed = false;
+let panStart = null, pinchStart = null;
+
+cv.addEventListener("pointerdown", e => {
+  cv.setPointerCapture(e.pointerId);
+  pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  if (playing) return;
+  if (pointers.size === 1) {
+    const rect = cv.getBoundingClientRect();
+    const [wx, wy] = s2w(e.clientX - rect.left, e.clientY - rect.top);
+    // ダンサーヒット判定（近い順）
+    const rad = Math.max(10, Math.min(0.35 * view.scale, 30)) / view.scale + 0.15;
+    let hit = null, best = 1e9;
+    for (const d of state.dancers) {
+      const p = curForm().pos[d.id]; if (!p) continue;
+      const dd = Math.hypot(p[0] - wx, p[1] - wy);
+      if (dd < rad && dd < best) { best = dd; hit = d.id; }
+    }
+    if (hit) {
+      if (multiMode) {
+        if (selected.has(hit)) selected.delete(hit); else selected.add(hit);
+      } else {
+        if (!selected.has(hit)) { selected.clear(); selected.add(hit); }
+      }
+      dragId = hit; dragMoved = false; dragUndoPushed = false;
+    } else {
+      if (!multiMode) selected.clear();
+      dragId = null;
+      panStart = { x: e.clientX, y: e.clientY, ox: view.ox, oy: view.oy };
+    }
+    render();
+  } else if (pointers.size === 2) {
+    dragId = null; panStart = null;
+    const ps = [...pointers.values()];
+    pinchStart = {
+      dist: Math.hypot(ps[0].x - ps[1].x, ps[0].y - ps[1].y),
+      cx: (ps[0].x + ps[1].x) / 2, cy: (ps[0].y + ps[1].y) / 2,
+      scale: view.scale, ox: view.ox, oy: view.oy
+    };
+  }
+});
+
+cv.addEventListener("pointermove", e => {
+  if (!pointers.has(e.pointerId)) return;
+  pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  if (pinchStart && pointers.size === 2) {
+    const ps = [...pointers.values()];
+    const nd = Math.hypot(ps[0].x - ps[1].x, ps[0].y - ps[1].y);
+    const ncx = (ps[0].x + ps[1].x) / 2, ncy = (ps[0].y + ps[1].y) / 2;
+    const k = Math.max(0.2, Math.min(5, nd / (pinchStart.dist || 1)));
+    view.scale = Math.max(6, Math.min(300, pinchStart.scale * k));
+    const kk = view.scale / pinchStart.scale;
+    view.ox = ncx - (pinchStart.cx - pinchStart.ox) * kk;
+    view.oy = ncy - (pinchStart.cy - pinchStart.oy) * kk;
+    render(); return;
+  }
+  if (playing) return;
+  if (dragId) {
+    const rect = cv.getBoundingClientRect();
+    let [wx, wy] = s2w(e.clientX - rect.left, e.clientY - rect.top);
+    if (!dragUndoPushed) { pushUndo(); dragUndoPushed = true; }
+    dragMoved = true;
+    if (snapOn) { wx = Math.round(wx * 2) / 2; wy = Math.round(wy * 2) / 2; }
+    wx = Math.max(0, Math.min(state.stage.w, wx));
+    wy = Math.max(0, Math.min(state.stage.d, wy));
+    const form = curForm();
+    const base = form.pos[dragId];
+    const dx = wx - base[0], dy = wy - base[1];
+    // 選択中の全員を一緒に動かす
+    const targets = selected.has(dragId) ? [...selected] : [dragId];
+    for (const id of targets) {
+      const p = form.pos[id]; if (!p) continue;
+      p[0] = Math.max(0, Math.min(state.stage.w, p[0] + dx));
+      p[1] = Math.max(0, Math.min(state.stage.d, p[1] + dy));
+    }
+    render();
+  } else if (panStart) {
+    view.ox = panStart.ox + (e.clientX - panStart.x);
+    view.oy = panStart.oy + (e.clientY - panStart.y);
+    render();
+  }
+});
+
+function endPointer(e) {
+  pointers.delete(e.pointerId);
+  if (pointers.size < 2) pinchStart = null;
+  if (dragId) {
+    if (dragMoved) { saveNow(); renderTimeline(); }
+    dragId = null;
+  }
+  panStart = null;
+}
+cv.addEventListener("pointerup", endPointer);
+cv.addEventListener("pointercancel", endPointer);
+
+cv.addEventListener("wheel", e => {
+  e.preventDefault();
+  const k = e.deltaY < 0 ? 1.12 : 0.9;
+  const ns = Math.max(6, Math.min(300, view.scale * k));
+  const rect = cv.getBoundingClientRect();
+  const mx = e.clientX - rect.left, my = e.clientY - rect.top;
+  view.ox = mx - (mx - view.ox) * (ns / view.scale);
+  view.oy = my - (my - view.oy) * (ns / view.scale);
+  view.scale = ns;
+  render();
+}, { passive: false });
+
+/* ================= タイムライン ================= */
+function renderTimeline() {
+  const tl = document.getElementById("timeline");
+  tl.innerHTML = "";
+  state.formations.forEach((f, i) => {
+    const el = document.createElement("div");
+    el.className = "fchip" + (i === curF ? " cur" : "");
+    el.innerHTML = '<div class="fname"></div><div class="fmeta"></div>';
+    el.querySelector(".fname").textContent = (i + 1) + ". " + f.name;
+    el.querySelector(".fmeta").textContent =
+      f.counts + "カウント" + (f.note ? " " : "");
+    if (f.note) {
+      const s = document.createElement("span");
+      s.className = "fnote"; s.textContent = "📝";
+      el.querySelector(".fmeta").appendChild(s);
+    }
+    el.onclick = () => {
+      if (playing) return;
+      if (i === curF) openFormationModal();
+      else { curF = i; refreshAll(); }
+    };
+    tl.appendChild(el);
+  });
+  const cur = tl.children[curF];
+  if (cur) cur.scrollIntoView({ block: "nearest", inline: "nearest" });
+}
+
+document.getElementById("addFormBtn").onclick = () => {
+  if (playing) return;
+  mutate(() => {
+    const src = curForm();
+    const nf = {
+      id: uid(), name: "隊形 " + (state.formations.length + 1),
+      note: "", counts: 8,
+      pos: JSON.parse(JSON.stringify(src.pos))
+    };
+    state.formations.splice(curF + 1, 0, nf);
+    curF++;
+  });
+  toast("現在の隊形を複製して追加しました");
+};
+
+/* ================= 再生 ================= */
+function stopPlay() {
+  playing = false; playPos = null;
+  cancelAnimationFrame(playReq);
+  document.getElementById("playBtn").textContent = "▶";
+  document.getElementById("playBtn").classList.remove("playing");
+  if (state) { render(); renderTimeline(); }
+}
+document.getElementById("playBtn").onclick = () => {
+  if (playing) { stopPlay(); return; }
+  if (state.formations.length < 2) { toast("隊形が2つ以上必要です"); return; }
+  playing = true;
+  document.getElementById("playBtn").textContent = "■";
+  document.getElementById("playBtn").classList.add("playing");
+  const HOLD = 0.7; // 各隊形で静止する秒数
+  const secPerCount = 60 / (state.bpm || 120);
+  // セグメント列を構築
+  const segs = [];
+  segs.push({ type: "hold", f: 0, dur: HOLD });
+  for (let i = 1; i < state.formations.length; i++) {
+    segs.push({ type: "move", from: i - 1, to: i, dur: Math.max(0.3, state.formations[i].counts * secPerCount) });
+    segs.push({ type: "hold", f: i, dur: HOLD });
+  }
+  let si = 0, t0 = performance.now();
+  const step = now => {
+    if (!playing) return;
+    let el = (now - t0) / 1000;
+    while (si < segs.length && el >= segs[si].dur) {
+      el -= segs[si].dur; t0 = now - el * 1000; si++;
+    }
+    if (si >= segs.length) { stopPlay(); return; }
+    const s = segs[si];
+    playPos = {};
+    if (s.type === "hold") {
+      const f = state.formations[s.f];
+      curF = s.f;
+      for (const d of state.dancers) if (f.pos[d.id]) playPos[d.id] = f.pos[d.id].slice();
+      playInfo = "▶ " + f.name;
+    } else {
+      const a = state.formations[s.from], b = state.formations[s.to];
+      const t = el / s.dur, tt = t * t * (3 - 2 * t); // ease
+      curF = s.to;
+      for (const d of state.dancers) {
+        const pa = a.pos[d.id], pb = b.pos[d.id];
+        if (pa && pb) playPos[d.id] = [pa[0] + (pb[0] - pa[0]) * tt, pa[1] + (pb[1] - pa[1]) * tt];
+        else if (pb) playPos[d.id] = pb.slice();
+      }
+      playInfo = "▶ " + a.name + " → " + b.name + "（" + b.counts + "カウント / BPM" + state.bpm + "）";
+    }
+    render(); renderTimeline();
+    playReq = requestAnimationFrame(step);
+  };
+  playReq = requestAnimationFrame(step);
+};
+
+/* ================= モーダル ================= */
+const overlay = document.getElementById("overlay");
+const modal = document.getElementById("modal");
+function openModal(html) {
+  modal.innerHTML = html;
+  overlay.classList.add("show");
+  return modal;
+}
+function closeModal() { overlay.classList.remove("show"); modal.innerHTML = ""; }
+overlay.addEventListener("click", e => { if (e.target === overlay) closeModal(); });
+
+function esc(s) {
+  return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+
+function toast(msg) {
+  const t = document.getElementById("toast");
+  t.textContent = msg; t.style.display = "block";
+  clearTimeout(t._tm);
+  t._tm = setTimeout(() => t.style.display = "none", 2200);
+}
+
+/* ---- メンバー管理 ---- */
+document.getElementById("dancersBtn").onclick = openDancersModal;
+function openDancersModal() {
+  if (playing) return;
+  let html = '<h2>メンバー（' + state.dancers.length + '人）</h2><div id="dlist"></div>' +
+    '<div class="mrow" style="margin-top:12px">' +
+    '<button class="btn primary" id="addD">＋ メンバー追加</button>' +
+    '<button class="btn" id="addD5">＋5人まとめて</button>' +
+    '<button class="btn" id="closeD">閉じる</button></div>' +
+    '<p style="font-size:12px;color:var(--dim);margin-top:8px">色をタップで変更 / 名前は直接編集できます</p>';
+  openModal(html);
+  const list = document.getElementById("dlist");
+  state.dancers.forEach(d => {
+    const row = document.createElement("div");
+    row.className = "drow";
+    row.innerHTML =
+      '<div class="swatch" style="background:' + esc(d.color) + '"></div>' +
+      '<input type="text" value="' + esc(d.name) + '" maxlength="10">' +
+      '<button class="btn danger">削除</button>';
+    row.querySelector(".swatch").onclick = () => {
+      mutate(() => {
+        const i = PALETTE.indexOf(d.color);
+        d.color = PALETTE[(i + 1) % PALETTE.length];
+      });
+      row.querySelector(".swatch").style.background = d.color;
+    };
+    const inp = row.querySelector("input");
+    inp.onchange = () => { mutate(() => { d.name = inp.value.trim() || d.name; }); };
+    row.querySelector(".danger").onclick = () => {
+      if (!confirm(d.name + " を削除しますか？（全ての隊形から消えます）")) return;
+      mutate(() => {
+        state.dancers = state.dancers.filter(x => x.id !== d.id);
+        for (const f of state.formations) delete f.pos[d.id];
+        selected.delete(d.id);
+      });
+      openDancersModal();
+    };
+    list.appendChild(row);
+  });
+  const addN = n => {
+    mutate(() => {
+      for (let k = 0; k < n; k++) {
+        const i = state.dancers.length;
+        const d = { id: uid(), name: "メンバー" + (i + 1), color: PALETTE[i % PALETTE.length] };
+        state.dancers.push(d);
+        // 全隊形の空きへ配置（前方に横並び）
+        state.formations.forEach(f => {
+          f.pos[d.id] = [
+            Math.min(state.stage.w - 0.5, 1 + (i % 10) * ((state.stage.w - 2) / 9 || 1)),
+            state.stage.d - 1
+          ];
+        });
+      }
+    });
+    openDancersModal();
+  };
+  document.getElementById("addD").onclick = () => addN(1);
+  document.getElementById("addD5").onclick = () => addN(5);
+  document.getElementById("closeD").onclick = closeModal;
+}
+
+/* ---- 整列ツール & 設定 ---- */
+document.getElementById("toolsBtn").onclick = () => {
+  if (playing) return;
+  const selN = selected.size;
+  openModal(
+    '<h2>整列ツール</h2>' +
+    '<p style="font-size:12px;color:var(--dim);margin-bottom:8px">対象: ' +
+    (selN ? '選択中の' + selN + '人' : '全員（誰も選択していないため）') + '</p>' +
+    '<div class="toolGrid">' +
+    '<button class="btn" data-a="row">― 横一列</button>' +
+    '<button class="btn" data-a="col">｜ 縦一列</button>' +
+    '<button class="btn" data-a="circle">◯ 円形</button>' +
+    '<button class="btn" data-a="vshape">Ｖ字</button>' +
+    '<button class="btn" data-a="grid2">▤ 2列</button>' +
+    '<button class="btn" data-a="center">中央へ寄せる</button>' +
+    '</div>' +
+    '<h3>ステージ設定</h3>' +
+    '<div class="mrow">幅 <input type="number" id="stW" min="4" max="60" step="1" value="' + state.stage.w + '"> m　' +
+    '奥行 <input type="number" id="stD" min="3" max="40" step="1" value="' + state.stage.d + '"> m</div>' +
+    '<h3>再生テンポ</h3>' +
+    '<div class="mrow">BPM <input type="number" id="bpmIn" min="40" max="240" value="' + state.bpm + '">' +
+    '<span style="font-size:12px;color:var(--dim)">移動カウント数は各隊形の設定で変更</span></div>' +
+    '<div class="mrow" style="margin-top:12px"><button class="btn primary" id="applySet">適用して閉じる</button></div>'
+  );
+  const target = () => selN ? state.dancers.filter(d => selected.has(d.id)) : state.dancers.slice();
+  modal.querySelectorAll("[data-a]").forEach(b => {
+    b.onclick = () => {
+      const ds = target(); if (!ds.length) return;
+      const W = state.stage.w, D = state.stage.d, n = ds.length;
+      mutate(() => {
+        const f = curForm();
+        ds.forEach((d, i) => {
+          let x, y;
+          if (b.dataset.a === "row") {
+            const gap = Math.min(2, (W - 2) / Math.max(1, n - 1));
+            x = W / 2 + (i - (n - 1) / 2) * gap; y = D / 2;
+          } else if (b.dataset.a === "col") {
+            const gap = Math.min(2, (D - 2) / Math.max(1, n - 1));
+            x = W / 2; y = D / 2 + (i - (n - 1) / 2) * gap;
+          } else if (b.dataset.a === "circle") {
+            const r = Math.min(W, D) / 2 - 1;
+            const a = -Math.PI / 2 + i * 2 * Math.PI / n;
+            x = W / 2 + r * Math.cos(a); y = D / 2 + r * Math.sin(a);
+          } else if (b.dataset.a === "vshape") {
+            const half = Math.floor(n / 2);
+            const k = i - half;
+            x = W / 2 + k * 1.2;
+            y = D / 2 - Math.abs(k) * 1.0 + n / 4;
+          } else if (b.dataset.a === "grid2") {
+            const perRow = Math.ceil(n / 2);
+            const gap = Math.min(2, (W - 2) / Math.max(1, perRow - 1));
+            const r0 = Math.floor(i / perRow), c0 = i % perRow;
+            x = W / 2 + (c0 - (perRow - 1) / 2) * gap;
+            y = D / 2 + (r0 - 0.5) * 1.6;
+          } else { // center
+            const p = f.pos[d.id];
+            x = p[0] + (W / 2 - p[0]) * 0.35; y = p[1] + (D / 2 - p[1]) * 0.35;
+          }
+          if (snapOn) { x = Math.round(x * 2) / 2; y = Math.round(y * 2) / 2; }
+          f.pos[d.id] = [Math.max(0, Math.min(W, x)), Math.max(0, Math.min(D, y))];
+        });
+      });
+      toast("整列しました（↩で元に戻せます）");
+    };
+  });
+  document.getElementById("applySet").onclick = () => {
+    const w = +document.getElementById("stW").value, d = +document.getElementById("stD").value;
+    const bpm = +document.getElementById("bpmIn").value;
+    mutate(() => {
+      if (w >= 4 && w <= 60) state.stage.w = w;
+      if (d >= 3 && d <= 40) state.stage.d = d;
+      if (bpm >= 40 && bpm <= 240) state.bpm = bpm;
+      // はみ出したダンサーを収める
+      for (const f of state.formations) for (const id in f.pos) {
+        f.pos[id][0] = Math.min(f.pos[id][0], state.stage.w);
+        f.pos[id][1] = Math.min(f.pos[id][1], state.stage.d);
+      }
+    });
+    closeModal(); fitView();
+  };
+};
+
+/* ---- 隊形の編集（チップ再タップ） ---- */
+function openFormationModal() {
+  const f = curForm();
+  const idx = curF;
+  openModal(
+    '<h2>隊形の編集</h2>' +
+    '<div class="mrow">名前 <input type="text" id="fmName" value="' + esc(f.name) + '" style="flex:1" maxlength="20"></div>' +
+    '<div class="mrow">この隊形への移動カウント数 <input type="number" id="fmCounts" min="1" max="64" value="' + f.counts + '"></div>' +
+    '<h3>メモ（立ち位置の注意点など）</h3>' +
+    '<textarea id="fmNote">' + esc(f.note) + '</textarea>' +
+    '<div class="mrow" style="margin-top:12px">' +
+    '<button class="btn primary" id="fmSave">保存</button>' +
+    '<button class="btn" id="fmLeft" ' + (idx === 0 ? "disabled" : "") + '>← 前へ移動</button>' +
+    '<button class="btn" id="fmRight" ' + (idx === state.formations.length - 1 ? "disabled" : "") + '>後ろへ移動 →</button>' +
+    '<button class="btn danger" id="fmDel" ' + (state.formations.length <= 1 ? "disabled" : "") + '>削除</button>' +
+    '</div>'
+  );
+  document.getElementById("fmSave").onclick = () => {
+    mutate(() => {
+      f.name = document.getElementById("fmName").value.trim() || f.name;
+      f.counts = Math.max(1, Math.min(64, +document.getElementById("fmCounts").value || 8));
+      f.note = document.getElementById("fmNote").value;
+    });
+    closeModal();
+  };
+  document.getElementById("fmLeft").onclick = () => {
+    mutate(() => {
+      state.formations.splice(idx, 1);
+      state.formations.splice(idx - 1, 0, f);
+      curF = idx - 1;
+    });
+    closeModal();
+  };
+  document.getElementById("fmRight").onclick = () => {
+    mutate(() => {
+      state.formations.splice(idx, 1);
+      state.formations.splice(idx + 1, 0, f);
+      curF = idx + 1;
+    });
+    closeModal();
+  };
+  document.getElementById("fmDel").onclick = () => {
+    if (!confirm("「" + f.name + "」を削除しますか？")) return;
+    mutate(() => {
+      state.formations.splice(idx, 1);
+      curF = Math.max(0, idx - 1);
+    });
+    closeModal();
+  };
+}
+
+/* ---- メニュー ---- */
+document.getElementById("menuBtn").onclick = () => {
+  if (playing) stopPlay();
+  openModal(
+    '<h2>メニュー</h2>' +
+    '<button class="btn wide" id="mNew">🆕 新しい作品を作る</button>' +
+    '<button class="btn wide" id="mOpen">📂 作品を開く / 管理</button>' +
+    '<button class="btn wide" id="mRename">✏️ 作品名を変更</button>' +
+    '<button class="btn wide" id="mPng">🖼 全隊形を画像(PNG)で保存</button>' +
+    '<button class="btn wide" id="mExport">💾 データを書き出し(JSONファイル)</button>' +
+    '<button class="btn wide" id="mShare">📤 データを共有(テキスト)</button>' +
+    '<button class="btn wide" id="mImport">📥 データを読み込み(JSON)</button>' +
+    '<button class="btn wide" id="mHelp">❓ 使い方</button>'
+  );
+  document.getElementById("mNew").onclick = () => {
+    const name = prompt("作品名を入力してください", "新しい作品 " + (Object.keys(loadProjects()).length + 1));
+    if (name === null) return;
+    createProject(newProject(name.trim() || "新しい作品"));
+    closeModal(); toast("新しい作品を作成しました");
+  };
+  document.getElementById("mOpen").onclick = openProjectsModal;
+  document.getElementById("mRename").onclick = () => {
+    const name = prompt("作品名", state.name);
+    if (name === null) return;
+    mutate(() => { state.name = name.trim() || state.name; });
+    closeModal();
+  };
+  document.getElementById("mPng").onclick = () => { closeModal(); exportPng(); };
+  document.getElementById("mExport").onclick = () => { closeModal(); exportJson(); };
+  document.getElementById("mShare").onclick = () => { closeModal(); shareJson(); };
+  document.getElementById("mImport").onclick = () => {
+    closeModal();
+    document.getElementById("fileInput").click();
+  };
+  document.getElementById("mHelp").onclick = openHelpModal;
+};
+
+/* ---- 作品一覧 ---- */
+function openProjectsModal() {
+  const all = loadProjects();
+  const ids = Object.keys(all).sort((a, b) => all[b].updated - all[a].updated);
+  let html = '<h2>作品一覧</h2><div id="plist"></div>';
+  openModal(html);
+  const list = document.getElementById("plist");
+  if (!ids.length) list.innerHTML = '<p style="color:var(--dim)">作品がありません</p>';
+  ids.forEach(id => {
+    const p = all[id];
+    const row = document.createElement("div");
+    row.className = "projRow";
+    const dt = new Date(p.updated);
+    row.innerHTML =
+      '<div class="pname">' + esc(p.name) + (id === curProjId ? '（編集中）' : '') +
+      '<div class="pdate">' + dt.toLocaleString("ja-JP") + '</div></div>' +
+      '<button class="btn primary">開く</button><button class="btn danger">削除</button>';
+    row.querySelector(".primary").onclick = () => { openProject(id); closeModal(); };
+    row.querySelector(".danger").onclick = () => {
+      if (!confirm("「" + p.name + "」を削除しますか？（元に戻せません）")) return;
+      const a2 = loadProjects(); delete a2[id];
+      localStorage.setItem(LS_PROJECTS, JSON.stringify(a2));
+      if (id === curProjId) {
+        const rest = Object.keys(a2);
+        if (rest.length) openProject(rest[0]);
+        else createProject(newProject());
+      }
+      openProjectsModal();
+    };
+    list.appendChild(row);
+  });
+}
+
+/* ---- 使い方 ---- */
+function openHelpModal() {
+  openModal(
+    '<h2>使い方</h2><div class="helpText">' +
+    '<b>■ 基本操作</b><br>' +
+    '・ダンサー（丸）を<b>ドラッグ</b>して立ち位置を決めます<br>' +
+    '・空きスペースのドラッグで画面移動、<b>2本指でズーム</b><br>' +
+    '・<b>⤢</b> で全体表示に戻ります<br><br>' +
+    '<b>■ 隊形（フォーメーション）</b><br>' +
+    '・下の<b>＋</b>で現在の隊形をコピーして次の隊形を追加<br>' +
+    '・下のチップをタップで隊形を切替、<b>もう一度タップ</b>で名前・カウント数・メモの編集や並べ替え・削除<br>' +
+    '・<b>👣</b> をONにすると前の隊形がうすく表示され、移動が矢印で見えます<br><br>' +
+    '<b>■ 再生</b><br>' +
+    '・<b>▶</b> で隊形間の移動をアニメーション再生します<br>' +
+    '・速さは「⊞ → BPM」と各隊形の「カウント数」で決まります（8カウント=BPM120で4秒）<br><br>' +
+    '<b>■ メンバー</b><br>' +
+    '・<b>👥</b> で追加・名前変更・色変更・削除<br>' +
+    '・<b>☑</b> をONにすると複数選択でき、まとめて動かせます<br>' +
+    '・<b>⊞</b> の整列ツールで横一列・円形などに一発整列<br><br>' +
+    '<b>■ 保存と共有</b><br>' +
+    '・編集内容は<b>自動保存</b>されます<br>' +
+    '・☰メニューからJSONファイルの書き出し/読み込みで、他の端末や友達とデータを共有できます<br>' +
+    '・「全隊形を画像で保存」で一覧表をPNG画像として保存できます<br>' +
+    '</div>' +
+    '<div class="mrow" style="margin-top:12px"><button class="btn primary" id="helpClose">閉じる</button></div>'
+  );
+  document.getElementById("helpClose").onclick = closeModal;
+}
+
+/* ================= 書き出し/読み込み ================= */
+function hasBridge() { return typeof window.AndroidBridge !== "undefined"; }
+
+function fileNameSafe(s) { return (s || "formation").replace(/[\\/:*?"<>|]/g, "_"); }
+
+function exportJson() {
+  const json = JSON.stringify(state, null, 1);
+  const name = fileNameSafe(state.name) + ".formation.json";
+  if (hasBridge()) {
+    AndroidBridge.saveFile(name, "application/json", btoa(unescape(encodeURIComponent(json))));
+  } else {
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([json], { type: "application/json" }));
+    a.download = name; a.click();
+  }
+  toast("書き出しました");
+}
+function shareJson() {
+  const json = JSON.stringify(state);
+  if (hasBridge()) {
+    AndroidBridge.shareText("フォーメーション: " + state.name, json);
+  } else if (navigator.share) {
+    navigator.share({ title: state.name, text: json }).catch(() => {});
+  } else {
+    exportJson();
+  }
+}
+document.getElementById("fileInput").addEventListener("change", e => {
+  const f = e.target.files && e.target.files[0];
+  e.target.value = "";
+  if (!f) return;
+  const r = new FileReader();
+  r.onload = () => {
+    try {
+      const st = JSON.parse(r.result);
+      if (!st || !Array.isArray(st.dancers) || !Array.isArray(st.formations) || !st.stage)
+        throw new Error("bad");
+      st.name = (st.name || "読み込んだ作品") + "";
+      createProject(st);
+      toast("読み込みました: " + st.name);
+    } catch (err) {
+      alert("読み込みに失敗しました。フォーメーションメーカーのJSONファイルを選んでください。");
+    }
+  };
+  r.readAsText(f);
+});
+
+function exportPng() {
+  const n = state.formations.length;
+  const cols = Math.min(3, n), rows = Math.ceil(n / cols);
+  const sc = 34;
+  const cw = state.stage.w * sc + 40, ch = state.stage.d * sc + 90;
+  const c = document.createElement("canvas");
+  c.width = cols * cw + 40; c.height = rows * ch + 70;
+  const x = c.getContext("2d");
+  x.fillStyle = "#ffffff"; x.fillRect(0, 0, c.width, c.height);
+  x.fillStyle = "#222"; x.font = "bold 26px sans-serif";
+  x.textAlign = "left"; x.textBaseline = "top";
+  x.fillText(state.name, 24, 20);
+  x.font = "13px sans-serif"; x.fillStyle = "#777";
+  x.textAlign = "right";
+  x.fillText("メンバー " + state.dancers.length + "人 / BPM " + state.bpm + " / ステージ " +
+    state.stage.w + "×" + state.stage.d + "m", c.width - 24, 30);
+  const selBak = new Set(selected); selected = new Set();
+  state.formations.forEach((f, i) => {
+    const gx = 24 + (i % cols) * cw, gy = 70 + Math.floor(i / cols) * ch;
+    x.fillStyle = "#333"; x.font = "bold 16px sans-serif";
+    x.textAlign = "left"; x.textBaseline = "top";
+    x.fillText((i + 1) + ". " + f.name + "（" + f.counts + "カウント）", gx, gy);
+    drawFormation(x, f, sc, gx, gy + 26, { light: true });
+    if (f.note) {
+      x.fillStyle = "#8a6d00"; x.font = "12px sans-serif";
+      x.fillText("📝 " + f.note.replace(/\n/g, " ").slice(0, 60), gx, gy + 32 + state.stage.d * sc);
+    }
+  });
+  selected = selBak;
+  const name = fileNameSafe(state.name) + "_formations.png";
+  if (hasBridge()) {
+    const b64 = c.toDataURL("image/png").split(",")[1];
+    AndroidBridge.saveFile(name, "image/png", b64);
+  } else {
+    const a = document.createElement("a");
+    a.href = c.toDataURL("image/png"); a.download = name; a.click();
+  }
+  toast("画像を書き出しました");
+}
+
+/* ================= ヘッダー/サイドボタン ================= */
+document.getElementById("undoBtn").onclick = doUndo;
+document.getElementById("redoBtn").onclick = doRedo;
+document.getElementById("fitBtn").onclick = fitView;
+document.getElementById("snapBtn").onclick = function () {
+  snapOn = !snapOn; this.classList.toggle("on", snapOn);
+  toast(snapOn ? "グリッド吸着 ON（0.5m単位）" : "グリッド吸着 OFF");
+};
+document.getElementById("ghostBtn").onclick = function () {
+  ghostOn = !ghostOn; this.classList.toggle("on", ghostOn);
+  render();
+};
+document.getElementById("multiBtn").onclick = function () {
+  multiMode = !multiMode; this.classList.toggle("on", multiMode);
+  if (!multiMode) selected.clear();
+  render();
+  toast(multiMode ? "複数選択モード ON：タップで追加/解除" : "複数選択モード OFF");
+};
+document.getElementById("projName").onclick = () => {
+  const name = prompt("作品名", state.name);
+  if (name === null) return;
+  mutate(() => { state.name = name.trim() || state.name; });
+};
+
+/* Android 戻るボタン連携 */
+window.appBack = function () {
+  if (overlay.classList.contains("show")) { closeModal(); return "handled"; }
+  if (playing) { stopPlay(); return "handled"; }
+  return "exit";
+};
+
+/* ================= 画面更新 ================= */
+function refreshAll() {
+  document.getElementById("projName").textContent = state.name;
+  document.getElementById("snapBtn").classList.toggle("on", snapOn);
+  document.getElementById("ghostBtn").classList.toggle("on", ghostOn);
+  document.getElementById("multiBtn").classList.toggle("on", multiMode);
+  updateUndoBtns();
+  renderTimeline();
+  render();
+}
+
+/* ================= 起動 ================= */
+(function init() {
+  const cur = localStorage.getItem(LS_CURRENT);
+  if (!(cur && openProject(cur))) {
+    createProject(newProject());
+    // 初回起動時は使い方を表示
+    if (!localStorage.getItem("fm_seen_help")) {
+      localStorage.setItem("fm_seen_help", "1");
+      setTimeout(openHelpModal, 400);
+    }
+  }
+  resizeCanvas(); fitView();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,39 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'io.github.kawa314.formationmaker'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId "io.github.kawa314.formationmaker"
+        minSdk 21
+        targetSdk 34
+        versionCode 1
+        versionName "1.0"
+    }
+
+    signingConfigs {
+        release {
+            // 個人利用向けの自己署名キー（リポジトリに同梱）。
+            // ストア公開する場合は必ず自分専用のキーに差し替えること。
+            storeFile file('../signing/formation.keystore')
+            storePassword 'formation-maker-2026'
+            keyAlias 'formation'
+            keyPassword 'formation-maker-2026'
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            signingConfig signingConfigs.release
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
