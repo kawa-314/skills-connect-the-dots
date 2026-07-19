@@ -122,6 +122,17 @@
   .projRow { display: flex; gap: 8px; align-items: center; padding: 8px 0; border-bottom: 1px solid #2a2f3b; }
   .projRow .pname { flex: 1; font-size: 14px; }
   .projRow .pdate { font-size: 11px; color: var(--dim); }
+  #musicRow {
+    display: none; align-items: center; gap: 8px; margin-bottom: 6px;
+    font-size: 11px; color: var(--dim);
+  }
+  #musicRow.show { display: flex; }
+  #musicRow input[type=range] { flex: 1; padding: 0; accent-color: var(--accent); }
+  #markBtn {
+    display: none; border: none; background: #6a4fd0; color: #fff;
+    border-radius: 10px; padding: 6px 12px; font-size: 13px; flex: none;
+  }
+  #markBtn.show { display: block; }
   #toast {
     position: fixed; left: 50%; bottom: 90px; transform: translateX(-50%);
     background: #000c; color: #fff; padding: 10px 18px; border-radius: 20px;
@@ -146,11 +157,18 @@
     <button class="iconBtn" id="snapBtn" title="グリッド吸着">🧲</button>
     <button class="iconBtn" id="ghostBtn" title="前の隊形を表示">👣</button>
     <button class="iconBtn" id="multiBtn" title="複数選択">☑</button>
+    <button class="iconBtn" id="musicBtn" title="音楽">🎵</button>
   </div>
   <div id="hint"></div>
 </div>
 
 <footer>
+  <div id="musicRow">
+    <span id="mTime">0:00.0</span>
+    <input type="range" id="seek" min="0" max="1000" value="0">
+    <span id="mDur">0:00.0</span>
+    <button id="markBtn">⏱ マーク</button>
+  </div>
   <div id="timelineRow">
     <button id="playBtn">▶</button>
     <div id="timeline"></div>
@@ -161,6 +179,7 @@
 <div id="overlay"><div id="modal"></div></div>
 <div id="toast"></div>
 <input type="file" id="fileInput" accept=".json,application/json,text/plain,*/*" style="display:none">
+<input type="file" id="musicInput" accept="audio/*" style="display:none">
 
 <script>
 "use strict";
@@ -221,6 +240,7 @@ function openProject(id) {
   state = all[id].data;
   curF = 0; selected.clear(); undoStack = []; redoStack = [];
   localStorage.setItem(LS_CURRENT, id);
+  setupAudioForProject();
   refreshAll(); fitView();
   return true;
 }
@@ -229,7 +249,9 @@ function createProject(st) {
   curProjId = uid();
   state = st;
   curF = 0; selected.clear(); undoStack = []; redoStack = [];
-  saveNow(); refreshAll(); fitView();
+  saveNow();
+  setupAudioForProject();
+  refreshAll(); fitView();
 }
 
 /* ================= undo/redo ================= */
@@ -348,8 +370,9 @@ function render() {
   const W = state.stage.w, D = state.stage.d;
   const form = curForm();
 
-  // 背景ステージ（現在の隊形 or 再生位置）
-  const posOf = id => (playing && playPos && playPos[id]) ? playPos[id] : form.pos[id];
+  // 背景ステージ（現在の隊形 or 再生/プレビュー位置）
+  const usePlay = (playing || previewing) && playPos;
+  const posOf = id => (usePlay && playPos[id]) ? playPos[id] : form.pos[id];
 
   // ステージ本体はdrawFormationの前半と同じ描き方をするため一旦ダミーformで枠のみ
   drawFormation(ctx, { pos: {} }, sc, ox, oy, {});
@@ -365,7 +388,7 @@ function render() {
   const rad = Math.max(10, Math.min(0.35 * sc, 30));
 
   // ゴースト（前の隊形）と移動矢印
-  if (ghostOn && !playing && curF > 0) {
+  if (ghostOn && !playing && !previewing && curF > 0) {
     const prev = state.formations[curF - 1];
     for (const d of state.dancers) {
       const pp = prev.pos[d.id], cp = form.pos[d.id];
@@ -426,6 +449,7 @@ cv.addEventListener("pointerdown", e => {
   cv.setPointerCapture(e.pointerId);
   pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
   if (playing) return;
+  if (previewing) { previewing = false; render(); }
   if (pointers.size === 1) {
     const rect = cv.getBoundingClientRect();
     const [wx, wy] = s2w(e.clientX - rect.left, e.clientY - rect.top);
@@ -527,7 +551,12 @@ cv.addEventListener("wheel", e => {
 }, { passive: false });
 
 /* ================= タイムライン ================= */
+let lastTLF = -1;
+function tlUpdate() {           // 再生中: 隊形が変わった時だけDOMを作り直す
+  if (lastTLF !== curF) renderTimeline();
+}
 function renderTimeline() {
+  lastTLF = curF;
   const tl = document.getElementById("timeline");
   tl.innerHTML = "";
   state.formations.forEach((f, i) => {
@@ -536,6 +565,7 @@ function renderTimeline() {
     el.innerHTML = '<div class="fname"></div><div class="fmeta"></div>';
     el.querySelector(".fname").textContent = (i + 1) + ". " + f.name;
     el.querySelector(".fmeta").textContent =
+      (f.t != null ? "⏱" + fmtTime(f.t) + " " : "") +
       f.counts + "カウント" + (f.note ? " " : "");
     if (f.note) {
       const s = document.createElement("span");
@@ -570,7 +600,9 @@ document.getElementById("addFormBtn").onclick = () => {
 
 /* ================= 再生 ================= */
 function stopPlay() {
-  playing = false; playPos = null;
+  playing = false; playPos = null; previewing = false;
+  if (audioEl) audioEl.pause();
+  document.getElementById("markBtn").classList.remove("show");
   cancelAnimationFrame(playReq);
   document.getElementById("playBtn").textContent = "▶";
   document.getElementById("playBtn").classList.remove("playing");
@@ -578,6 +610,7 @@ function stopPlay() {
 }
 document.getElementById("playBtn").onclick = () => {
   if (playing) { stopPlay(); return; }
+  if (musicReady) { musicPlay(); return; }   // 音楽があれば音楽同期再生
   if (state.formations.length < 2) { toast("隊形が2つ以上必要です"); return; }
   playing = true;
   document.getElementById("playBtn").textContent = "■";
@@ -617,7 +650,7 @@ document.getElementById("playBtn").onclick = () => {
       }
       playInfo = "▶ " + a.name + " → " + b.name + "（" + b.counts + "カウント / BPM" + state.bpm + "）";
     }
-    render(); renderTimeline();
+    render(); tlUpdate();
     playReq = requestAnimationFrame(step);
   };
   playReq = requestAnimationFrame(step);
@@ -797,6 +830,8 @@ function openFormationModal() {
     '<h2>隊形の編集</h2>' +
     '<div class="mrow">名前 <input type="text" id="fmName" value="' + esc(f.name) + '" style="flex:1" maxlength="20"></div>' +
     '<div class="mrow">この隊形への移動カウント数 <input type="number" id="fmCounts" min="1" max="64" value="' + f.counts + '"></div>' +
+    '<div class="mrow">曲の時間 <input type="text" id="fmTime" value="' + fmtTime(f.t) + '" placeholder="例 1:23.5" style="width:100px">' +
+    '<span style="font-size:11px;color:var(--dim)">空欄=未設定（音楽同期で使用）</span></div>' +
     '<h3>メモ（立ち位置の注意点など）</h3>' +
     '<textarea id="fmNote">' + esc(f.note) + '</textarea>' +
     '<div class="mrow" style="margin-top:12px">' +
@@ -810,6 +845,8 @@ function openFormationModal() {
     mutate(() => {
       f.name = document.getElementById("fmName").value.trim() || f.name;
       f.counts = Math.max(1, Math.min(64, +document.getElementById("fmCounts").value || 8));
+      const t = parseTime(document.getElementById("fmTime").value);
+      if (t == null) delete f.t; else f.t = t;
       f.note = document.getElementById("fmNote").value;
     });
     closeModal();
@@ -899,6 +936,7 @@ function openProjectsModal() {
       if (!confirm("「" + p.name + "」を削除しますか？（元に戻せません）")) return;
       const a2 = loadProjects(); delete a2[id];
       localStorage.setItem(LS_PROJECTS, JSON.stringify(a2));
+      idbDel(id);
       if (id === curProjId) {
         const rest = Object.keys(a2);
         if (rest.length) openProject(rest[0]);
@@ -929,6 +967,10 @@ function openHelpModal() {
     '・<b>👥</b> で追加・名前変更・色変更・削除<br>' +
     '・<b>☑</b> をONにすると複数選択でき、まとめて動かせます<br>' +
     '・<b>⊞</b> の整列ツールで横一列・円形などに一発整列<br><br>' +
+    '<b>■ 音楽同期</b><br>' +
+    '・<b>🎵</b> で音楽ファイル(mp3等)を読み込むと、▶で曲と一緒に再生されます<br>' +
+    '・再生中に<b>⏱ マーク</b>をタップすると、隊形2、3…の順に「決めの時間」が記録され、次回から曲ピッタリに隊形が動きます<br>' +
+    '・シークバーで曲の途中にジャンプしてプレビューできます<br><br>' +
     '<b>■ 保存と共有</b><br>' +
     '・編集内容は<b>自動保存</b>されます<br>' +
     '・☰メニューからJSONファイルの書き出し/読み込みで、他の端末や友達とデータを共有できます<br>' +
@@ -1025,6 +1067,230 @@ function exportPng() {
   }
   toast("画像を書き出しました");
 }
+
+/* ================= 音楽同期 ================= */
+let audioEl = null, musicUrl = null, musicReady = false, previewing = false;
+
+function idbOpen() {
+  return new Promise((res, rej) => {
+    const r = indexedDB.open("fm_audio", 1);
+    r.onupgradeneeded = () => r.result.createObjectStore("audio");
+    r.onsuccess = () => res(r.result);
+    r.onerror = () => rej(r.error);
+  });
+}
+function idbPut(key, blob) {
+  return idbOpen().then(db => new Promise((res, rej) => {
+    const tx = db.transaction("audio", "readwrite");
+    tx.objectStore("audio").put(blob, key);
+    tx.oncomplete = res; tx.onerror = () => rej(tx.error);
+  }));
+}
+function idbGet(key) {
+  return idbOpen().then(db => new Promise((res, rej) => {
+    const rq = db.transaction("audio").objectStore("audio").get(key);
+    rq.onsuccess = () => res(rq.result || null);
+    rq.onerror = () => rej(rq.error);
+  }));
+}
+function idbDel(key) {
+  return idbOpen().then(db => new Promise(res => {
+    const tx = db.transaction("audio", "readwrite");
+    tx.objectStore("audio").delete(key);
+    tx.oncomplete = res; tx.onerror = res;
+  })).catch(() => {});
+}
+
+function fmtTime(t) {
+  if (t == null || isNaN(t)) return "";
+  const m = Math.floor(t / 60), s = t - m * 60;
+  return m + ":" + (s < 10 ? "0" : "") + s.toFixed(1);
+}
+function parseTime(str) {
+  str = (str || "").trim();
+  if (!str) return null;
+  const m = str.match(/^(?:(\d+):)?(\d+(?:\.\d+)?)$/);
+  if (!m) return null;
+  return (m[1] ? +m[1] * 60 : 0) + +m[2];
+}
+
+function teardownAudio() {
+  if (audioEl) { audioEl.pause(); audioEl = null; }
+  if (musicUrl) { URL.revokeObjectURL(musicUrl); musicUrl = null; }
+  musicReady = false; previewing = false;
+  updateMusicUI();
+}
+function loadAudioBlob(blob) {
+  teardownAudio();
+  musicUrl = URL.createObjectURL(blob);
+  audioEl = new Audio(musicUrl);
+  audioEl.preload = "auto";
+  audioEl.addEventListener("loadedmetadata", () => {
+    musicReady = true; updateMusicUI();
+  });
+  audioEl.addEventListener("error", () => {
+    toast("この音楽ファイルは再生できません");
+    teardownAudio();
+  });
+}
+// 作品切替時に呼ぶ：保存済み音楽を読み直す
+function setupAudioForProject() {
+  teardownAudio();
+  if (state && state.music && curProjId) {
+    idbGet(curProjId).then(blob => {
+      if (blob) loadAudioBlob(blob);
+      else updateMusicUI();
+    }).catch(() => {});
+  }
+}
+function updateMusicUI() {
+  const row = document.getElementById("musicRow");
+  row.classList.toggle("show", musicReady);
+  document.getElementById("musicBtn").classList.toggle("on", musicReady);
+  if (musicReady) {
+    document.getElementById("mDur").textContent = fmtTime(audioEl.duration);
+    updateSeekUI();
+  }
+}
+function updateSeekUI() {
+  if (!musicReady) return;
+  const T = audioEl.currentTime, D = audioEl.duration || 1;
+  document.getElementById("mTime").textContent = fmtTime(T);
+  document.getElementById("seek").value = Math.round(T / D * 1000);
+}
+
+document.getElementById("musicInput").addEventListener("change", e => {
+  const f = e.target.files && e.target.files[0];
+  e.target.value = "";
+  if (!f) return;
+  idbPut(curProjId, f).then(() => {
+    mutate(() => { state.music = { name: f.name }; });
+    loadAudioBlob(f);
+    toast("音楽を読み込みました: " + f.name);
+    closeModal();
+  }).catch(() => {
+    // IndexedDBが使えない環境でも今回のセッション中は再生できるようにする
+    mutate(() => { state.music = { name: f.name }; });
+    loadAudioBlob(f);
+    toast("読み込みました（この端末では再起動後に再読み込みが必要です）");
+    closeModal();
+  });
+});
+
+document.getElementById("musicBtn").onclick = openMusicModal;
+function openMusicModal() {
+  if (playing) stopPlay();
+  const has = !!(state.music && state.music.name);
+  const marked = state.formations.filter((f, i) => i > 0 && f.t != null).length;
+  openModal(
+    '<h2>音楽同期</h2>' +
+    (has
+      ? '<p style="font-size:13px;margin-bottom:8px">🎵 ' + esc(state.music.name) +
+        (musicReady ? '（' + fmtTime(audioEl.duration) + '）' : '（読み込み中/再生不可）') + '</p>'
+      : '<p style="font-size:13px;color:var(--dim);margin-bottom:8px">音楽ファイル（mp3 / m4a / wav など）を読み込むと、曲に合わせて隊形を再生できます。</p>') +
+    '<button class="btn wide primary" id="musLoad">📂 音楽ファイルを読み込む</button>' +
+    (has ? '<button class="btn wide danger" id="musRemove">🗑 音楽を削除</button>' : '') +
+    '<h3>隊形のタイミング設定（' + marked + '/' + Math.max(0, state.formations.length - 1) + '）</h3>' +
+    '<div class="helpText" style="font-size:12px">' +
+    '① 音楽を読み込んで <b>▶</b> で再生<br>' +
+    '② 隊形がピッタリ決まる瞬間に <b>⏱ マーク</b> をタップ → 隊形2、隊形3…の順に時間が記録されます<br>' +
+    '③ もう一度 ▶ を押すと、曲に合わせて隊形が動きます<br>' +
+    '・細かい修正は隊形チップを再タップ →「曲の時間」で編集<br>' +
+    '・シークバーで曲の途中へジャンプしてプレビューできます<br>' +
+    '・移動にかかる長さは各隊形の「カウント数」×BPMで決まり、指定時間ちょうどに隊形が完成します</div>' +
+    (marked ? '<button class="btn wide" id="musClear" style="margin-top:10px">⏱ タイム設定を全てクリア</button>' : '') +
+    '<div class="mrow" style="margin-top:10px"><button class="btn" id="musClose">閉じる</button></div>' +
+    '<p style="font-size:11px;color:var(--dim);margin-top:8px">※ 音楽はこの端末内にのみ保存されます（JSON書き出しには含まれません）</p>'
+  );
+  document.getElementById("musLoad").onclick = () => document.getElementById("musicInput").click();
+  document.getElementById("musClose").onclick = closeModal;
+  const rm = document.getElementById("musRemove");
+  if (rm) rm.onclick = () => {
+    if (!confirm("音楽を削除しますか？（タイム設定は残ります）")) return;
+    idbDel(curProjId);
+    mutate(() => { delete state.music; });
+    teardownAudio();
+    closeModal();
+  };
+  const cl = document.getElementById("musClear");
+  if (cl) cl.onclick = () => {
+    if (!confirm("全ての隊形のタイム設定をクリアしますか？")) return;
+    mutate(() => { state.formations.forEach(f => { delete f.t; }); });
+    openMusicModal();
+  };
+}
+
+// 音楽時刻Tから隊形位置を計算して playPos / curF / playInfo を更新
+function computePosAt(T) {
+  const seq = [];
+  state.formations.forEach((f, i) => {
+    let t = (i === 0) ? (f.t != null ? f.t : 0) : f.t;
+    if (t == null) return;
+    if (seq.length && t < seq[seq.length - 1].t) t = seq[seq.length - 1].t;
+    seq.push({ f, i, t });
+  });
+  playPos = {};
+  if (!seq.length) return;
+  let k = 0;
+  while (k + 1 < seq.length && seq[k + 1].t <= T) k++;
+  const cur = seq[k], nxt = seq[k + 1];
+  const hold = () => {
+    for (const d of state.dancers) if (cur.f.pos[d.id]) playPos[d.id] = cur.f.pos[d.id].slice();
+    curF = cur.i;
+    playInfo = "🎵 " + cur.f.name;
+  };
+  if (!nxt || T <= cur.t) { hold(); return; }
+  const win = nxt.t - cur.t;
+  const moveDur = Math.max(0.3, Math.min(nxt.f.counts * 60 / (state.bpm || 120), win));
+  const ms = nxt.t - moveDur;
+  if (T < ms) { hold(); return; }
+  const t0 = Math.min(1, (T - ms) / moveDur), tt = t0 * t0 * (3 - 2 * t0);
+  curF = nxt.i;
+  for (const d of state.dancers) {
+    const pa = cur.f.pos[d.id], pb = nxt.f.pos[d.id];
+    if (pa && pb) playPos[d.id] = [pa[0] + (pb[0] - pa[0]) * tt, pa[1] + (pb[1] - pa[1]) * tt];
+    else if (pb) playPos[d.id] = pb.slice();
+  }
+  playInfo = "🎵 " + cur.f.name + " → " + nxt.f.name + "（" + fmtTime(T) + "）";
+}
+
+function musicPlay() {
+  playing = true;
+  document.getElementById("playBtn").textContent = "■";
+  document.getElementById("playBtn").classList.add("playing");
+  document.getElementById("markBtn").classList.add("show");
+  if (audioEl.ended || audioEl.duration - audioEl.currentTime < 0.2) audioEl.currentTime = 0;
+  audioEl.play();
+  const step = () => {
+    if (!playing) return;
+    if (audioEl.ended) { stopPlay(); return; }
+    computePosAt(audioEl.currentTime);
+    updateSeekUI();
+    render(); tlUpdate();
+    playReq = requestAnimationFrame(step);
+  };
+  playReq = requestAnimationFrame(step);
+}
+
+document.getElementById("markBtn").onclick = () => {
+  if (!playing || !musicReady) return;
+  const idx = state.formations.findIndex((f, i) => i > 0 && f.t == null);
+  if (idx < 0) { toast("全隊形のタイム設定済みです（隊形チップ再タップで修正）"); return; }
+  state.formations[idx].t = Math.round(audioEl.currentTime * 10) / 10;
+  saveNow(); renderTimeline();
+  toast("⏱ " + state.formations[idx].name + " = " + fmtTime(state.formations[idx].t));
+};
+
+document.getElementById("seek").addEventListener("input", e => {
+  if (!musicReady) return;
+  audioEl.currentTime = (+e.target.value / 1000) * (audioEl.duration || 0);
+  updateSeekUI();
+  if (!playing) {           // 停止中はその時点の隊形をプレビュー
+    previewing = true;
+    computePosAt(audioEl.currentTime);
+    render(); tlUpdate();
+  }
+});
 
 /* ================= ヘッダー/サイドボタン ================= */
 document.getElementById("undoBtn").onclick = doUndo;
