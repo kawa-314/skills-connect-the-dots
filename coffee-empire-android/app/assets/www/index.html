@@ -8,7 +8,7 @@
 :root{
   --bg:#1a120b; --bg2:#241a10; --card:#2d2116; --card2:#3a2b1c;
   --line:#4a3826; --text:#f3e9dc; --sub:#b9a58c; --accent:#d99a4e;
-  --accent2:#8c5a32; --good:#7fc97f; --bad:#e77c7c; --gold:#ffd27f;
+  --accent2:#8c5a32; --good:#7fc97f; --bad:#e77c7c; --gold:#ffd27f; --warn:#e8b04b;
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{height:100%}
@@ -19,125 +19,125 @@ body{
   padding-top:env(safe-area-inset-top);
 }
 #app{display:flex;flex-direction:column;height:100vh}
-/* ---------- header ---------- */
-#header{
-  background:linear-gradient(180deg,#33240f,#2a1d10);
-  border-bottom:1px solid var(--line); padding:8px 10px 6px;
-  flex:0 0 auto;
-}
+#header{background:linear-gradient(180deg,#33240f,#2a1d10);border-bottom:1px solid var(--line);
+  padding:7px 10px 5px;flex:0 0 auto}
 #hrow1{display:flex;justify-content:space-between;align-items:center;gap:8px}
-#day-label{font-weight:700;color:var(--gold);font-size:13px;white-space:nowrap}
-#weather{font-size:13px;color:var(--sub)}
-#cash{font-size:19px;font-weight:800;letter-spacing:.5px}
+#day-label{font-weight:700;color:var(--gold);font-size:12.5px;white-space:nowrap}
+#weather{font-size:12.5px;color:var(--sub)}
+#cash{font-size:18px;font-weight:800}
 #cash.neg{color:var(--bad)}
-#hrow2{display:flex;justify-content:space-between;align-items:center;margin-top:4px;gap:6px}
-#kpis{display:flex;gap:10px;font-size:11px;color:var(--sub);flex-wrap:wrap}
+#hrow2{display:flex;justify-content:space-between;align-items:center;margin-top:3px;gap:6px}
+#kpis{display:flex;gap:9px;font-size:10.5px;color:var(--sub);flex-wrap:wrap}
 #kpis b{color:var(--text)}
-#speed{display:flex;gap:5px}
-.spd{
-  background:var(--card2);border:1px solid var(--line);color:var(--text);
-  border-radius:8px;padding:4px 10px;font-size:13px;line-height:1;
-}
+#speed{display:flex;gap:4px}
+.spd{background:var(--card2);border:1px solid var(--line);color:var(--text);
+  border-radius:8px;padding:4px 9px;font-size:12px;line-height:1}
 .spd.on{background:var(--accent);color:#241505;border-color:var(--accent);font-weight:700}
-/* ---------- main ---------- */
-#main{flex:1 1 auto;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:10px 10px 20px}
+#main{flex:1 1 auto;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:10px 10px 24px}
 .page{display:none}
 .page.show{display:block}
-h2{font-size:15px;color:var(--gold);margin:14px 0 8px;display:flex;align-items:center;gap:6px}
+h2{font-size:14.5px;color:var(--gold);margin:14px 0 7px;display:flex;align-items:center;gap:6px}
 h2:first-child{margin-top:2px}
-.card{
-  background:var(--card);border:1px solid var(--line);border-radius:12px;
-  padding:10px 12px;margin-bottom:10px;
-}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;
+  padding:10px 12px;margin-bottom:9px}
+.card.alert{border-color:var(--bad)}
+.card.warn{border-color:var(--warn)}
 .muted{color:var(--sub);font-size:12px}
 .row{display:flex;justify-content:space-between;align-items:center;gap:8px}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .kpi{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px 10px}
-.kpi .v{font-size:17px;font-weight:800;margin-top:2px}
+.kpi .v{font-size:16.5px;font-weight:800;margin-top:2px}
 .kpi .v.good{color:var(--good)} .kpi .v.bad{color:var(--bad)}
-button.btn{
-  background:var(--accent);color:#241505;border:0;border-radius:9px;
-  padding:8px 12px;font-size:13px;font-weight:700;
-}
+button.btn{background:var(--accent);color:#241505;border:0;border-radius:9px;
+  padding:8px 12px;font-size:13px;font-weight:700}
 button.btn.sub{background:var(--card2);color:var(--text);border:1px solid var(--line);font-weight:600}
 button.btn.danger{background:#6e3030;color:#ffd9d9}
-button.btn:disabled{opacity:.38}
-button.mini{
-  background:var(--card2);border:1px solid var(--line);color:var(--text);
-  border-radius:8px;padding:5px 9px;font-size:12px;
-}
+button.btn:disabled{opacity:.35}
+button.mini{background:var(--card2);border:1px solid var(--line);color:var(--text);
+  border-radius:8px;padding:5px 9px;font-size:11.5px}
+button.mini:disabled{opacity:.35}
+button.mini.hot{background:var(--accent);color:#241505;font-weight:700;border-color:var(--accent)}
 .tag{display:inline-block;background:var(--card2);border:1px solid var(--line);
-  border-radius:6px;padding:1px 6px;font-size:11px;color:var(--sub);margin-right:4px}
-.bar{height:6px;background:#191007;border-radius:3px;overflow:hidden;margin-top:4px}
+  border-radius:6px;padding:1px 6px;font-size:10.5px;color:var(--sub);margin-right:4px}
+.tag.bad{color:#ffbcbc;border-color:#7a4040;background:#3a2020}
+.tag.good{color:#c6e9c6;border-color:#3f6b3f;background:#1f2f1f}
+.tag.warn{color:#ffe0a8;border-color:#7a6030;background:#382c14}
+.bar{height:6px;background:#191007;border-radius:3px;overflow:hidden;margin-top:4px;display:flex}
 .bar>i{display:block;height:100%;background:var(--accent)}
-/* log */
-#log{max-height:180px;overflow-y:auto;font-size:12px}
+#log{max-height:170px;overflow-y:auto;font-size:12px}
 #log div{padding:3px 0;border-bottom:1px dashed #3a2b1c;color:var(--sub)}
 #log div b{color:var(--text)}
-canvas{width:100%;height:110px;display:block}
-/* store card */
-.store-head{display:flex;justify-content:space-between;align-items:baseline}
-.store-head .nm{font-weight:800;font-size:15px}
-.stat-line{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:12px;color:var(--sub);margin:6px 0}
+canvas{width:100%;height:104px;display:block}
+.store-head{display:flex;justify-content:space-between;align-items:center;gap:6px}
+.store-head .nm{font-weight:800;font-size:14px}
+.stat-line{display:flex;flex-wrap:wrap;gap:3px 11px;font-size:11.5px;color:var(--sub);margin:5px 0}
 .stat-line b{color:var(--text)}
-.btnrow{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
-/* menu items */
-.prod{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px dashed var(--line)}
+.btnrow{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}
+.prod{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px dashed var(--line)}
 .prod:last-child{border-bottom:0}
 .prod .info{flex:1 1 auto;min-width:0}
-.prod .nm{font-weight:700;font-size:13px}
+.prod .nm{font-weight:700;font-size:12.5px}
 .prod .sub{font-size:11px;color:var(--sub)}
-.stepper{display:flex;align-items:center;gap:4px}
-.stepper button{width:30px;height:30px;border-radius:8px;border:1px solid var(--line);
-  background:var(--card2);color:var(--text);font-size:16px;font-weight:700}
-.stepper .pv{width:56px;text-align:center;font-weight:700;font-size:13px}
-.toggle{width:42px;height:24px;border-radius:12px;background:#191007;border:1px solid var(--line);position:relative}
-.toggle i{position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:#6b573f;transition:.15s}
-.toggle.on{background:var(--accent2)} .toggle.on i{left:20px;background:var(--gold)}
-/* tabs */
-#tabs{
-  flex:0 0 auto;display:flex;background:#241a10;border-top:1px solid var(--line);
-  padding-bottom:env(safe-area-inset-bottom);
-}
-.tab{flex:1;text-align:center;padding:8px 0 9px;font-size:10.5px;color:var(--sub)}
-.tab .ic{font-size:19px;display:block;margin-bottom:1px}
+.stepper{display:flex;align-items:center;gap:3px}
+.stepper button{width:28px;height:28px;border-radius:8px;border:1px solid var(--line);
+  background:var(--card2);color:var(--text);font-size:15px;font-weight:700}
+.stepper .pv{width:52px;text-align:center;font-weight:700;font-size:12.5px}
+.toggle{width:40px;height:23px;border-radius:12px;background:#191007;border:1px solid var(--line);position:relative;flex:0 0 auto}
+.toggle i{position:absolute;top:2px;left:2px;width:17px;height:17px;border-radius:50%;background:#6b573f;transition:.15s}
+.toggle.on{background:var(--accent2)} .toggle.on i{left:19px;background:var(--gold)}
+.toggle.dis{opacity:.35}
+#tabs{flex:0 0 auto;display:flex;background:#241a10;border-top:1px solid var(--line);
+  padding-bottom:env(safe-area-inset-bottom)}
+.tab{flex:1;text-align:center;padding:7px 0 8px;font-size:9.5px;color:var(--sub);position:relative}
+.tab .ic{font-size:17px;display:block;margin-bottom:1px}
 .tab.on{color:var(--gold);background:linear-gradient(180deg,#33240f,transparent)}
-/* modal */
-#modal-wrap{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;
+.tab .dot{position:absolute;top:4px;right:calc(50% - 15px);width:7px;height:7px;
+  border-radius:50%;background:var(--bad);display:none}
+.tab.alert .dot{display:block}
+#modal-wrap{position:fixed;inset:0;background:rgba(0,0,0,.65);display:none;
   align-items:flex-end;justify-content:center;z-index:50}
 #modal-wrap.show{display:flex}
 #modal{background:var(--bg2);border:1px solid var(--line);border-radius:16px 16px 0 0;
-  width:100%;max-width:560px;max-height:82vh;overflow-y:auto;padding:16px 14px 26px}
+  width:100%;max-width:560px;max-height:84vh;overflow-y:auto;padding:16px 14px 26px}
 #modal h3{color:var(--gold);font-size:16px;margin-bottom:10px}
-/* toast */
-#toasts{position:fixed;top:calc(env(safe-area-inset-top) + 64px);left:0;right:0;
-  display:flex;flex-direction:column;align-items:center;gap:6px;z-index:60;pointer-events:none}
-.toast{background:rgba(20,12,5,.92);border:1px solid var(--accent2);color:var(--text);
-  border-radius:10px;padding:8px 14px;font-size:12.5px;max-width:88%;
-  animation:tin .2s ease-out}
+#toasts{position:fixed;top:calc(env(safe-area-inset-top) + 60px);left:0;right:0;
+  display:flex;flex-direction:column;align-items:center;gap:5px;z-index:60;pointer-events:none}
+.toast{background:rgba(20,12,5,.93);border:1px solid var(--accent2);color:var(--text);
+  border-radius:10px;padding:7px 13px;font-size:12px;max-width:90%;animation:tin .2s ease-out}
+.toast.bad{border-color:#8a4040}
 @keyframes tin{from{transform:translateY(-8px);opacity:0}to{transform:none;opacity:1}}
 .star{color:var(--gold)}
-.small-note{font-size:11px;color:var(--sub);margin-top:6px}
-.milestone{display:flex;gap:8px;align-items:center;padding:5px 0;font-size:12.5px}
+.small-note{font-size:11px;color:var(--sub);margin-top:5px}
+.milestone{display:flex;gap:7px;align-items:center;padding:4px 0;font-size:12px}
 .milestone.done{color:var(--sub);text-decoration:line-through}
-.milestone .mk{width:18px}
+.rank{display:flex;justify-content:space-between;align-items:center;padding:5px 0;
+  border-bottom:1px dashed var(--line);font-size:12.5px}
+.rank:last-child{border-bottom:0}
+.meter{height:20px;background:#191007;border-radius:6px;position:relative;overflow:hidden;margin:6px 0}
+.meter>i{display:block;height:100%;background:linear-gradient(90deg,#5d8f5d,#7fc97f)}
+.meter.over>i{background:linear-gradient(90deg,#8f5d5d,#e77c7c)}
+.meter span{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:700;color:#fff;text-shadow:0 1px 2px #000}
+.cand{border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin-bottom:7px;background:var(--card2)}
+.skl{font-weight:800;color:var(--gold)}
+.sect{border-top:1px solid var(--line);margin-top:8px;padding-top:8px}
 </style>
 </head>
 <body>
 <div id="app">
   <div id="header">
     <div id="hrow1">
-      <span id="day-label">1日目 (月)</span>
+      <span id="day-label">1年目 1日 (月)</span>
       <span id="weather">☀️ 晴れ</span>
       <span id="cash">¥5,000,000</span>
     </div>
     <div id="hrow2">
       <div id="kpis">
         <span>評判 <b id="k-rep">★3.0</b></span>
-        <span>認知度 <b id="k-aw">5</b></span>
+        <span>認知 <b id="k-aw">10</b></span>
         <span>店舗 <b id="k-st">0</b></span>
-        <span>時価総額 <b id="k-cap">-</b></span>
-        <span>本日利益 <b id="k-pf">¥0</b></span>
+        <span>時価 <b id="k-cap">-</b></span>
+        <span>日次 <b id="k-pf">¥0</b></span>
       </div>
       <div id="speed">
         <button class="spd" id="sp-pause">⏸</button>
@@ -150,6 +150,7 @@ canvas{width:100%;height:110px;display:block}
   <div id="main">
     <!-- ============ HOME ============ -->
     <div class="page show" id="pg-home">
+      <div id="alerts"></div>
       <div class="grid2">
         <div class="kpi"><div class="muted">本日の来客</div><div class="v" id="h-visitors">0人</div></div>
         <div class="kpi"><div class="muted">本日の売上</div><div class="v" id="h-rev">¥0</div></div>
@@ -157,7 +158,9 @@ canvas{width:100%;height:110px;display:block}
         <div class="kpi"><div class="muted">機会損失(行列)</div><div class="v" id="h-lost">0人</div></div>
       </div>
       <h2>📈 利益の推移(30日)</h2>
-      <div class="card"><canvas id="chart" height="110"></canvas></div>
+      <div class="card"><canvas id="chart" height="104"></canvas></div>
+      <h2>📊 店舗成績ランキング</h2>
+      <div class="card" id="store-rank"></div>
       <h2>🏆 マイルストーン</h2>
       <div class="card" id="milestones"></div>
       <h2>📰 ニュース</h2>
@@ -171,36 +174,52 @@ canvas{width:100%;height:110px;display:block}
     <!-- ============ STORES ============ -->
     <div class="page" id="pg-stores">
       <div class="card row">
-        <div><b>店舗一覧</b><div class="muted">出店して帝国を拡大しよう</div></div>
-        <button class="btn" id="btn-newstore">＋ 新規出店</button>
+        <div><b>店舗一覧</b><div class="muted" id="slot-note">空き物件を探して出店しよう</div></div>
+        <button class="btn" id="btn-newstore">＋ 出店</button>
       </div>
       <div id="store-list"></div>
     </div>
 
+    <!-- ============ ORG ============ -->
+    <div class="page" id="pg-org">
+      <h2>🎛️ 管理能力</h2>
+      <div class="card" id="mgmt-card"></div>
+      <h2>🏛️ 本部の幹部と委任</h2>
+      <div id="exec-list"></div>
+      <h2>👔 店長の配属</h2>
+      <div class="card" id="mgr-assign"></div>
+      <h2>💴 賃金水準</h2>
+      <div class="card" id="wage-card"></div>
+      <h2>🧑‍💼 人材市場</h2>
+      <div class="card" id="candidates"></div>
+    </div>
+
     <!-- ============ MENU ============ -->
     <div class="page" id="pg-menu">
-      <h2>☕ ドリンクメニュー</h2>
+      <div class="card" id="menu-summary"></div>
+      <h2>☕ ドリンク</h2>
       <div class="card" id="menu-drinks"></div>
-      <h2>🥐 フードメニュー</h2>
+      <h2>🥐 フード</h2>
       <div class="card" id="menu-foods"></div>
       <h2>🔬 商品開発 (R&D)</h2>
       <div class="card" id="menu-rnd"></div>
-      <h2>🌱 コーヒー豆の仕入れ</h2>
+      <h2>🌱 豆の相場と仕入れ</h2>
       <div class="card" id="beans"></div>
       <h2>📣 販促キャンペーン</h2>
       <div class="card">
         <div class="row"><b>ブランド認知度</b><b id="m-aw" class="star">10</b></div>
         <div class="bar"><i id="m-awbar" style="width:10%"></i></div>
-        <div class="small-note">認知度が高いほど、全店舗の集客が増えます。毎日少しずつ低下します。</div>
+        <div class="small-note">認知度が高いほど全店舗の集客が増えます。毎日少しずつ低下します。</div>
       </div>
       <div id="campaigns"></div>
     </div>
 
-    <!-- ============ MARKET (ランキング / M&A / 事業 / 不動産) ============ -->
+    <!-- ============ MARKET ============ -->
     <div class="page" id="pg-mkt">
       <h2>🏆 業界時価総額ランキング</h2>
       <div class="card" id="ranking"></div>
-      <h2>🏢 各社の情報とM&A</h2>
+      <div class="card" id="antitrust"></div>
+      <h2>🤝 競合各社と株式取得</h2>
       <div id="ma-list"></div>
       <h2>🏗️ 他業種への進出</h2>
       <div id="ventures"></div>
@@ -219,15 +238,9 @@ canvas{width:100%;height:110px;display:block}
       </div>
       <h2>💰 本日の収支内訳</h2>
       <div class="card" id="pl"></div>
-      <h2>🏦 銀行 (借入限度 ¥10,000,000 / 日利0.05%)</h2>
-      <div class="card">
-        <div class="btnrow">
-          <button class="btn" id="btn-borrow">¥500,000 借りる</button>
-          <button class="btn sub" id="btn-repay">¥500,000 返す</button>
-        </div>
-        <div class="small-note">現金がマイナスのまま7日経つと倒産します。</div>
-      </div>
-      <h2>📊 株式</h2>
+      <h2>🏦 銀行</h2>
+      <div class="card" id="bank"></div>
+      <h2>📊 自社株式</h2>
       <div class="card" id="stock"></div>
     </div>
 
@@ -237,24 +250,24 @@ canvas{width:100%;height:110px;display:block}
         <div class="kpi"><div class="muted">社長の個人資産</div><div class="v" id="c-cash">¥0</div></div>
         <div class="kpi"><div class="muted">役員報酬</div><div class="v" id="c-salary">無報酬</div></div>
       </div>
-      <h2>💼 役員報酬の設定</h2>
+      <h2>💼 役員報酬</h2>
       <div class="card">
         <div class="btnrow" id="salary-sel"></div>
         <div class="small-note">報酬は会社の経費です。上げすぎると利益と株価を圧迫します。</div>
       </div>
       <h2>🛍️ 社長のショッピング</h2>
       <div class="card" id="lux-list"></div>
-      <div class="small-note">上場後は「持株売却」(財務タブ)で個人資産を増やせます。ただし持株比率の下げすぎに注意…</div>
     </div>
   </div>
 
   <div id="tabs">
-    <div class="tab on" data-pg="home"><span class="ic">🏠</span>ホーム</div>
-    <div class="tab" data-pg="stores"><span class="ic">🏬</span>店舗</div>
-    <div class="tab" data-pg="menu"><span class="ic">☕</span>商品</div>
-    <div class="tab" data-pg="mkt"><span class="ic">📈</span>市場</div>
-    <div class="tab" data-pg="fin"><span class="ic">💰</span>財務</div>
-    <div class="tab" data-pg="ceo"><span class="ic">👔</span>社長</div>
+    <div class="tab on" data-pg="home"><span class="dot"></span><span class="ic">🏠</span>ホーム</div>
+    <div class="tab" data-pg="stores"><span class="dot"></span><span class="ic">🏬</span>店舗</div>
+    <div class="tab" data-pg="org"><span class="dot"></span><span class="ic">🏛️</span>組織</div>
+    <div class="tab" data-pg="menu"><span class="dot"></span><span class="ic">☕</span>商品</div>
+    <div class="tab" data-pg="mkt"><span class="dot"></span><span class="ic">📈</span>市場</div>
+    <div class="tab" data-pg="fin"><span class="dot"></span><span class="ic">💰</span>財務</div>
+    <div class="tab" data-pg="ceo"><span class="dot"></span><span class="ic">👔</span>社長</div>
   </div>
 </div>
 
@@ -265,12 +278,18 @@ canvas{width:100%;height:110px;display:block}
 'use strict';
 /* =====================  DATA  ===================== */
 const DISTRICTS=[
- {id:'ekimae', name:'駅前',       traffic:520, rent:9000, tol:1.10, wd:1.0,  we:1.15, desc:'人通り最大。家賃も最高クラス。'},
- {id:'office', name:'オフィス街', traffic:430, rent:7000, tol:1.25, wd:1.25, we:0.50, desc:'平日に強く客単価が高い。'},
- {id:'shoten', name:'商店街',     traffic:330, rent:4800, tol:1.00, wd:1.0,  we:1.20, desc:'バランス型。常連がつきやすい。'},
- {id:'campus', name:'大学前',     traffic:310, rent:3600, tol:0.80, wd:1.1,  we:0.65, desc:'学生街。価格に敏感。'},
- {id:'suburb', name:'住宅街',     traffic:220, rent:2600, tol:0.95, wd:0.9,  we:1.35, desc:'家賃が安く週末に強い。'},
- {id:'mall',   name:'郊外モール', traffic:400, rent:5600, tol:1.05, wd:0.75, we:1.60, desc:'週末の集客力は圧倒的。'},
+ {id:'ekimae', name:'駅前',       pool:980, slots:4, rent:9000, tol:1.10, wd:1.0,  we:1.15,
+  desc:'人通り最大の一等地。枠は4つしかなく、ステラが既に押さえている。'},
+ {id:'office', name:'オフィス街', pool:810, slots:4, rent:7000, tol:1.25, wd:1.25, we:0.50,
+  desc:'客単価が高く平日に強い。週末はほぼ人がいない。'},
+ {id:'shoten', name:'商店街',     pool:620, slots:5, rent:4800, tol:1.00, wd:1.0,  we:1.20,
+  desc:'バランス型。枠が多く、拠点を築きやすい。'},
+ {id:'campus', name:'大学前',     pool:590, slots:3, rent:3600, tol:0.80, wd:1.1,  we:0.65,
+  desc:'学生街。価格に非常に敏感で、高値をつけると一気に離れる。'},
+ {id:'suburb', name:'住宅街',     pool:420, slots:6, rent:2600, tol:0.95, wd:0.9,  we:1.35,
+  desc:'家賃が安く枠も多い。週末に強いが人通りは少ない。'},
+ {id:'mall',   name:'郊外モール', pool:750, slots:3, rent:5600, tol:1.05, wd:0.75, we:1.60,
+  desc:'週末の集客力は圧倒的。平日は閑散とする。'},
 ];
 const PRODUCTS=[
  {id:'drip',     name:'ドリップコーヒー', e:'☕', cost:35,  fair:320, appeal:10, cat:'drink', bean:true,  temp:'hot',  rnd:0},
@@ -288,9 +307,9 @@ const PRODUCTS=[
  {id:'cake',     name:'チーズケーキ',     e:'🍰', cost:110, fair:520, appeal:12, cat:'food',  bean:false, temp:'',     rnd:450000},
 ];
 const BEANS=[
- {id:'robusta',  name:'ロブスタ豆',            q:1, mult:0.70, desc:'安いが味は値段なり。満足度に注意。'},
- {id:'brazil',   name:'ブラジル ブレンド',     q:2, mult:1.00, desc:'定番のバランス型。'},
- {id:'colombia', name:'コロンビア シングル',   q:3, mult:1.55, desc:'香り高く満足度アップ。'},
+ {id:'robusta',  name:'ロブスタ豆',              q:1, mult:0.70, desc:'安いが味は値段なり。満足度に難あり。'},
+ {id:'brazil',   name:'ブラジル ブレンド',       q:2, mult:1.00, desc:'定番のバランス型。'},
+ {id:'colombia', name:'コロンビア シングル',     q:3, mult:1.55, desc:'香り高く満足度が上がる。'},
  {id:'geisha',   name:'スペシャルティ ゲイシャ', q:4, mult:2.60, desc:'最高級。ブランド価値を押し上げる。'},
 ];
 const CAMPAIGNS=[
@@ -300,23 +319,52 @@ const CAMPAIGNS=[
  {id:'tv',    name:'TV CM',               e:'📺', cost:1500000, days:14, power:38, desc:'全国区の知名度へ。'},
 ];
 const COMPETITORS=[
- {id:'stella',   name:'ステラコーヒー', e:'🌟', power:60, cap:800000000, stores:{ekimae:2, office:1, mall:1},
-  desc:'外資系の全国チェーン。プレミアム路線で資金力は圧倒的、業界の絶対王者。'},
- {id:'dripgo',   name:'ドリップ&ゴー',  e:'🚶', power:38, cap:250000000, stores:{office:1, shoten:1, campus:1},
-  desc:'テイクアウト特化の格安チェーン。回転率で稼ぐ薄利多売モデルで急成長中。'},
- {id:'mamezen',  name:'珈琲豆善',       e:'🫘', power:30, cap:120000000, stores:{shoten:1, suburb:1},
-  desc:'昭和創業の老舗喫茶チェーン。固定客は厚いが、後継者不足に悩んでいる。'},
- {id:'nekomado', name:'ねこまど珈琲',   e:'🐱', power:24, cap:60000000, stores:{campus:1},
-  desc:'猫カフェ併設の新興チェーン。SNSでバズり続ける業界の台風の目。'},
+ {id:'stella',   name:'ステラコーヒー', e:'🌟', power:62, cap:10000000000, person:'capital',
+  stores:{ekimae:2, office:2, mall:1},
+  desc:'外資系の全国チェーン。資金力は圧倒的で、業界の絶対王者。あなたが伸びれば必ず潰しに来る。'},
+ {id:'dripgo',   name:'ドリップ&ゴー',  e:'🚶', power:40, cap:3500000000, person:'price',
+  stores:{office:1, shoten:1, campus:1},
+  desc:'テイクアウト特化の格安チェーン。追い詰められると全店値下げの価格戦争を仕掛けてくる。'},
+ {id:'mamezen',  name:'珈琲豆善',       e:'🫘', power:32, cap:1800000000, person:'talent',
+  stores:{shoten:1, suburb:1},
+  desc:'昭和創業の老舗。腕利きの職人を多数抱え、good人材を引き抜いてくる。後継者不足に悩む。'},
+ {id:'nekomado', name:'ねこまど珈琲',   e:'🐱', power:26, cap:800000000, person:'buzz',
+  stores:{campus:1},
+  desc:'猫カフェ併設の新興チェーン。SNSでバズを起こしては、あなたの認知度を奪っていく。'},
 ];
 const FUND={name:'グレートベア投資ファンド', e:'🐻'};
+const EXEC_ROLES=[
+ {id:'ops',  name:'運営本部長',   e:'🧑‍💼', deleg:'staffing',  dname:'人員配置の自動化',
+  desc:'管理能力を大きく高め、全店舗の人員を需要に合わせて自動調整します。'},
+ {id:'hr',   name:'人事部長',     e:'📚', deleg:'training',  dname:'研修・定着の自動化',
+  desc:'スキルの低い店舗を自動で研修し、離職を抑えます。'},
+ {id:'cmo',  name:'マーケ本部長', e:'📣', deleg:'marketing', dname:'販促の自動化',
+  desc:'認知度が下がると、予算を見て自動でキャンペーンを打ちます。'},
+ {id:'rnd',  name:'商品開発部長', e:'🔬', deleg:'menu',      dname:'メニュー刷新の自動化',
+  desc:'飽きられた商品を外し、新商品を自動で開発します。'},
+ {id:'buyer',name:'購買本部長',   e:'🌱', deleg:'hedging',   dname:'豆の自動ヘッジ',
+  desc:'豆相場が安いうちに長期契約を結び、高騰から会社を守ります。'},
+ {id:'cfo',  name:'財務本部長',   e:'🛡️', deleg:'defense',   dname:'買収防衛の自動化',
+  desc:'敵対的な買い集めを察知し、自動で自社株買いを行います。'},
+];
+const TRAITS=[
+ {id:'service',name:'接客の達人',e:'✨',desc:'満足度が大きく上がる'},
+ {id:'cost',   name:'コスト管理',e:'💴',desc:'その店の人件費-15%'},
+ {id:'coach',  name:'育成上手',  e:'📗',desc:'配属先のスキルが毎日伸びる'},
+ {id:'magnet', name:'集客の鬼',  e:'🧲',desc:'その店の集客力+20%'},
+ {id:'steady', name:'堅実',      e:'🪙',desc:'給与が25%安い'},
+];
+const SURNAMES=['佐藤','鈴木','高橋','田中','伊藤','渡辺','山本','中村','小林','加藤','吉田','山田',
+ '佐々木','山口','松本','井上','木村','林','斎藤','清水','山崎','阿部','森','池田','橋本','石川'];
+const GIVEN=['健一','美咲','大輔','由紀','翔太','彩','拓也','恵','直樹','愛','俊介','千夏',
+ '涼','麻衣','和也','沙織','悠斗','里奈','浩二','舞'];
 const VENTURES=[
  {id:'bakery', name:'ベーカリー工房',   e:'🥖', cost:15000000,  income:45000,
   desc:'自社工房で焼きたてパンを供給。フード原価が20%下がる。'},
  {id:'roast',  name:'自家焙煎工場',     e:'🏭', cost:40000000,  income:70000,
-  desc:'豆を自社焙煎して外販も。コーヒー原価が25%下がる。'},
+  desc:'豆を自社焙煎。原価-25%に加え、相場変動の影響を半減できる。'},
  {id:'conv',   name:'コンビニFC事業',   e:'🏪', cost:100000000, income:220000,
-  desc:'コンビニのフランチャイズ本部に出資。安定した収益源。'},
+  desc:'コンビニのFC本部に出資。本業と無関係に安定収益が入る。'},
  {id:'hotel',  name:'ホテル&カフェ事業', e:'🏨', cost:300000000, income:700000,
   desc:'ラウンジカフェ併設の高級ホテル。ブランドの頂点へ。'},
 ];
@@ -327,19 +375,24 @@ const PROPERTIES=[
  {id:'tower',    name:'オフィスタワー',       e:'🌆', price:600000000, rent:380000},
 ];
 const LUXURY=[
- {id:'suit',      name:'オーダースーツ',           e:'🤵', cost:1500000,    aw:1,  desc:'一流の身だしなみから。'},
- {id:'watch',     name:'高級腕時計',               e:'⌚', cost:5000000,    aw:2,  desc:'商談相手が一目置く。'},
- {id:'car',       name:'スーパーカー',             e:'🏎️', cost:40000000,   aw:4,  desc:'街中の視線を独り占め。'},
- {id:'penthouse', name:'タワマン最上階',           e:'🏙️', cost:150000000,  aw:6,  desc:'成功者の証。'},
- {id:'cruiser',   name:'大型クルーザー',           e:'🛥️', cost:300000000,  aw:8,  desc:'週末は海の上で役員会議を。'},
- {id:'jet',       name:'プライベートジェット',     e:'✈️', cost:1000000000, aw:10, desc:'世界中の豆産地へひとっ飛び。'},
- {id:'island',    name:'プライベートアイランド',   e:'🏝️', cost:3000000000, aw:15, desc:'いつかは自分の島を。'},
+ {id:'suit',      name:'オーダースーツ',       e:'🤵', cost:1500000,    aw:1,  desc:'一流の身だしなみから。'},
+ {id:'watch',     name:'高級腕時計',           e:'⌚', cost:5000000,    aw:2,  desc:'商談相手が一目置く。'},
+ {id:'car',       name:'スーパーカー',         e:'🏎️', cost:40000000,   aw:4,  desc:'街中の視線を独り占め。'},
+ {id:'penthouse', name:'タワマン最上階',       e:'🏙️', cost:150000000,  aw:6,  desc:'成功者の証。'},
+ {id:'cruiser',   name:'大型クルーザー',       e:'🛥️', cost:300000000,  aw:8,  desc:'週末は海の上で役員会議を。'},
+ {id:'jet',       name:'プライベートジェット', e:'✈️', cost:1000000000, aw:10, desc:'世界中の豆産地へひとっ飛び。'},
+ {id:'island',    name:'プライベートアイランド',e:'🏝️', cost:3000000000, aw:15, desc:'いつかは自分の島を。'},
 ];
 const SALARIES=[
- {name:'無報酬',            amt:0},
- {name:'堅実 ¥5万/日',      amt:50000},
- {name:'高給 ¥20万/日',     amt:200000},
- {name:'豪遊 ¥100万/日',    amt:1000000},
+ {name:'無報酬',        amt:0},
+ {name:'¥5万/日',       amt:50000},
+ {name:'¥20万/日',      amt:200000},
+ {name:'¥100万/日',     amt:1000000},
+];
+const WAGE_LEVELS=[
+ {name:'低賃金',   mult:0.8, morale:-1.6},
+ {name:'相場並み', mult:1.0, morale:0},
+ {name:'好待遇',   mult:1.25,morale:+1.4},
 ];
 const WEATHERS=[
  {id:'sun',  e:'☀️', name:'晴れ',   w:46, traffic:1.0,  hot:1.0, cold:1.0},
@@ -349,319 +402,611 @@ const WEATHERS=[
  {id:'snow', e:'❄️', name:'寒波',   w:7,  traffic:0.80, hot:1.45,cold:0.55},
 ];
 const WD=['月','火','水','木','金','土','日'];
-const WAGE_BARISTA=9000, WAGE_MANAGER=15000;
-const LOAN_LIMIT=10000000, LOAN_STEP=500000, LOAN_RATE=0.0005;
+const BASE_WAGE=9000;
 const MILESTONES=[
- {id:'m1', name:'1号店をオープンする',              reward:100000,  chk:g=>g.stores.length>=1},
- {id:'m2', name:'累計来客 1,000人を達成',           reward:150000,  chk:g=>g.totalVisitors>=1000},
- {id:'m3', name:'1日の利益 ¥100,000 を達成',        reward:200000,  chk:g=>g.bestDayProfit>=100000},
- {id:'m4', name:'商品を8種類ラインナップする',      reward:250000,  chk:g=>g.unlocked.length>=8},
- {id:'m5', name:'店舗を3店舗に拡大',                reward:400000,  chk:g=>g.stores.length>=3},
- {id:'m6', name:'ブランド認知度 50 を達成',         reward:500000,  chk:g=>g.awareness>=50},
- {id:'m7', name:'評判 ★4.5 を達成',                 reward:600000,  chk:g=>g.reputation>=4.5},
- {id:'m8', name:'店舗を6店舗に拡大',                reward:1000000, chk:g=>g.stores.length>=6},
- {id:'m9', name:'累計利益 ¥10,000,000 を達成',      reward:1500000, chk:g=>g.totalProfit>=10000000},
- {id:'m10',name:'10店舗達成!コーヒー帝国の完成!', reward:3000000, chk:g=>g.stores.length>=10},
- {id:'m11',name:'株式上場(IPO)を果たす',           reward:800000,  chk:g=>g.listed},
- {id:'m12',name:'不動産オーナーになる',             reward:300000,  chk:g=>g.properties.length>=1},
- {id:'m13',name:'他業種へ進出する',                 reward:500000,  chk:g=>g.ventures.length>=1},
- {id:'m14',name:'初のM&Aを成立させる',              reward:2000000, chk:g=>g.comps.some(c=>c.acquired)},
- {id:'m15',name:'時価総額10億円を達成',             reward:3000000, chk:g=>g.lastVal>=1000000000},
- {id:'m16',name:'業界時価総額ランキング1位',        reward:5000000, chk:g=>g.stores.length>0&&g.comps.filter(c=>!c.acquired).every(c=>g.lastVal>c.cap)},
- {id:'m17',name:'社長コレクション全制覇「伝説の社長」', reward:10000000, chk:g=>g.luxOwned.length>=LUXURY.length},
+ {id:'m1', name:'1号店をオープンする',            reward:100000,  chk:g=>g.stores.length>=1},
+ {id:'m2', name:'店長を配属する',                 reward:150000,  chk:g=>g.stores.some(s=>s.managerId)},
+ {id:'m3', name:'1日の利益 ¥200,000 を達成',      reward:250000,  chk:g=>g.bestDayProfit>=200000},
+ {id:'m4', name:'本部に幹部を就任させる',         reward:300000,  chk:g=>Object.values(g.execs).some(v=>v)},
+ {id:'m5', name:'3つの地区に進出する',            reward:400000,  chk:g=>new Set(g.stores.map(s=>s.districtId)).size>=3},
+ {id:'m6', name:'評判 ★4.2 を達成',               reward:600000,  chk:g=>g.reputation>=4.2},
+ {id:'m7', name:'株式上場(IPO)を果たす',          reward:800000,  chk:g=>g.listed},
+ {id:'m8', name:'他業種へ進出する',               reward:500000,  chk:g=>g.ventures.length>=1},
+ {id:'m9', name:'競合の株式を33%取得(拒否権)',    reward:1500000, chk:g=>g.comps.some(c=>c.myShare>=33)},
+ {id:'m10',name:'競合を1社buyoutする',            reward:3000000, chk:g=>g.comps.some(c=>c.acquired)},
+ {id:'m11',name:'時価総額10億円を達成',           reward:2000000, chk:g=>g.lastVal>=1000000000},
+ {id:'m11b',name:'時価総額50億円を達成',           reward:6000000, chk:g=>g.lastVal>=5000000000},
+ {id:'m11c',name:'ランキングで3位以内に入る',      reward:3000000, chk:g=>g.comps.filter(c=>!c.acquired&&c.cap>g.lastVal).length<=2&&g.stores.length>0},
+ {id:'m12',name:'業界ランキング1位に立つ',        reward:5000000, chk:g=>g.everTop},
+ {id:'m13',name:'王者ステラコーヒーを支配下に',   reward:10000000,chk:g=>{const c=g.comps.find(x=>x.id==='stella');return c&&c.acquired;}},
+ {id:'m14',name:'社長コレクション全制覇',         reward:10000000,chk:g=>g.luxOwned.length>=LUXURY.length},
 ];
 
 /* =====================  STATE  ===================== */
 let G=null;
-const SAVE_KEY='coffee_empire_save_v1';
+const SAVE_KEY='coffee_empire_save_v3';
+function blankToday(){
+  return {rev:0,cogs:0,wage:0,rent:0,hq:0,interest:0,visitors:0,lost:0,profit:0,
+          biz:0,prop:0,salary:0,mgmt:0,fine:0};
+}
 function newGame(){
-  return {
-    day:1, cash:5000000, loan:0, negDays:0,
+  const g={
+    day:1, cash:5000000, loan:0, negDays:0, baseRate:0.0005, covenantDays:0,
     awareness:10, reputation:3.0,
-    beanId:'brazil',
-    unlocked:['drip','latte','ice'],
-    enabled:['drip','latte','ice'],
-    prices:{},                       // id -> price (default fair)
-    stores:[],                       // see openStore
-    campaigns:[],                    // {id, daysLeft, perDay}
-    comps:JSON.parse(JSON.stringify(COMPETITORS)),
-    weather:WEATHERS[0].id,
-    hist:[],                         // last 30 {profit}
-    log:[],
-    milestonesDone:[],
-    today:{rev:0,cogs:0,wage:0,rent:0,mkt:0,interest:0,visitors:0,lost:0,profit:0,biz:0,prop:0,salary:0},
+    beanId:'brazil', beanSpot:1.0, spotHist:[], beanContract:null,
+    unlocked:['drip','latte','ice'], enabled:['drip','latte','ice'], prices:{}, fresh:{},
+    trend:null, priceWar:0,
+    stores:[], managers:[], candidates:[], execs:{}, wageIdx:1,
+    wageDrift:1, rentMod:{},
+    deleg:{staffing:false,training:false,marketing:false,menu:false,hedging:false,defense:false},
+    campaigns:[], comps:JSON.parse(JSON.stringify(COMPETITORS)),
+    weather:'sun', hist:[], log:[], milestonesDone:[],
+    today:blankToday(),
     totalVisitors:0, totalRev:0, totalProfit:0, bestDayProfit:0,
-    listed:false, ownerShare:100, fundShare:0, lastFundWarn:0,
-    lastVal:20000000, valHist:[],
+    listed:false, ownerShare:100, holders:{fund:0,stella:0}, lastWarn:0,
+    lastVal:20000000, valHist:[], everTop:false, topStreak:0,
+    antitrustWarned:false,
     personalCash:2000000, salaryIdx:0, luxOwned:[],
     ventures:[], properties:[],
-    speed:0, cleared:false, over:false, seq:1,
+    speed:0, cleared:false, over:false, seq:1, mseq:1,
   };
-}
-function migrate(g){
-  // 旧バージョンのセーブデータに新フィールドを補完する
-  const d=newGame();
-  for(const k in d) if(g[k]===undefined) g[k]=d[k];
-  for(const k in d.today) if(g.today[k]===undefined) g.today[k]=d.today[k];
-  for(const c of COMPETITORS){
-    const e=g.comps.find(x=>x.id===c.id);
-    if(!e) g.comps.push(JSON.parse(JSON.stringify(c)));
-    else{ if(e.cap===undefined)e.cap=c.cap; if(!e.desc)e.desc=c.desc; }
-  }
+  for(const p of PRODUCTS) g.fresh[p.id]=1;
+  for(const c of g.comps){ c.myShare=0; c.acquired=false; c.cd=15+Math.floor(Math.random()*20); c.defended=0; }
+  for(let i=0;i<6;i++) g.candidates.push(makeCandidate(g));
   return g;
 }
 function save(){ try{ localStorage.setItem(SAVE_KEY, JSON.stringify(G)); }catch(e){} }
 window.onAppPause=function(){ save(); };
 function load(){
-  try{
-    const s=localStorage.getItem(SAVE_KEY);
-    if(s){ const g=JSON.parse(s); if(g && g.day) return g; }
-  }catch(e){}
+  try{ const s=localStorage.getItem(SAVE_KEY); if(s){ const g=JSON.parse(s); if(g&&g.day) return g; } }catch(e){}
   return null;
 }
 
 /* =====================  HELPERS  ===================== */
 const $=id=>document.getElementById(id);
 const yen=n=>'¥'+Math.round(n).toLocaleString('ja-JP');
-const fmtBig=n=>{ n=Math.round(n); return Math.abs(n)>=100000000 ? (n/100000000).toFixed(2)+'億円' : yen(n); };
-function calcValuation(){
-  const hist=G.hist.slice(-14);
-  const avg=hist.length? hist.reduce((s,h)=>s+h.p,0)/hist.length : 0;
-  const per=10 + G.reputation*1.6 + G.awareness/25;      // おおよそ13〜21
-  const earnVal=Math.max(0,avg)*365*per;
-  const propVal=G.properties.reduce((s,p)=>s+p.curPrice,0);
-  const ventVal=G.ventures.reduce((s,v)=>{const x=VENTURES.find(y=>y.id===v);return s+(x?x.cost*0.7:0);},0);
-  const assets=G.cash-G.loan+propVal+ventVal;
-  return Math.round(Math.max(5000000, earnVal + Math.max(0,assets)*0.9 + G.stores.length*15000000));
-}
+const fmtBig=n=>{ n=Math.round(n); return Math.abs(n)>=100000000?(n/100000000).toFixed(2)+'億円':yen(n); };
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+function rnd(a,b){ return a+Math.random()*(b-a); }
+function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+function weightedPick(ws){ let s=ws.reduce((a,b)=>a+b,0), r=Math.random()*s;
+  for(let i=0;i<ws.length;i++){ r-=ws[i]; if(r<=0)return i; } return ws.length-1; }
 function price(pid){ const p=PRODUCTS.find(x=>x.id===pid); return (G.prices[pid]!=null)?G.prices[pid]:p.fair; }
 function bean(){ return BEANS.find(b=>b.id===G.beanId); }
 function weather(){ return WEATHERS.find(w=>w.id===G.weather); }
 function isWeekend(){ const d=(G.day-1)%7; return d>=5; }
-function toast(msg){
+function dayLabel(){ const y=Math.floor((G.day-1)/365)+1, dd=(G.day-1)%365+1;
+  return y+'年目 '+dd+'日 ('+WD[(G.day-1)%7]+')'; }
+function districtOf(st){ return DISTRICTS.find(d=>d.id===st.districtId); }
+function getMgr(id){ return id? G.managers.find(m=>m.id===id) : null; }
+function getExec(role){ return G.execs[role]? getMgr(G.execs[role]) : null; }
+function toast(msg,bad){
   const box=$('toasts');
   while(box.children.length>=3) box.removeChild(box.firstChild);
-  const t=document.createElement('div'); t.className='toast'; t.innerHTML=msg;
+  const t=document.createElement('div'); t.className='toast'+(bad?' bad':''); t.innerHTML=msg;
   box.appendChild(t);
   setTimeout(()=>{ t.style.opacity='0'; t.style.transition='opacity .4s'; setTimeout(()=>t.remove(),400); },2600);
 }
-function news(msg){
-  G.log.unshift('<b>'+G.day+'日目</b> '+msg);
-  if(G.log.length>60)G.log.length=60;
+function news(msg){ G.log.unshift('<b>'+G.day+'日</b> '+msg); if(G.log.length>60)G.log.length=60; }
+function spark(vals,w,h,color){
+  w=w||62; h=h||18; color=color||'var(--accent)';
+  if(!vals||vals.length<2) return '';
+  const mx=Math.max.apply(null,vals), mn=Math.min.apply(null,vals), rg=(mx-mn)||1;
+  const pts=vals.map((v,i)=>((i*(w-2)/(vals.length-1))+1).toFixed(1)+','+(h-1-((v-mn)/rg)*(h-2)).toFixed(1)).join(' ');
+  let zero='';
+  if(mn<0&&mx>0){ const zy=(h-1-((0-mn)/rg)*(h-2)).toFixed(1);
+    zero='<line x1="0" y1="'+zy+'" x2="'+w+'" y2="'+zy+'" stroke="#4a3826" stroke-dasharray="2,2"/>'; }
+  return '<svg width="'+w+'" height="'+h+'" style="vertical-align:middle">'+zero+
+    '<polyline points="'+pts+'" fill="none" stroke="'+color+'" stroke-width="1.5"/></svg>';
 }
-function districtOf(st){ return DISTRICTS.find(d=>d.id===st.districtId); }
-function storeOpenCost(d){ return 1200000 + d.rent*90; }
-function compAttractIn(did){
-  let a=0;
-  for(const c of G.comps){ a += (c.stores[did]||0) * c.power; }
-  return a;
+function avgProfit(n){
+  const h=G.hist.slice(-n); if(!h.length) return 0;
+  return h.reduce((s,x)=>s+x.p,0)/h.length;
 }
-function storeAttract(st){
-  return 40 + st.equip*15 + st.interior*10 + st.skill*0.5 + st.rep*10 + (st.manager?15:0);
+/* --- 出店枠 --- */
+function compStoresIn(did){ let n=0; for(const c of G.comps){ if(!c.acquired) n+=(c.stores[did]||0); } return n; }
+function myStoresIn(did){ return G.stores.filter(s=>s.districtId===did).length; }
+function freeSlots(did){ const d=DISTRICTS.find(x=>x.id===did);
+  return Math.max(0, d.slots - myStoresIn(did) - compStoresIn(did)); }
+function totalFreeSlots(){ return DISTRICTS.reduce((s,d)=>s+freeSlots(d.id),0); }
+function storeOpenCost(d){ return 2000000 + d.rent*150; }
+/* --- 管理能力 --- */
+function mgmtLoad(){ return G.stores.reduce((s,st)=>s+(st.managerId?0.3:1.15),0); }
+function mgmtCap(){
+  let c=3;
+  const ops=getExec('ops'); if(ops) c+=3+ops.skill/12;
+  for(const r of EXEC_ROLES){ if(r.id!=='ops'&&G.execs[r.id]) c+=0.8; }
+  return c;
+}
+function mgmtPenalty(){ const o=mgmtLoad()-mgmtCap(); return o>0? Math.min(0.55,o*0.075) : 0; }
+/* --- 原価 --- */
+function beanMult(){
+  const base=G.beanContract? G.beanContract.rate : G.beanSpot;
+  return G.ventures.includes('roast')? 1+(base-1)*0.5 : base;   // 焙煎工場で相場変動を半減
 }
 function prodCost(p){
-  // 事業シナジー: 焙煎工場で豆原価-25%、ベーカリーでフード原価-20%
-  if(p.bean) return p.cost*bean().mult*(G.ventures.includes('roast')?0.75:1);
+  if(p.bean) return p.cost*bean().mult*beanMult()*(G.ventures.includes('roast')?0.75:1);
   if(p.cat==='food') return p.cost*(G.ventures.includes('bakery')?0.8:1);
   return p.cost;
 }
+function wageOf(st){
+  const m=getMgr(st.managerId);
+  let w=st.staff*BASE_WAGE*(G.wageDrift||1)*WAGE_LEVELS[G.wageIdx].mult;
+  if(m&&m.traitId==='cost') w*=0.85;
+  return w;
+}
+function rentOf(d){ return Math.round(d.rent*((G.rentMod&&G.rentMod[d.id])||1)); }
+function perStaffCapacity(st){
+  const m=getMgr(st.managerId);
+  return (75+st.skill*0.9)*(1+(st.equip-1)*0.15)*(m?1+m.skill/250:0.90)*menuComplexity();
+}
+function storeCapacity(st){ return st.staff*perStaffCapacity(st); }
+function idealStaff(st){ return clamp(Math.ceil((st.lastPot||60)/Math.max(1,perStaffCapacity(st))),1,12); }
+function storeAttract(st){
+  if(st.closedDays>0) return 0;
+  const m=getMgr(st.managerId);
+  let a=40+st.equip*15+st.interior*10+st.skill*0.5+st.rep*12+(m?12+m.skill*0.22:0);
+  if(m&&m.traitId==='magnet') a*=1.2;
+  return Math.max(1,a);
+}
+function compAttractIn(did){
+  let a=0; for(const c of G.comps){ if(!c.acquired) a+=(c.stores[did]||0)*c.power; } return a;
+}
+function menuComplexity(){ return clamp(1-Math.max(0,G.enabled.length-6)*0.035, 0.6, 1); }
+function calcValuation(){
+  const avg=avgProfit(20);
+  const per=11+G.reputation*1.7+G.awareness/22;
+  const earn=Math.max(0,avg)*365*per;
+  const propV=G.properties.reduce((s,p)=>s+p.curPrice,0);
+  const ventV=G.ventures.reduce((s,v)=>{const x=VENTURES.find(y=>y.id===v);return s+(x?x.cost*0.7:0);},0);
+  const stakeV=G.comps.reduce((s,c)=>s+(c.acquired?0:c.cap*c.myShare/100),0);
+  const assets=G.cash-G.loan+propV+ventV+stakeV;
+  return Math.round(Math.max(5000000, earn+Math.max(0,assets)*0.9+G.stores.length*12000000));
+}
+function industryStoreShare(){
+  const mine=G.stores.length, comp=DISTRICTS.reduce((s,d)=>s+compStoresIn(d.id),0);
+  return mine/Math.max(1,mine+comp);
+}
+function stakeCost(c){ return Math.round(c.cap*0.05*(1.15+(c.myShare/100)*1.2)); }
+function creditLimit(){
+  const avg=avgProfit(30);
+  const assets=G.properties.reduce((s,p)=>s+p.curPrice,0)+G.stores.length*2500000;
+  return Math.max(3000000, Math.round(avg*160+assets*0.45));
+}
+function loanRate(){ const lev=G.loan/Math.max(1,creditLimit()); return G.baseRate*(1+lev*1.8); }
 
-/* =====================  SIMULATION  ===================== */
+/* =====================  CANDIDATES  ===================== */
+function makeCandidate(g){
+  g=g||G;
+  const skill=Math.round(clamp(rnd(28,72)+(Math.random()<0.15?rnd(10,25):0),25,95));
+  const tr=pick(TRAITS);
+  let sal=Math.round((3200+skill*140)/100)*100;
+  if(tr.id==='steady') sal=Math.round(sal*0.75/100)*100;
+  return {id:'m'+(g.mseq++), name:pick(SURNAMES)+' '+pick(GIVEN), skill:skill,
+          traitId:tr.id, salary:sal, assign:null, role:null};
+}
+function refreshCandidates(){
+  if(G.day%4===0 && G.candidates.length){
+    G.candidates.shift(); G.candidates.push(makeCandidate());
+  }
+  while(G.candidates.length<6) G.candidates.push(makeCandidate());
+}
+
+/* =====================  DELEGATION (自動化)  ===================== */
+function runDelegation(){
+  const D=G.deleg;
+  // 人員配置
+  if(D.staffing && getExec('ops')){
+    for(const st of G.stores){
+      const target=idealStaff(st);
+      if(st.staff<target) st.staff++;
+      else if(st.staff>target) st.staff--;
+    }
+  }
+  // 研修
+  if(D.training && getExec('hr')){
+    const weak=G.stores.filter(s=>s.skill<75).sort((a,b)=>a.skill-b.skill)[0];
+    if(weak && G.cash>400000){ G.cash-=80000; weak.skill=Math.min(100,weak.skill+7); }
+  }
+  // 販促
+  if(D.marketing && getExec('cmo')){
+    if(G.awareness<38){
+      const aff=CAMPAIGNS.filter(c=>!G.campaigns.find(x=>x.id===c.id)&&G.cash>c.cost*4)
+        .sort((a,b)=>b.power-a.power)[0];
+      if(aff){ G.cash-=aff.cost; G.campaigns.push({id:aff.id,daysLeft:aff.days,perDay:aff.power/aff.days});
+        news('📣 マーケ本部長の判断で<b>'+aff.name+'</b>を開始しました'); }
+    }
+  }
+  // メニュー刷新
+  if(D.menu && getExec('rnd')){
+    // 鮮度の落ちた商品を休止し、回復した商品を復帰
+    for(const p of PRODUCTS){
+      if(!G.unlocked.includes(p.id)) continue;
+      const on=G.enabled.includes(p.id);
+      if(on && G.fresh[p.id]<0.62 && G.enabled.length>4){
+        G.enabled=G.enabled.filter(x=>x!==p.id);
+        news('🔬 商品開発部長が飽きられた<b>'+p.name+'</b>を一時休止しました');
+      } else if(!on && G.fresh[p.id]>0.97 && G.enabled.length<8){
+        G.enabled.push(p.id);
+        news('🔬 商品開発部長が<b>'+p.name+'</b>を再投入しました');
+      }
+    }
+    // 新商品の自動開発
+    const lock=PRODUCTS.filter(p=>!G.unlocked.includes(p.id)).sort((a,b)=>a.rnd-b.rnd)[0];
+    if(lock && G.cash>lock.rnd*6){
+      G.cash-=lock.rnd; G.unlocked.push(lock.id);
+      news('🔬 商品開発部長が<b>'+lock.name+'</b>を開発しました');
+    }
+  }
+  // 豆ヘッジ
+  if(D.hedging && getExec('buyer')){
+    if(!G.beanContract && G.beanSpot<0.88){
+      G.beanContract={rate:G.beanSpot*1.03, daysLeft:90};
+      news('🌱 購買本部長が安値で豆の長期契約(90日)を結びました');
+    }
+  }
+  // 買収防衛
+  if(D.defense && getExec('cfo') && G.listed){
+    const threat=G.holders.fund+G.holders.stella;
+    const cost=Math.round(G.lastVal*0.05*1.05);
+    if(threat>=22 && G.ownerShare<62 && G.cash>cost*2.5){
+      G.cash-=cost; G.ownerShare=Math.min(100,G.ownerShare+5); shrinkHolders(5);
+      news('🛡️ 財務本部長が防衛のため自社株買いを実施 (持株'+Math.round(G.ownerShare)+'%)');
+    }
+  }
+}
+function shrinkHolders(pct){
+  // 自社株買いは市場流通分＋敵対株主から按分で回収
+  const tot=G.holders.fund+G.holders.stella;
+  if(tot<=0) return;
+  const take=Math.min(tot,pct*0.6);
+  G.holders.fund=Math.max(0,G.holders.fund-take*(G.holders.fund/tot));
+  G.holders.stella=Math.max(0,G.holders.stella-take*(G.holders.stella/tot));
+}
+
+/* =====================  MARKET SUBSYSTEMS  ===================== */
+function updateBeanMarket(){
+  if(G.beanContract){ G.beanContract.daysLeft--;
+    if(G.beanContract.daysLeft<=0){ G.beanContract=null; news('📜 豆の長期契約が満了しました'); } }
+  G.beanSpot += (1-G.beanSpot)*0.02 + (Math.random()-0.5)*0.05;
+  G.beanSpot = clamp(G.beanSpot,0.55,2.6);
+  G.spotHist.push(G.beanSpot); if(G.spotHist.length>30)G.spotHist.shift();
+}
+function updateTrends(){
+  if(G.trend){ G.trend.daysLeft--;
+    if(G.trend.daysLeft<=0){ const p=PRODUCTS.find(x=>x.id===G.trend.pid);
+      news('📉 '+p.name+'のブームが去りました'); G.trend=null; } }
+  else if(Math.random()<0.013){
+    const p=pick(PRODUCTS);
+    G.trend={pid:p.id, daysLeft:35+Math.floor(Math.random()*45)};
+    news('🔥 <b>'+p.name+'</b>が大ブーム!提供していれば大きな追い風です');
+    toast('🔥 '+p.e+' '+p.name+'がブーム!');
+  }
+  for(const p of PRODUCTS){
+    if(G.fresh[p.id]===undefined) G.fresh[p.id]=1;
+    if(G.enabled.includes(p.id)) G.fresh[p.id]=Math.max(0.55,G.fresh[p.id]-0.0035);
+    else G.fresh[p.id]=Math.min(1,G.fresh[p.id]+0.012);
+  }
+  if(G.priceWar>0) G.priceWar--;
+}
 function menuStats(){
-  // returns {avgPrice, avgCost, appealSum, gouge} over enabled drinks & foods
   const b=bean(), w=weather();
-  let dw=0,dp=0,dc=0,dApp=0,gouge=0,cnt=0;
-  let fw=0,fp=0,fc=0,fApp=0;
+  let dw=0,dp=0,dc=0,fw=0,fp=0,fc=0,fApp=0,gouge=0,cnt=0;
   for(const id of G.enabled){
     const p=PRODUCTS.find(x=>x.id===id); if(!p)continue;
-    const pr=price(id);
-    const cost=prodCost(p);
-    let ap=p.appeal;
+    const pr=price(id), cost=prodCost(p);
+    let ap=p.appeal*(G.fresh[id]||1);
+    if(G.trend&&G.trend.pid===id) ap*=1.8;
     if(p.cat==='drink'){
       if(p.temp==='hot') ap*=w.hot; else if(p.temp==='cold') ap*=w.cold;
       if(p.bean) ap*=(0.8+b.q*0.1);
     }
     const ratio=pr/p.fair;
-    ap*=Math.max(0.15, Math.pow(1/Math.max(ratio,0.5), 1.6));  // 高すぎると選ばれにくい
-    if(ratio>1.25){ gouge+=Math.min(0.5,(ratio-1.25)); cnt++; }
-    if(p.cat==='drink'){ dw+=ap; dp+=ap*pr; dc+=ap*cost; dApp+=p.appeal; }
-    else               { fw+=ap; fp+=ap*pr; fc+=ap*cost; fApp+=p.appeal; }
+    ap*=Math.max(0.15,Math.pow(1/Math.max(ratio,0.5),1.6));
+    if(ratio>1.25){ gouge+=Math.min(0.5,ratio-1.25); cnt++; }
+    if(p.cat==='drink'){ dw+=ap; dp+=ap*pr; dc+=ap*cost; }
+    else { fw+=ap; fp+=ap*pr; fc+=ap*cost; fApp+=p.appeal; }
   }
-  const hasDrink=dw>0, hasFood=fw>0;
-  const foodAttach=hasFood? Math.min(0.45, 0.15+fApp*0.02) : 0;
+  const hasD=dw>0, hasF=fw>0;
+  const attach=hasF? Math.min(0.45,0.15+fApp*0.02):0;
+  const waste=1+Math.max(0,G.enabled.length-6)*0.02;   // 品目過多で廃棄増
   return {
-    avgPrice:(hasDrink? dp/dw:0) + foodAttach*(hasFood? fp/fw:0),
-    avgCost:(hasDrink? dc/dw:0) + foodAttach*(hasFood? fc/fw:0),
-    variety:Math.min(1.25, 0.85 + G.enabled.length*0.035),
-    gouge:cnt? gouge/cnt:0,
-    hasDrink,
+    avgPrice:(hasD?dp/dw:0)+attach*(hasF?fp/fw:0),
+    avgCost:((hasD?dc/dw:0)+attach*(hasF?fc/fw:0))*waste,
+    variety:clamp(0.85+G.enabled.length*0.045,0.85,1.30),
+    gouge:cnt?gouge/cnt:0, hasD:hasD,
   };
 }
-function simDay(){
-  const w=WEATHERS[weightedPick(WEATHERS.map(x=>x.w))];
-  G.weather=w.id;
-  const menu=menuStats();
-  const b=bean();
-  const t={rev:0,cogs:0,wage:0,rent:0,mkt:0,interest:0,visitors:0,lost:0,profit:0,biz:0,prop:0,salary:0};
 
-  for(const st of G.stores){
-    const d=districtOf(st);
-    const dayMult=isWeekend()? d.we : d.wd;
-    const awMult=0.55 + (G.awareness/100)*0.95;
-    const share=storeAttract(st) / (storeAttract(st)+compAttractIn(d.id)+30);
-    let pot=d.traffic * dayMult * w.traffic * awMult * share * menu.variety * (0.9+Math.random()*0.2);
-    if(!menu.hasDrink) pot*=0.15;
-    const capacity=st.staff*(42+st.skill*0.6)*(1+(st.equip-1)*0.15)*(st.manager?1.15:1);
-    const served=Math.round(Math.min(pot,capacity));
-    const lost=Math.max(0,Math.round(pot-served));
-    // 価格許容度: 地区の tol を平均価格に反映
-    const tolPenalty=Math.max(0, (menu.avgPrice/(420*d.tol))-1)*0.6;
-    const rev=served*menu.avgPrice*(1-Math.min(0.35,tolPenalty*0.3));
-    const cogs=served*menu.avgCost;
-    // 満足度
-    let sat=1.8 + b.q*0.45 + st.skill/100*1.0 + st.interior*0.12 + st.equip*0.08 + (st.manager?0.12:0);
-    sat -= (lost>0? Math.min(0.9,(lost/Math.max(pot,1))*1.2):0);
-    sat -= menu.gouge*1.1;
-    sat -= tolPenalty*0.8;
-    sat=Math.max(1,Math.min(5,sat));
-    st.rep=st.rep*0.9+sat*0.1;
-    st.todayVisitors=served; st.todayRev=rev; st.todaySat=sat; st.todayLost=lost;
-    t.visitors+=served; t.lost+=lost; t.rev+=rev; t.cogs+=cogs;
-    t.wage+=st.staff*WAGE_BARISTA + (st.manager?WAGE_MANAGER:0);
-    t.rent+=d.rent;
+/* =====================  SIMULATION  ===================== */
+function simDay(){
+  const w=WEATHERS[weightedPick(WEATHERS.map(x=>x.w))]; G.weather=w.id;
+  refreshCandidates();
+  runDelegation();
+  updateBeanMarket();
+  updateTrends();
+  const menu=menuStats(), b=bean();
+  const t=blankToday();
+  const pen=mgmtPenalty();
+
+  for(const d of DISTRICTS){
+    const mine=G.stores.filter(s=>s.districtId===d.id);
+    if(!mine.length) continue;
+    const pool=d.pool*(isWeekend()?d.we:d.wd)*w.traffic*(0.92+Math.random()*0.16);
+    const awMult=0.62+(G.awareness/100)*0.95;
+    const at=mine.map(s=>storeAttract(s)*menu.variety*(1-pen));
+    const total=at.reduce((a,x)=>a+x,0)+compAttractIn(d.id)+35;
+    mine.forEach((st,i)=>{
+      const rent=st.owned?0:rentOf(d);
+      if(st.closedDays>0){
+        st.closedDays--; st.today={rev:0,profit:-(rent+wageOf(st)),visitors:0,lost:0,sat:st.rep,share:0};
+        t.rent+=rent; t.wage+=wageOf(st);
+        pushStoreHist(st);
+        return;
+      }
+      const share=at[i]/total;
+      const pot=Math.round(pool*share*awMult);
+      st.lastPot=pot;
+      const cap=Math.round(storeCapacity(st));
+      const served=Math.min(pot,cap), lost=Math.max(0,pot-cap);
+      // 価格許容度(価格戦争中は厳しくなる)
+      const tolBase=d.tol*(G.priceWar>0?0.82:1);
+      const tolPen=Math.max(0,(menu.avgPrice/(430*tolBase))-1)*0.6;
+      const rev=served*menu.avgPrice*(1-Math.min(0.35,tolPen*0.3));
+      const cogs=served*menu.avgCost;
+      const wage=wageOf(st);
+      const m=getMgr(st.managerId);
+      // 満足度
+      let sat=1.9+b.q*0.42+st.skill/100*1.0+st.interior*0.12+st.equip*0.08+(st.morale-60)/160;
+      if(m){ sat+=0.15+m.skill/250; if(m.traitId==='service') sat+=0.4; }
+      sat-=lost>0? Math.min(0.9,(lost/Math.max(pot,1))*1.2):0;
+      sat-=menu.gouge*1.1; sat-=tolPen*0.8; sat-=pen*1.2;
+      sat=clamp(sat,1,5);
+      st.rep=st.rep*0.9+sat*0.1;
+      // 士気と離職
+      const util=served/Math.max(1,cap);
+      st.morale=clamp(st.morale+(m?0.6:-0.15)+WAGE_LEVELS[G.wageIdx].morale*0.5
+        +(util>0.98?-1.6:util>0.88?-0.3:0.6),0,100);
+      if(st.morale<32 && st.staff>1 && Math.random()<0.07){
+        st.staff--; st.morale+=8;
+        news('😞 <b>'+st.name+'</b>でスタッフが1人退職しました(士気低下)');
+      }
+      if(m&&m.traitId==='coach') st.skill=Math.min(100,st.skill+0.5);
+      st.today={rev:rev,profit:rev-cogs-wage-rent,visitors:served,lost:lost,sat:sat,share:share};
+      pushStoreHist(st);
+      t.visitors+=served; t.lost+=lost; t.rev+=rev; t.cogs+=cogs; t.wage+=wage; t.rent+=rent;
+    });
   }
-  // marketing campaigns
+  // キャンペーン
   for(const c of G.campaigns){ G.awareness=Math.min(100,G.awareness+c.perDay); c.daysLeft--; }
   G.campaigns=G.campaigns.filter(c=>c.daysLeft>0);
-  G.awareness=Math.max(10,G.awareness-0.3);  // 常連ベースとして10は維持される
-  // 他業種事業の収入
-  for(const vid of G.ventures){
-    const v=VENTURES.find(x=>x.id===vid);
-    if(v) t.biz+=v.income*(0.75+Math.random()*0.5);
-  }
-  // 不動産: 家賃収入と価格変動 (やや上昇バイアス)
-  for(const p of G.properties){
-    t.prop+=p.rent;
-    p.curPrice=Math.max(1000000,Math.round(p.curPrice*(1+(Math.random()-0.485)*0.008)));
-  }
-  // 役員報酬 (会社→社長個人へ)
-  t.salary=SALARIES[G.salaryIdx].amt;
-  G.personalCash+=t.salary;
-  // interest
-  t.interest=G.loan*LOAN_RATE;
-  t.profit=t.rev-t.cogs-t.wage-t.rent-t.interest+t.biz+t.prop-t.salary;
+  G.awareness=Math.max(8,G.awareness-0.35);
+  // 事業・不動産
+  for(const vid of G.ventures){ const v=VENTURES.find(x=>x.id===vid); if(v) t.biz+=v.income*(0.75+Math.random()*0.5); }
+  for(const p of G.properties){ t.prop+=p.rent;
+    p.curPrice=Math.max(1000000,Math.round(p.curPrice*(1+(Math.random()-0.485)*0.008))); }
+  // 本部コスト・給与
+  let mgrPay=0;
+  for(const m of G.managers) mgrPay += m.role==='exec'? m.salary*2.2 : m.salary;
+  t.mgmt=mgrPay+Math.pow(G.stores.length,1.35)*6000;
+  t.salary=SALARIES[G.salaryIdx].amt; G.personalCash+=t.salary;
+  t.interest=G.loan*loanRate();
+  t.profit=t.rev-t.cogs-t.wage-t.rent-t.mgmt-t.interest-t.salary-t.fine+t.biz+t.prop;
   G.cash+=t.profit;
   G.today=t;
   G.totalVisitors+=t.visitors; G.totalRev+=t.rev; G.totalProfit+=t.profit;
-  if(t.profit>G.bestDayProfit)G.bestDayProfit=t.profit;
-  // reputation = 店舗平均
-  if(G.stores.length){
-    G.reputation=G.stores.reduce((s,x)=>s+x.rep,0)/G.stores.length;
-  }
-  G.hist.push({p:Math.round(t.profit)});
-  if(G.hist.length>30)G.hist.shift();
-  // 競合の時価総額はゆるやかに変動
-  for(const c of G.comps){ if(!c.acquired) c.cap=Math.round(c.cap*(1+(Math.random()-0.48)*0.01)); }
-  // 自社の企業価値と株式市場
+  if(t.profit>G.bestDayProfit) G.bestDayProfit=t.profit;
+  if(G.stores.length) G.reputation=G.stores.reduce((s,x)=>s+x.rep,0)/G.stores.length;
+  G.hist.push({p:Math.round(t.profit)}); if(G.hist.length>30)G.hist.shift();
+
+  // 企業価値と市場
+  for(const c of G.comps){ if(!c.acquired) c.cap=Math.round(c.cap*(1.0002+(Math.random()-0.5)*0.012)); }
   G.lastVal=calcValuation();
   G.valHist.push(G.lastVal); if(G.valHist.length>30)G.valHist.shift();
-  if(G.listed){
-    const bad=(t.profit<0)||(G.valHist.length>=15 && G.lastVal<G.valHist[0]*0.85);
-    if(G.ownerShare<50){
-      const float=100-G.ownerShare;
-      G.fundShare=Math.min(float, G.fundShare+(bad?0.8:0.25));
-    }else{
-      G.fundShare=Math.max(0,G.fundShare-0.3);
-    }
-    const f=Math.floor(G.fundShare/10)*10;
-    if(f>=20 && f>G.lastFundWarn){
-      G.lastFundWarn=f;
-      news('🐻 <b>'+FUND.name+'</b>が株式を買い進めています(保有率'+Math.round(G.fundShare)+'%)!');
-      toast('🐻 ファンド保有率 '+Math.round(G.fundShare)+'%…自社株買いで防衛を!');
-    }
-    if(G.fundShare<20) G.lastFundWarn=0;
-    if(G.fundShare>=50){ takeoverOver(); return; }
-  }
-  // events
+  const top=G.comps.filter(c=>!c.acquired).every(c=>G.lastVal>c.cap) && G.stores.length>0;
+  if(top){ G.everTop=true; G.topStreak++; } else G.topStreak=0;
+
+  bankCovenant();
+  stockMarket();
+  if(G.over) return;
   randomEvent();
-  compExpand();
+  compAI();
+  checkAntitrust();
   checkMilestones();
-  // bankruptcy
+  if(G.topStreak>=30 && !G.cleared){ G.cleared=true; showClear(); }
+
   if(G.cash<0){ G.negDays++;
     if(G.negDays===1) news('⚠️ 現金がマイナスです!7日以内に立て直さないと倒産します。');
-    if(G.negDays>=7){ gameOver(); return; }
+    if(G.negDays>=7){ gameOver('資金繰りがつかず倒産しました。'); return; }
   } else G.negDays=0;
   G.day++;
   save();
 }
-function weightedPick(ws){
-  let sum=ws.reduce((a,b)=>a+b,0), r=Math.random()*sum;
-  for(let i=0;i<ws.length;i++){ r-=ws[i]; if(r<=0)return i; }
-  return ws.length-1;
+function pushStoreHist(st){
+  st.hist=st.hist||[];
+  st.hist.push(Math.round(st.today.profit));
+  if(st.hist.length>14) st.hist.shift();
 }
+function bankCovenant(){
+  const lim=creditLimit();
+  if(G.loan>lim){
+    G.covenantDays++;
+    if(G.covenantDays===1){
+      news('🏦 <b>銀行から警告</b>:業績悪化で借入枠が'+fmtBig(lim)+'に縮小。超過分の返済を求められています。');
+      toast('🏦 借入枠を超過!返済を求められています',true);
+    }
+    if(G.covenantDays>=15){
+      // 強制売却
+      if(G.properties.length){
+        const p=G.properties.shift(); G.cash+=p.curPrice*0.85; G.loan=Math.max(0,G.loan-p.curPrice*0.85);
+        news('🏦 銀行の要求で不動産が強制売却されました。'); G.covenantDays=8;
+      } else if(G.stores.length>1){
+        const s=G.stores.pop(); G.cash+=1500000; G.loan=Math.max(0,G.loan-1500000);
+        news('🏦 銀行の要求で<b>'+s.name+'</b>が売却されました。'); G.covenantDays=8;
+      } else { gameOver('銀行の融資が引き上げられ、会社は立ち行かなくなりました。'); }
+    }
+  } else G.covenantDays=0;
+}
+function stockMarket(){
+  if(!G.listed) return;
+  const bad=avgProfit(14)<0 || (G.valHist.length>=20 && G.lastVal<G.valHist[0]*0.85);
+  const stella=G.comps.find(c=>c.id==='stella');
+  const stellaAlive=stella&&!stella.acquired;
+  const float_=Math.max(0,100-G.ownerShare-G.holders.fund-G.holders.stella);
+  if(G.ownerShare<50){
+    if(float_>0.5){
+      G.holders.fund=Math.min(G.holders.fund+(bad?0.55:0.2),G.holders.fund+float_);
+      // ステラは自分が格上のときだけ参戦
+      if(stellaAlive && stella.cap>G.lastVal*0.7 && bad){
+        G.holders.stella=Math.min(G.holders.stella+0.35,G.holders.stella+Math.max(0,float_-0.5));
+      }
+    }
+  } else {
+    G.holders.fund=Math.max(0,G.holders.fund-0.3);
+    G.holders.stella=Math.max(0,G.holders.stella-0.2);
+  }
+  const threat=G.holders.fund+G.holders.stella;
+  const step=Math.floor(threat/10)*10;
+  if(step>=20 && step>G.lastWarn){
+    G.lastWarn=step;
+    const who=G.holders.stella>G.holders.fund? ('🌟 '+stella.name) : (FUND.e+' '+FUND.name);
+    news('⚠️ <b>'+who+'があなたの株を買い進めています</b>(敵対的保有 '+Math.round(threat)+'%)!');
+    toast('⚠️ 敵対的保有 '+Math.round(threat)+'%!自社株買いで防衛を',true);
+  }
+  if(threat<20) G.lastWarn=0;
+  if(threat>=50){
+    const who=G.holders.stella>G.holders.fund? stella.name : FUND.name;
+    gameOver(who+'に株式の過半数を握られ、経営権を失いました。');
+  }
+}
+function checkAntitrust(){
+  const sh=industryStoreShare();
+  if(sh>0.5 && !G.antitrustWarned){
+    G.antitrustWarned=true;
+    news('⚖️ <b>公正取引委員会が調査を開始</b>:業界シェアが50%を超えました。これ以上の統合は制限されます。');
+    toast('⚖️ 独占禁止法の調査が入りました',true);
+  }
+  if(sh<=0.5) G.antitrustWarned=false;
+  if(sh>0.68 && Math.random()<0.03 && G.stores.length>6){
+    const fine=Math.round(G.lastVal*0.02);
+    G.cash-=fine;
+    const s=G.stores.pop();
+    news('⚖️ <b>分割命令</b>:'+s.name+'の売却と課徴金'+fmtBig(fine)+'が命じられました。');
+    toast('⚖️ 独禁法違反で分割命令!',true);
+  }
+}
+/* ---- ランダムイベント(牙あり) ---- */
 function randomEvent(){
   const r=Math.random();
-  if(r<0.03 && G.stores.length){
-    const st=G.stores[Math.floor(Math.random()*G.stores.length)];
-    const dmg=50000+Math.floor(Math.random()*100000);
-    G.cash-=dmg;
-    news('🔧 <b>'+st.name+'</b>のエスプレッソマシンが故障!修理費 '+yen(dmg));
-    toast('🔧 '+st.name+'のマシンが故障… '+yen(dmg));
-  } else if(r<0.05 && G.awareness<95){
-    G.awareness=Math.min(100,G.awareness+5);
-    news('📰 地元メディアに紹介されました!認知度+5');
-    toast('📰 メディア掲載!認知度アップ');
-  } else if(r<0.07 && G.stores.length){
-    const bonus=30000+Math.floor(Math.random()*70000);
-    G.cash+=bonus;
-    news('🎉 大口のケータリング注文が入りました! '+yen(bonus));
-    toast('🎉 ケータリング注文 +'+yen(bonus));
+  if(!G.stores.length) return;
+  if(r<0.008){ // 保健所
+    const st=G.stores.filter(s=>s.closedDays<=0).sort((a,b)=>a.rep-b.rep)[0];
+    if(st && st.rep<3.0){
+      st.closedDays=3; st.rep=Math.max(1,st.rep-0.8);
+      const fine=200000+Math.floor(Math.random()*300000); G.cash-=fine;
+      news('🚨 <b>'+st.name+'が保健所の抜き打ち検査で3日間の営業停止</b>!罰金'+yen(fine));
+      toast('🚨 '+st.name+'が営業停止に!',true);
+    }
+  } else if(r<0.022){ // 炎上
+    G.reputation=Math.max(1,G.reputation-0.5);
+    for(const s of G.stores) s.rep=Math.max(1,s.rep-0.5);
+    G.awareness=Math.min(100,G.awareness+8);
+    news('💥 <b>SNSで接客対応が炎上</b>!名前は広まりましたが評判が急落しました。');
+    toast('💥 SNS炎上!評判が急落',true);
+  } else if(r<0.032){ // 家賃更新
+    const d=pick(DISTRICTS);
+    G.rentMod[d.id]=((G.rentMod[d.id])||1)*1.15;
+    news('📄 <b>'+d.name+'の家賃が更新で15%引き上げ</b>られました(現在 '+yen(rentOf(d))+'/日)。');
+  } else if(r<0.042){ // 豆の不作
+    G.beanSpot=clamp(G.beanSpot*1.45,0.55,2.6);
+    news('🌧️ <b>産地が不作</b>!豆の相場が急騰しています'+(G.beanContract?'(長期契約で影響を回避)':''));
+    toast('🌧️ 豆の相場が急騰!',true);
+  } else if(r<0.050){ // 設備故障
+    const st=pick(G.stores);
+    const dmg=80000+Math.floor(Math.random()*180000); G.cash-=dmg;
+    news('🔧 <b>'+st.name+'</b>のマシンが故障。修理費'+yen(dmg));
+  } else if(r<0.060){ // メディア
+    G.awareness=Math.min(100,G.awareness+6);
+    news('📰 地元メディアに好意的に紹介されました!認知度+6');
+  } else if(r<0.068){ // ケータリング
+    const bonus=80000+Math.floor(Math.random()*200000); G.cash+=bonus;
+    news('🎉 大口のケータリング注文! '+yen(bonus));
+  } else if(r<0.074){ // 賃上げ
+    G.wageDrift=(G.wageDrift||1)*1.05;
+    news('📢 <b>最低賃金が引き上げ</b>られました。全店の人件費が5%上昇します。');
+    toast('📢 最低賃金の引き上げで人件費増',true);
   }
 }
-function compExpand(){
-  if(G.day%30!==0) return;
-  const alive=G.comps.filter(c=>!c.acquired);
-  if(alive.length && Math.random()<0.7){
-    const c=alive[Math.floor(Math.random()*alive.length)];
-    const d=DISTRICTS[Math.floor(Math.random()*DISTRICTS.length)];
-    c.stores[d.id]=(c.stores[d.id]||0)+1;
-    c.cap=Math.round(c.cap*1.05);
-    news('🏢 競合の<b>'+c.name+'</b>が'+d.name+'に新店舗をオープン!');
-    toast('🏢 '+c.name+'が'+d.name+'に出店…');
+/* ---- 競合AI ---- */
+function compAI(){
+  for(const c of G.comps){
+    if(c.acquired) continue;
+    c.cd=(c.cd||0)-1;
+    if(c.cd>0) continue;
+    c.cd=(c.myShare>=33? 45:22)+Math.floor(Math.random()*22);   // 33%取得で動きが鈍る
+    const myBest=bestDistrictOfPlayer();
+    if(c.person==='capital'){
+      if(myBest && freeSlots(myBest.id)>0){
+        c.stores[myBest.id]=(c.stores[myBest.id]||0)+1; c.cap=Math.round(c.cap*1.04);
+        news('🌟 <b>'+c.name+'があなたの主力地区「'+myBest.name+'」に出店</b>!真っ向勝負を仕掛けてきました。');
+        toast('🌟 ステラが'+myBest.name+'に出店!',true);
+      } else {
+        G.awareness=Math.max(8,G.awareness-5);
+        news('🌟 '+c.name+'が大規模な広告攻勢。あなたの認知度が奪われました。');
+      }
+    } else if(c.person==='price'){
+      G.priceWar=Math.max(G.priceWar,30);
+      news('⚔️ <b>'+c.name+'が全店で大幅値下げ</b>!価格競争が始まりました(30日間、客の価格許容度が低下)。');
+      toast('⚔️ 価格戦争が始まりました',true);
+    } else if(c.person==='talent'){
+      const assigned=G.managers.filter(m=>m.role==='store');
+      if(assigned.length && Math.random()<0.7){
+        const m=assigned.sort((a,b)=>b.skill-a.skill)[0];
+        const st=G.stores.find(s=>s.managerId===m.id);
+        if(st) st.managerId=null;
+        G.managers=G.managers.filter(x=>x.id!==m.id);
+        news('🫘 <b>'+c.name+'に店長「'+m.name+'」が引き抜かれました</b>!');
+        toast('🫘 店長を引き抜かれました!',true);
+      } else {
+        const open=DISTRICTS.filter(d=>freeSlots(d.id)>0);
+        if(open.length){ const d=pick(open); c.stores[d.id]=(c.stores[d.id]||0)+1;
+          news('🫘 '+c.name+'が'+d.name+'に出店しました。'); }
+      }
+    } else if(c.person==='buzz'){
+      G.awareness=Math.max(8,G.awareness-7);
+      news('🐱 '+c.name+'のSNS企画が大バズり。あなたの認知度が奪われました。');
+    }
   }
 }
-function takeoverOver(){
-  G.over=true; G.speed=0; save();
-  showModal('<h3>🐻 敵対的買収成立…</h3>'+
-  '<div class="card">'+FUND.name+'があなたの会社の株式50%を取得し、経営権を失いました。<br><br>'+
-  '持株比率を50%以上に保つか、業績と株価を維持していれば防げたはず…。<br>'+
-  '<b>'+G.day+'日間</b>の経営、おつかれさまでした。</div>'+
-  '<button class="btn" style="width:100%" onclick="act.reset(true)">もう一度挑戦する</button>');
+function bestDistrictOfPlayer(){
+  let best=null,bv=-1;
+  for(const d of DISTRICTS){
+    const v=G.stores.filter(s=>s.districtId===d.id).reduce((s,x)=>s+(x.today?x.today.rev:0),0);
+    if(v>bv){ bv=v; best=d; }
+  }
+  return bv>0? best:null;
 }
 function checkMilestones(){
   for(const m of MILESTONES){
     if(G.milestonesDone.includes(m.id)) continue;
     if(m.chk(G)){
-      G.milestonesDone.push(m.id);
-      G.cash+=m.reward;
-      news('🏆 マイルストーン達成:<b>'+m.name+'</b> 報酬 '+yen(m.reward));
+      G.milestonesDone.push(m.id); G.cash+=m.reward;
+      news('🏆 マイルストーン達成:<b>'+m.name+'</b> 報酬'+yen(m.reward));
       toast('🏆 '+m.name+'達成! +'+yen(m.reward));
-      if(m.id==='m10' && !G.cleared){ G.cleared=true; showClear(); }
     }
   }
 }
 
 /* =====================  ACTIONS  ===================== */
+function tryPay(cost){ if(G.cash<cost){ toast('💸 現金が足りません('+fmtBig(cost)+'必要)',true); return false; } G.cash-=cost; return true; }
 function openStore(did){
   const d=DISTRICTS.find(x=>x.id===did);
+  if(freeSlots(did)<=0){ toast('🚫 '+d.name+'に空き物件がありません',true); return; }
   const cost=storeOpenCost(d);
-  if(G.cash<cost){ toast('💸 現金が足りません('+yen(cost)+'必要)'); return; }
-  G.cash-=cost;
-  const st={
-    id:'s'+(G.seq++), districtId:did, name:G.stores.length+1+'号店 ('+d.name+')',
-    staff:2, skill:25, manager:false, equip:1, interior:1, rep:3.0,
-    todayVisitors:0, todayRev:0, todaySat:3, todayLost:0,
-  };
+  if(!tryPay(cost)) return;
+  const st={ id:'s'+(G.seq++), districtId:did, name:(G.stores.length+1)+'号店 ('+d.name+')',
+    staff:2, skill:25, morale:70, managerId:null, equip:1, interior:1, rep:3.0, owned:false,
+    closedDays:0, lastPot:60, hist:[], today:{rev:0,profit:0,visitors:0,lost:0,sat:3,share:0} };
   G.stores.push(st);
   news('🎊 <b>'+st.name+'</b>をオープンしました!');
   toast('🎊 '+st.name+'オープン!');
@@ -669,476 +1014,713 @@ function openStore(did){
 }
 function closeStore(sid){
   const st=G.stores.find(x=>x.id===sid); if(!st)return;
+  if(st.managerId){ const m=getMgr(st.managerId); if(m){ m.assign=null; m.role=null; } }
   G.stores=G.stores.filter(x=>x.id!==sid);
-  news('🚪 '+st.name+'を閉店しました。');
+  G.cash+=1200000;
+  news('🚪 '+st.name+'を閉店しました(売却益 '+yen(1200000)+')');
   closeModal(); renderAll(); save();
 }
-function tryPay(cost){
-  if(G.cash<cost){ toast('💸 現金が足りません('+yen(cost)+'必要)'); return false; }
-  G.cash-=cost; return true;
+function absorb(c){
+  let n=0;
+  for(const d of DISTRICTS){
+    const cnt=c.stores[d.id]||0;
+    for(let i=0;i<cnt;i++){
+      G.stores.push({ id:'s'+(G.seq++), districtId:d.id,
+        name:(G.stores.length+1)+'号店 ('+d.name+'・旧'+c.name+')',
+        staff:3, skill:45, morale:65, managerId:null, equip:2, interior:2, rep:3.3, owned:false,
+        closedDays:0, lastPot:80, hist:[], today:{rev:0,profit:0,visitors:0,lost:0,sat:3,share:0} });
+      n++;
+    }
+  }
+  c.stores={}; c.acquired=true;
+  G.awareness=Math.min(100,G.awareness+12);
+  // 買収先の店長が数人ついてくる
+  for(let i=0;i<Math.min(3,Math.ceil(n/2));i++){
+    const m=makeCandidate(); m.skill=Math.min(95,m.skill+12); G.managers.push(m);
+  }
+  news('🤝 <b>'+c.name+'の経営権を取得!</b> '+n+'店舗と人材、ブランドを手中に収めました。');
+  toast('🤝 '+c.e+' '+c.name+'を支配下に!');
 }
-function unlockProduct(pid){
-  const p=PRODUCTS.find(x=>x.id===pid);
-  if(!tryPay(p.rnd)) return;
-  G.unlocked.push(pid); G.enabled.push(pid);
-  news('🔬 新商品<b>'+p.name+'</b>を開発しました!');
-  toast('🔬 '+p.e+' '+p.name+'を開発!');
-  renderAll(); save();
-}
+const act={
+  hire(sid){ const st=G.stores.find(x=>x.id===sid); if(st&&st.staff<12){ st.staff++; st.skill=Math.max(10,st.skill-3); renderAll(); save(); } },
+  fire(sid){ const st=G.stores.find(x=>x.id===sid); if(st&&st.staff>1){ st.staff--; st.morale=Math.max(0,st.morale-6); renderAll(); save(); } },
+  optStaff(sid){ const st=G.stores.find(x=>x.id===sid); if(!st)return;
+    const t=idealStaff(st);
+    if(t===st.staff){ toast('✅ すでに最適な人員です'); return; }
+    st.staff=t; toast('🧮 人員を'+t+'人に最適化しました');
+    renderAll(); save(); },
+  train(sid){ const st=G.stores.find(x=>x.id===sid);
+    if(st&&tryPay(80000)){ st.skill=Math.min(100,st.skill+8); toast('📚 研修完了!スキル'+Math.round(st.skill)); renderAll(); save(); } },
+  equip(sid){ const st=G.stores.find(x=>x.id===sid);
+    if(st&&st.equip<5&&tryPay(st.equip*500000)){ st.equip++; toast('⚙️ 設備 Lv'+st.equip+'!'); renderAll(); save(); } },
+  interior(sid){ const st=G.stores.find(x=>x.id===sid);
+    if(st&&st.interior<5&&tryPay(st.interior*400000)){ st.interior++; toast('🛋️ 内装 Lv'+st.interior+'!'); renderAll(); save(); } },
+  buySite(sid){ const st=G.stores.find(x=>x.id===sid); if(!st||st.owned)return;
+    const d=districtOf(st), cost=d.rent*2500;
+    if(!tryPay(cost))return;
+    st.owned=true;
+    G.properties.push({id:'pr'+(G.seq++),type:'site',boughtPrice:cost,curPrice:cost,rent:0,label:st.name+'の物件'});
+    news('🏠 <b>'+st.name+'</b>の物件を買い取りました。以後この店の家賃はゼロです。');
+    renderAll(); save(); },
+  close(sid){ const st=G.stores.find(x=>x.id===sid); if(!st)return;
+    showModal('<h3>🚪 閉店の確認</h3><div class="card">'+st.name+'を閉店しますか?<br>'+
+      '<span class="muted">売却益 '+yen(1200000)+'が入り、出店枠が空きます。</span></div>'+
+      '<div class="btnrow"><button class="btn danger" onclick="closeStore(\''+sid+'\')">閉店する</button>'+
+      '<button class="btn sub" onclick="closeModal()">やめる</button></div>'); },
+  detail(sid){ showStoreDetail(sid); },
+  /* --- 組織 --- */
+  hireMgr(cid,role){
+    const i=G.candidates.findIndex(c=>c.id===cid); if(i<0)return;
+    const c=G.candidates[i];
+    const fee=c.salary*8;
+    if(!tryPay(fee))return;
+    G.candidates.splice(i,1); G.candidates.push(makeCandidate());
+    G.managers.push(c);
+    news('🧑‍💼 <b>'+c.name+'</b>(スキル'+c.skill+')を採用しました(支度金'+yen(fee)+')');
+    toast('🧑‍💼 '+c.name+'を採用!');
+    renderAll(); save(); },
+  assign(mid,sid){
+    const m=getMgr(mid); if(!m)return;
+    if(m.assign){ const old=G.stores.find(s=>s.managerId===mid); if(old) old.managerId=null;
+      for(const r of EXEC_ROLES) if(G.execs[r.id]===mid) G.execs[r.id]=null; }
+    if(sid==='none'){ m.assign=null; m.role=null; }
+    else if(sid.indexOf('exec:')===0){
+      const role=sid.slice(5);
+      const prev=G.execs[role]; if(prev){ const pm=getMgr(prev); if(pm){pm.assign=null;pm.role=null;} }
+      G.execs[role]=mid; m.assign=role; m.role='exec';
+    } else {
+      const st=G.stores.find(s=>s.id===sid); if(!st)return;
+      if(st.managerId){ const pm=getMgr(st.managerId); if(pm){pm.assign=null;pm.role=null;} }
+      st.managerId=mid; m.assign=sid; m.role='store';
+    }
+    closeModal(); renderAll(); save(); },
+  fireMgr(mid){
+    const m=getMgr(mid); if(!m)return;
+    const st=G.stores.find(s=>s.managerId===mid); if(st) st.managerId=null;
+    for(const r of EXEC_ROLES) if(G.execs[r.id]===mid) G.execs[r.id]=null;
+    G.managers=G.managers.filter(x=>x.id!==mid);
+    news('👋 '+m.name+'が退職しました');
+    closeModal(); renderAll(); save(); },
+  toggleDeleg(key){
+    const role=EXEC_ROLES.find(r=>r.deleg===key);
+    if(!G.execs[role.id]){ toast('🚫 先に'+role.name+'を就任させてください',true); return; }
+    G.deleg[key]=!G.deleg[key];
+    toast((G.deleg[key]?'✅ ':'⏸ ')+role.dname+(G.deleg[key]?'を開始':'を停止'));
+    renderOrg(); save(); },
+  wage(i){ G.wageIdx=i; toast('💴 賃金水準: '+WAGE_LEVELS[i].name); renderOrg(); save(); },
+  /* --- 商品 --- */
+  toggle(pid){ const i=G.enabled.indexOf(pid);
+    if(i>=0)G.enabled.splice(i,1); else G.enabled.push(pid); renderMenu(); save(); },
+  priceUp(pid){ G.prices[pid]=price(pid)+10; renderMenu(); save(); },
+  priceDn(pid){ G.prices[pid]=Math.max(50,price(pid)-10); renderMenu(); save(); },
+  unlock(pid){ const p=PRODUCTS.find(x=>x.id===pid); if(!tryPay(p.rnd))return;
+    G.unlocked.push(pid); if(G.enabled.length<9)G.enabled.push(pid);
+    news('🔬 新商品<b>'+p.name+'</b>を開発しました!'); toast('🔬 '+p.e+' '+p.name+'を開発!');
+    renderAll(); save(); },
+  bean(bid){ G.beanId=bid; toast('🌱 '+BEANS.find(b=>b.id===bid).name+'に切替'); renderMenu(); save(); },
+  contract(){ if(G.beanContract){ toast('既に長期契約中です'); return; }
+    const fee=Math.round(500000*G.beanSpot);
+    if(!tryPay(fee))return;
+    G.beanContract={rate:G.beanSpot*1.03, daysLeft:90};
+    news('📜 豆の長期契約(90日・相場'+G.beanSpot.toFixed(2)+')を結びました');
+    toast('📜 長期契約を締結'); renderMenu(); save(); },
+  campaign(cid){ const c=CAMPAIGNS.find(x=>x.id===cid);
+    if(G.campaigns.find(x=>x.id===cid))return;
+    if(!tryPay(c.cost))return;
+    G.campaigns.push({id:cid,daysLeft:c.days,perDay:c.power/c.days});
+    news('📣 <b>'+c.name+'</b>を開始しました!'); toast(c.e+' '+c.name+'開始!');
+    renderMenu(); renderHeader(); save(); },
+  /* --- 株式・M&A --- */
+  ipo(){ if(G.listed)return;
+    const proceeds=Math.round(G.lastVal*0.3*0.9);
+    G.listed=true; G.ownerShare=70; G.cash+=proceeds;
+    news('🔔 <b>株式上場(IPO)!</b> '+fmtBig(proceeds)+'を調達しました!');
+    toast('🔔 上場おめでとうございます!'); renderAll(); save(); },
+  raiseCap(){ if(!G.listed||G.ownerShare<10)return;
+    const p=Math.round(G.lastVal*0.05*0.95); G.ownerShare-=5; G.cash+=p;
+    news('📈 増資で'+fmtBig(p)+'を調達 (持株'+Math.round(G.ownerShare)+'%)'); renderAll(); save(); },
+  sellShares(){ if(!G.listed||G.ownerShare<15)return;
+    const p=Math.round(G.lastVal*0.05*0.95); G.ownerShare-=5; G.personalCash+=p;
+    news('💼 社長が持株5%を売却し'+fmtBig(p)+'を得ました (持株'+Math.round(G.ownerShare)+'%)');
+    renderAll(); save(); },
+  buyback(){ if(!G.listed||G.ownerShare>=100)return;
+    const cost=Math.round(G.lastVal*0.05*1.05); if(!tryPay(cost))return;
+    G.ownerShare=Math.min(100,G.ownerShare+5); shrinkHolders(5);
+    news('🛡️ 自社株買いを実施 (持株'+Math.round(G.ownerShare)+'%)'); toast('🛡️ 自社株買い完了');
+    renderAll(); save(); },
+  buyStake(cid,mode){
+    const c=G.comps.find(x=>x.id===cid); if(!c||c.acquired)return;
+    if(c.myShare>=50)return;
+    const pct=5;
+    const cost=stakeCost(c);
+    if(industryStoreShare()>0.5 && c.myShare+pct>=50){
+      toast('⚖️ 独占禁止法により、これ以上の経営権取得は認められません',true); return; }
+    if(mode==='stock'){
+      if(!G.listed){ toast('🔒 株式交換には自社の上場が必要です',true); return; }
+      const dil=cost/(G.lastVal+cost);
+      G.ownerShare=G.ownerShare*(1-dil);
+      G.holders.fund*=(1-dil); G.holders.stella*=(1-dil);
+      news('🔄 <b>株式交換</b>で'+c.name+'株を取得。新株発行により持株が'+Math.round(G.ownerShare)+'%に希薄化しました。');
+      if(G.ownerShare<50) toast('⚠️ 持株が50%未満に!買収防衛に注意',true);
+    } else {
+      if(!tryPay(cost))return;
+    }
+    c.myShare+=pct;
+    c.cap=Math.round(c.cap*1.02);  // 買い集めで株価上昇
+    news('📊 <b>'+c.name+'</b>の株を'+pct+'%取得(保有'+c.myShare+'%・'+fmtBig(cost)+')');
+    if(c.myShare>=33 && c.myShare<38) news('🔒 '+c.name+'に対する<b>拒否権</b>を獲得!同社の動きを鈍らせます。');
+    // 相手の防衛
+    if(c.myShare>=25 && c.defended<2 && Math.random()<0.3){
+      c.defended++;
+      const before=c.myShare;
+      c.myShare=Math.round(c.myShare*0.78);
+      c.cap=Math.round(c.cap*1.18);
+      news('🛡️ <b>'+c.name+'が新株発行で対抗</b>!あなたの持株が'+before+'%→'+c.myShare+'%に希薄化されました。');
+      toast('🛡️ '+c.name+'に希薄化されました',true);
+    } else if(c.myShare>=40 && Math.random()<0.18){
+      const wk=G.comps.filter(x=>!x.acquired&&x.id!==c.id).sort((a,b)=>b.cap-a.cap)[0];
+      if(wk){ const before=c.myShare; c.myShare=Math.max(0,c.myShare-8);
+        news('🤍 <b>'+wk.name+'がホワイトナイトとして'+c.name+'に出資</b>!あなたの持株が'+before+'%→'+c.myShare+'%に。');
+        toast('🤍 ホワイトナイトが現れました',true); }
+    }
+    if(c.myShare>=50) absorb(c);
+    renderAll(); save(); },
+  venture(vid){ const v=VENTURES.find(x=>x.id===vid);
+    if(!v||G.ventures.includes(vid)||!tryPay(v.cost))return;
+    G.ventures.push(vid); news('🏗️ <b>'+v.name+'</b>へ進出しました!'); toast(v.e+' '+v.name+'へ進出!');
+    renderAll(); save(); },
+  buyProp(tid){ const t=PROPERTIES.find(x=>x.id===tid); if(!t||!tryPay(t.price))return;
+    G.properties.push({id:'pr'+(G.seq++),type:tid,boughtPrice:t.price,curPrice:t.price,rent:t.rent});
+    news('🏠 <b>'+t.name+'</b>を購入(家賃'+yen(t.rent)+'/日)'); toast(t.e+' '+t.name+'を購入!');
+    renderAll(); save(); },
+  sellProp(pid){ const i=G.properties.findIndex(x=>x.id===pid); if(i<0)return;
+    const pp=G.properties[i]; const p=Math.round(pp.curPrice*0.97);
+    G.properties.splice(i,1); G.cash+=p;
+    news('🏠 物件を'+fmtBig(p)+'で売却しました'); renderAll(); save(); },
+  salary(i){ G.salaryIdx=i; toast('💼 役員報酬: '+SALARIES[i].name); renderCeo(); save(); },
+  buyLux(id){ const l=LUXURY.find(x=>x.id===id); if(!l||G.luxOwned.includes(id))return;
+    if(G.personalCash<l.cost){ toast('💸 個人資産が足りません',true); return; }
+    G.personalCash-=l.cost; G.luxOwned.push(id); G.awareness=Math.min(100,G.awareness+l.aw);
+    news('🛍️ 社長が<b>'+l.name+'</b>を購入!話題になっています(認知度+'+l.aw+')');
+    toast(l.e+' '+l.name+'を購入!'); renderAll(); save(); },
+  borrow(){ const lim=creditLimit(), step=Math.min(500000,Math.max(0,lim-G.loan));
+    if(step<=0){ toast('🏦 借入枠がいっぱいです',true); return; }
+    G.loan+=step; G.cash+=step; news('🏦 '+yen(step)+'を借入'); renderAll(); save(); },
+  repay(){ const step=Math.min(500000,G.loan,Math.max(0,G.cash));
+    if(step<=0)return; G.loan-=step; G.cash-=step; news('🏦 '+yen(step)+'を返済'); renderAll(); save(); },
+  reset(force){ if(force===true){ doReset(); return; }
+    showModal('<h3>⚠️ 新規ゲーム</h3><div class="card">セーブデータを消して最初からやり直しますか?</div>'+
+      '<div class="btnrow"><button class="btn danger" onclick="act.reset(true)">最初から</button>'+
+      '<button class="btn sub" onclick="closeModal()">やめる</button></div>'); },
+};
+window.act=act; window.openStore=openStore; window.closeStore=closeStore;
+function doReset(){ localStorage.removeItem(SAVE_KEY); G=newGame(); closeModal(); renderAll(); showTutorial(); }
 
-/* =====================  UI: RENDER  ===================== */
+/* =====================  RENDER  ===================== */
 function renderHeader(){
-  const d=(G.day-1)%7;
-  $('day-label').textContent=G.day+'日目 ('+WD[d]+')';
-  const w=weather();
-  $('weather').textContent=w.e+' '+w.name;
-  $('cash').textContent=yen(G.cash);
-  $('cash').className=G.cash<0?'neg':'';
+  $('day-label').textContent=dayLabel();
+  const w=weather(); $('weather').textContent=w.e+' '+w.name;
+  $('cash').textContent=yen(G.cash); $('cash').className=G.cash<0?'neg':'';
   $('k-rep').textContent='★'+G.reputation.toFixed(1);
   $('k-aw').textContent=Math.round(G.awareness);
   $('k-st').textContent=G.stores.length;
   $('k-cap').textContent=fmtBig(G.lastVal);
   const pf=$('k-pf'); pf.textContent=yen(G.today.profit);
   pf.style.color=G.today.profit>=0?'var(--good)':'var(--bad)';
-  for(const [id,sp] of [['sp-pause',0],['sp-1',1],['sp-3',3]])
-    $(id).classList.toggle('on',G.speed===sp);
+  for(const [id,sp] of [['sp-pause',0],['sp-1',1],['sp-3',3]]) $(id).classList.toggle('on',G.speed===sp);
+  // タブの警告ドット
+  const alerts=collectAlerts();
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('alert'));
+  for(const a of alerts){ const t=document.querySelector('.tab[data-pg="'+a.pg+'"]'); if(t)t.classList.add('alert'); }
+}
+function collectAlerts(){
+  const out=[];
+  if(mgmtPenalty()>0) out.push({pg:'org',msg:'⚠️ <b>管理能力を超えています</b>(効率-'+Math.round(mgmtPenalty()*100)+'%)。店長を配属するか運営本部長を就任させてください。'});
+  const losing=G.stores.filter(s=>s.hist&&s.hist.length>=5&&s.hist.slice(-5).reduce((a,b)=>a+b,0)<0);
+  if(losing.length) out.push({pg:'stores',msg:'📉 赤字が続く店舗が'+losing.length+'店あります。'});
+  const nomgr=G.stores.filter(s=>!s.managerId).length;
+  if(nomgr>=3) out.push({pg:'org',msg:'👔 店長のいない店舗が'+nomgr+'店。管理負荷が高まっています。'});
+  if(G.loan>creditLimit()) out.push({pg:'fin',msg:'🏦 <b>借入枠を超過</b>しています。返済しないと資産を強制売却されます。'});
+  if(G.listed&&(G.holders.fund+G.holders.stella)>=25) out.push({pg:'fin',msg:'⚠️ <b>敵対的な株主が'+Math.round(G.holders.fund+G.holders.stella)+'%</b>を保有。50%で経営権を失います。'});
+  if(G.priceWar>0) out.push({pg:'menu',msg:'⚔️ 価格戦争中(残り'+G.priceWar+'日)。値下げを検討してください。'});
+  if(G.beanSpot>1.45&&!G.beanContract) out.push({pg:'menu',msg:'🌱 豆の相場が高騰中(×'+G.beanSpot.toFixed(2)+')。原価を圧迫しています。'});
+  return out;
 }
 function renderHome(){
-  $('h-visitors').textContent=G.today.visitors.toLocaleString()+'人';
-  $('h-rev').textContent=yen(G.today.rev);
-  const hp=$('h-profit'); hp.textContent=yen(G.today.profit);
-  hp.className='v '+(G.today.profit>=0?'good':'bad');
-  $('h-lost').textContent=G.today.lost.toLocaleString()+'人';
+  const t=G.today;
+  $('h-visitors').textContent=t.visitors.toLocaleString()+'人';
+  $('h-rev').textContent=yen(t.rev);
+  const hp=$('h-profit'); hp.textContent=yen(t.profit); hp.className='v '+(t.profit>=0?'good':'bad');
+  $('h-lost').textContent=t.lost.toLocaleString()+'人';
+  const al=collectAlerts();
+  $('alerts').innerHTML=al.map(a=>'<div class="card warn"><div style="font-size:12.5px">'+a.msg+'</div></div>').join('');
   $('log').innerHTML=G.log.map(x=>'<div>'+x+'</div>').join('')||'<div>まだニュースはありません。</div>';
-  // milestones
   $('milestones').innerHTML=MILESTONES.map(m=>{
-    const done=G.milestonesDone.includes(m.id);
-    return '<div class="milestone'+(done?' done':'')+'"><span class="mk">'+(done?'✅':'⬜')+'</span>'+
-      m.name+' <span class="muted">('+yen(m.reward)+')</span></div>';
+    const d=G.milestonesDone.includes(m.id);
+    return '<div class="milestone'+(d?' done':'')+'"><span>'+(d?'✅':'⬜')+'</span>'+m.name+
+      ' <span class="muted">('+yen(m.reward)+')</span></div>';
   }).join('');
+  // 店舗成績ランキング
+  if(!G.stores.length){ $('store-rank').innerHTML='<div class="muted">店舗がありません</div>'; }
+  else{
+    const ss=G.stores.slice().sort((a,b)=>b.today.profit-a.today.profit);
+    $('store-rank').innerHTML=ss.map((s,i)=>{
+      const d=districtOf(s);
+      const col=s.today.profit>=0?'var(--good)':'var(--bad)';
+      return '<div class="rank" onclick="act.detail(\''+s.id+'\')">'+
+        '<span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+
+        (i+1)+'. '+s.name.replace(/\s*\(.*/,'')+' <span class="muted">'+d.name+'</span></span>'+
+        spark(s.hist,50,16,col)+
+        '<span style="color:'+col+';width:82px;text-align:right">'+yen(s.today.profit)+'</span></div>';
+    }).join('');
+  }
   drawChart();
 }
 function drawChart(){
   const cv=$('chart'); const dpr=window.devicePixelRatio||1;
-  const W=cv.clientWidth||300, H=110;
+  const W=cv.clientWidth||300,H=104;
   cv.width=W*dpr; cv.height=H*dpr;
-  const ctx=cv.getContext('2d'); ctx.scale(dpr,dpr);
-  ctx.clearRect(0,0,W,H);
+  const ctx=cv.getContext('2d'); ctx.setTransform(1,0,0,1,0,0); ctx.scale(dpr,dpr); ctx.clearRect(0,0,W,H);
   const data=G.hist.map(h=>h.p);
-  if(data.length<2){ ctx.fillStyle='#b9a58c'; ctx.font='12px sans-serif';
-    ctx.fillText('営業データを蓄積中…',10,60); return; }
-  const mx=Math.max(...data,1), mn=Math.min(...data,0);
-  const y=v=>H-8-((v-mn)/(mx-mn||1))*(H-20);
-  const x=i=>8+i*(W-16)/(data.length-1);
-  // zero line
-  ctx.strokeStyle='#4a3826'; ctx.setLineDash([3,3]);
-  ctx.beginPath(); ctx.moveTo(0,y(0)); ctx.lineTo(W,y(0)); ctx.stroke(); ctx.setLineDash([]);
+  if(data.length<2){ ctx.fillStyle='#b9a58c'; ctx.font='12px sans-serif'; ctx.fillText('営業データを蓄積中…',10,56); return; }
+  const mx=Math.max.apply(null,data.concat([1])), mn=Math.min.apply(null,data.concat([0]));
+  const y=v=>H-8-((v-mn)/((mx-mn)||1))*(H-20), x=i=>8+i*(W-16)/(data.length-1);
+  ctx.strokeStyle='#4a3826'; ctx.setLineDash([3,3]); ctx.beginPath();
+  ctx.moveTo(0,y(0)); ctx.lineTo(W,y(0)); ctx.stroke(); ctx.setLineDash([]);
   ctx.strokeStyle='#d99a4e'; ctx.lineWidth=2; ctx.beginPath();
-  data.forEach((v,i)=>{ i?ctx.lineTo(x(i),y(v)):ctx.moveTo(x(i),y(v)); });
-  ctx.stroke();
-  ctx.fillStyle='#7fc97f'; ctx.font='10px sans-serif';
-  ctx.fillText('最高 '+yen(mx),8,12);
-  ctx.fillStyle='#e77c7c';
-  ctx.fillText('最低 '+yen(mn),8,H-2);
+  data.forEach((v,i)=>{ i?ctx.lineTo(x(i),y(v)):ctx.moveTo(x(i),y(v)); }); ctx.stroke();
+  ctx.fillStyle='#7fc97f'; ctx.font='10px sans-serif'; ctx.fillText('最高 '+yen(mx),8,12);
+  ctx.fillStyle='#e77c7c'; ctx.fillText('最低 '+yen(mn),8,H-2);
+}
+function storeBadges(st){
+  const b=[];
+  if(st.closedDays>0) b.push('<span class="tag bad">営業停止 残'+st.closedDays+'日</span>');
+  if(!st.managerId) b.push('<span class="tag warn">店長不在</span>');
+  if(st.today.lost>st.today.visitors*0.25&&st.today.lost>10) b.push('<span class="tag bad">行列で機会損失</span>');
+  if(st.hist&&st.hist.length>=5&&st.hist.slice(-5).reduce((a,c)=>a+c,0)<0) b.push('<span class="tag bad">赤字継続</span>');
+  if(st.morale<38) b.push('<span class="tag bad">士気低下</span>');
+  if(st.rep<3) b.push('<span class="tag warn">評判低下</span>');
+  if(st.today.profit>0&&st.rep>=4) b.push('<span class="tag good">優良店</span>');
+  return b.join('');
 }
 function renderStores(){
+  const free=totalFreeSlots();
+  $('slot-note').textContent='空き物件 '+free+'枠 / 全'+DISTRICTS.reduce((s,d)=>s+d.slots,0)+'枠';
+  $('btn-newstore').disabled=free<=0;
   const el=$('store-list');
-  if(!G.stores.length){
-    el.innerHTML='<div class="card muted">まだ店舗がありません。「＋ 新規出店」から1号店を開きましょう!</div>';
-    return;
-  }
+  if(!G.stores.length){ el.innerHTML='<div class="card muted">まだ店舗がありません。「＋出店」から1号店を開きましょう!</div>'; return; }
   el.innerHTML=G.stores.map(st=>{
-    const d=districtOf(st);
+    const d=districtOf(st), m=getMgr(st.managerId);
+    const col=st.today.profit>=0?'var(--good)':'var(--bad)';
     return '<div class="card">'+
       '<div class="store-head"><span class="nm">🏬 '+st.name+'</span>'+
-      '<span class="star">★'+st.rep.toFixed(1)+'</span></div>'+
+        '<span class="star">★'+st.rep.toFixed(1)+'</span></div>'+
+      '<div style="margin:4px 0">'+storeBadges(st)+'</div>'+
       '<div class="stat-line">'+
-        '<span>本日 <b>'+st.todayVisitors+'人</b> / '+yen(st.todayRev)+'</span>'+
-        (st.todayLost>0?'<span style="color:var(--bad)">行列で'+st.todayLost+'人逃す</span>':'')+
+        '<span>本日 <b>'+st.today.visitors+'人</b></span>'+
+        '<span>売上 <b>'+yen(st.today.rev)+'</b></span>'+
+        '<span>利益 <b style="color:'+col+'">'+yen(st.today.profit)+'</b></span>'+
+        '<span>商圏シェア <b>'+Math.round(st.today.share*100)+'%</b></span>'+
       '</div>'+
       '<div class="stat-line">'+
-        '<span>スタッフ <b>'+st.staff+'人</b></span>'+
+        '<span>店長 <b>'+(m?m.name+'('+m.skill+')':'なし')+'</b></span>'+
+        '<span>人員 <b>'+st.staff+'</b>'+(idealStaff(st)!==st.staff?' <span style="color:var(--warn)">(推奨'+idealStaff(st)+')</span>':'')+'</span>'+
         '<span>スキル <b>'+Math.round(st.skill)+'</b></span>'+
-        '<span>設備 Lv<b>'+st.equip+'</b></span>'+
-        '<span>内装 Lv<b>'+st.interior+'</b></span>'+
-        '<span>'+(st.manager?'👔店長あり':'店長なし')+'</span>'+
+        '<span>士気 <b>'+Math.round(st.morale)+'</b></span>'+
+        '<span>設備<b>'+st.equip+'</b>/内装<b>'+st.interior+'</b></span>'+
       '</div>'+
-      '<div class="stat-line"><span class="muted">家賃 '+yen(d.rent)+'/日・人件費 '+
-        yen(st.staff*WAGE_BARISTA+(st.manager?WAGE_MANAGER:0))+'/日</span></div>'+
+      '<div class="row"><span class="muted">14日の利益推移</span>'+spark(st.hist,110,20,col)+'</div>'+
       '<div class="btnrow">'+
-        '<button class="mini" onclick="act.hire(\''+st.id+'\')">➕採用 (日給'+yen(WAGE_BARISTA)+')</button>'+
+        '<button class="mini" onclick="act.detail(\''+st.id+'\')">📋 詳細・操作</button>'+
+        '<button class="mini" onclick="act.hire(\''+st.id+'\')">➕採用</button>'+
         '<button class="mini" onclick="act.fire(\''+st.id+'\')">➖削減</button>'+
-        '<button class="mini" onclick="act.train(\''+st.id+'\')">📚研修 '+yen(80000)+'</button>'+
-        (st.equip<5?'<button class="mini" onclick="act.equip(\''+st.id+'\')">⚙️設備強化 '+yen(st.equip*400000)+'</button>':'')+
-        (st.interior<5?'<button class="mini" onclick="act.interior(\''+st.id+'\')">🛋️内装改装 '+yen(st.interior*300000)+'</button>':'')+
-        (!st.manager?'<button class="mini" onclick="act.manager(\''+st.id+'\')">👔店長雇用 (日給'+yen(WAGE_MANAGER)+')</button>':'')+
-        '<button class="mini" style="color:var(--bad)" onclick="act.close(\''+st.id+'\')">閉店</button>'+
+        '<button class="mini'+(idealStaff(st)!==st.staff?' hot':'')+'" onclick="act.optStaff(\''+st.id+'\')">🧮 人員最適化</button>'+
+        '<button class="mini" onclick="showAssign(\''+st.id+'\')">👔 店長</button>'+
       '</div></div>';
   }).join('');
 }
+function renderOrg(){
+  const load=mgmtLoad(), cap=mgmtCap(), pen=mgmtPenalty();
+  const pct=Math.min(100,(load/Math.max(cap,0.1))*100);
+  $('mgmt-card').innerHTML=
+    '<div class="row"><b>管理負荷 '+load.toFixed(1)+' / 管理能力 '+cap.toFixed(1)+'</b>'+
+    (pen>0?'<span class="tag bad">効率 -'+Math.round(pen*100)+'%</span>':'<span class="tag good">健全</span>')+'</div>'+
+    '<div class="meter'+(pen>0?' over':'')+'"><i style="width:'+pct+'%"></i>'+
+    '<span>'+(pen>0?'統制不能':'管理できています')+'</span></div>'+
+    '<div class="small-note">店長のいない店は負荷1.15、いる店は0.3。運営本部長を就任させると管理能力が大幅に上がります。'+
+    '超過すると全店舗の集客と満足度が下がります。</div>';
+  // 幹部
+  $('exec-list').innerHTML=EXEC_ROLES.map(r=>{
+    const m=getExec(r.id), on=G.deleg[r.deleg];
+    return '<div class="card">'+
+      '<div class="row"><b>'+r.e+' '+r.name+'</b>'+
+        (m?'<span class="tag good">'+m.name+' (スキル'+m.skill+')</span>':'<span class="tag warn">空席</span>')+'</div>'+
+      '<div class="muted" style="margin:4px 0">'+r.desc+'</div>'+
+      (m?'<div class="small-note">役員報酬 '+yen(m.salary*2.2)+'/日</div>':'')+
+      '<div class="row" style="margin-top:6px">'+
+        '<span style="font-size:12.5px">'+(m?'':'<span class="muted">要就任 → </span>')+r.dname+'</span>'+
+        '<div class="toggle'+(on?' on':'')+(m?'':' dis')+'" onclick="act.toggleDeleg(\''+r.deleg+'\')"><i></i></div>'+
+      '</div>'+
+      '<div class="btnrow"><button class="mini" onclick="showExecPick(\''+r.id+'\')">'+(m?'交代・解任':'就任させる')+'</button></div>'+
+      '</div>';
+  }).join('');
+  // 店長配属
+  const free=G.managers.filter(m=>!m.assign);
+  $('mgr-assign').innerHTML=
+    (G.stores.length? G.stores.map(st=>{
+      const m=getMgr(st.managerId);
+      return '<div class="prod"><div class="info"><div class="nm">🏬 '+st.name+'</div>'+
+        '<div class="sub">'+(m?'👔 '+m.name+' / スキル'+m.skill+' / '+traitOf(m).e+traitOf(m).name+' / '+yen(m.salary)+'（日）':'店長なし(負荷1.15)')+'</div></div>'+
+        '<button class="mini'+(m?'':' hot')+'" onclick="showAssign(\''+st.id+'\')">'+(m?'変更':'配属')+'</button></div>';
+    }).join('') : '<div class="muted">店舗がありません</div>')+
+    '<div class="sect muted">待機中の人材: '+(free.length? free.map(m=>m.name+'('+m.skill+')').join('、') : 'なし')+'</div>';
+  // 賃金
+  $('wage-card').innerHTML=
+    '<div class="btnrow">'+WAGE_LEVELS.map((w,i)=>
+      '<button class="mini'+(i===G.wageIdx?' hot':'')+'" onclick="act.wage('+i+')">'+w.name+' ×'+w.mult+'</button>').join('')+'</div>'+
+    '<div class="small-note">好待遇は士気が上がり離職を防ぎます。低賃金は人件費が下がりますが、士気が落ちて次々に辞めていきます。</div>';
+  // 人材市場
+  $('candidates').innerHTML=G.candidates.map(c=>{
+    const t=traitOf(c);
+    return '<div class="cand"><div class="row"><b>'+c.name+'</b><span class="skl">スキル '+c.skill+'</span></div>'+
+      '<div class="muted" style="margin:3px 0">'+t.e+' <b>'+t.name+'</b> — '+t.desc+'</div>'+
+      '<div class="row"><span class="muted">給与 '+yen(c.salary)+'/日 ・ 支度金 '+yen(c.salary*8)+'</span>'+
+      '<button class="mini" '+(G.cash<c.salary*8?'disabled':'')+' onclick="act.hireMgr(\''+c.id+'\')">採用</button></div></div>';
+  }).join('');
+}
+function traitOf(m){ return TRAITS.find(t=>t.id===m.traitId)||TRAITS[0]; }
 function renderMenu(){
+  const m=menuStats();
+  $('menu-summary').innerHTML=
+    '<div class="row"><b>メニュー '+G.enabled.length+'品</b>'+
+      '<span class="'+(menuComplexity()<0.93?'tag bad':'tag good')+'">オペレーション効率 '+Math.round(menuComplexity()*100)+'%</span></div>'+
+    '<div class="stat-line"><span>平均客単価 <b>'+yen(m.avgPrice)+'</b></span>'+
+      '<span>平均原価 <b>'+yen(m.avgCost)+'</b></span>'+
+      '<span>品揃え魅力 <b>×'+m.variety.toFixed(2)+'</b></span></div>'+
+    '<div class="small-note">品目は7品前後が最も効率的です。増やしすぎると提供が遅れ廃棄も増えます。</div>'+
+    (G.trend?'<div class="small-note" style="color:var(--gold)">🔥 '+PRODUCTS.find(p=>p.id===G.trend.pid).name+
+      'がブーム中(残り'+G.trend.daysLeft+'日)</div>':'')+
+    (G.priceWar>0?'<div class="small-note" style="color:var(--bad)">⚔️ 価格戦争中(残り'+G.priceWar+'日):客の価格許容度が18%低下しています</div>':'');
   const drinks=[],foods=[];
   for(const p of PRODUCTS){
     if(!G.unlocked.includes(p.id))continue;
-    const on=G.enabled.includes(p.id);
-    const pr=price(p.id);
-    const cost=prodCost(p);
+    const on=G.enabled.includes(p.id), pr=price(p.id), cost=prodCost(p);
+    const fr=G.fresh[p.id]||1;
     const html='<div class="prod">'+
       '<div class="toggle'+(on?' on':'')+'" onclick="act.toggle(\''+p.id+'\')"><i></i></div>'+
-      '<div class="info"><div class="nm">'+p.e+' '+p.name+'</div>'+
+      '<div class="info"><div class="nm">'+p.e+' '+p.name+
+        (G.trend&&G.trend.pid===p.id?' <span class="tag good">🔥ブーム</span>':'')+
+        (fr<0.7?' <span class="tag warn">飽きられ気味</span>':'')+'</div>'+
       '<div class="sub">原価 '+yen(cost)+' / 適正 '+yen(p.fair)+
-      (pr>p.fair*1.25?' <span style="color:var(--bad)">⚠️高すぎ</span>':'')+'</div></div>'+
-      '<div class="stepper">'+
-        '<button onclick="act.priceDn(\''+p.id+'\')">−</button>'+
-        '<span class="pv">'+yen(pr)+'</span>'+
-        '<button onclick="act.priceUp(\''+p.id+'\')">＋</button>'+
-      '</div></div>';
+        (pr>p.fair*1.25?' <span style="color:var(--bad)">⚠️高すぎ</span>':'')+'</div></div>'+
+      '<div class="stepper"><button onclick="act.priceDn(\''+p.id+'\')">−</button>'+
+      '<span class="pv">'+yen(pr)+'</span>'+
+      '<button onclick="act.priceUp(\''+p.id+'\')">＋</button></div></div>';
     (p.cat==='drink'?drinks:foods).push(html);
   }
-  $('menu-drinks').innerHTML=drinks.join('')||'<div class="muted">ドリンクがありません</div>';
-  $('menu-foods').innerHTML=foods.join('')||'<div class="muted">開発タブからフードを開発しましょう</div>';
-  // R&D
+  $('menu-drinks').innerHTML=drinks.join('')||'<div class="muted">なし</div>';
+  $('menu-foods').innerHTML=foods.join('')||'<div class="muted">まだフードがありません</div>';
   const locked=PRODUCTS.filter(p=>!G.unlocked.includes(p.id));
   $('menu-rnd').innerHTML=locked.length? locked.map(p=>
     '<div class="prod"><div class="info"><div class="nm">'+p.e+' '+p.name+'</div>'+
-    '<div class="sub">'+(p.cat==='drink'?'ドリンク':'フード')+' / 適正価格 '+yen(p.fair)+'</div></div>'+
+    '<div class="sub">'+(p.cat==='drink'?'ドリンク':'フード')+' / 適正 '+yen(p.fair)+'</div></div>'+
     '<button class="btn" '+(G.cash<p.rnd?'disabled':'')+' onclick="act.unlock(\''+p.id+'\')">開発 '+yen(p.rnd)+'</button></div>'
-  ).join(''):'<div class="muted">🎉 全商品を開発済みです!</div>';
-  // beans
-  $('beans').innerHTML=BEANS.map(b=>
-    '<div class="prod"><div class="info"><div class="nm">'+(G.beanId===b.id?'✅ ':'')+b.name+
-    ' <span class="star">'+'★'.repeat(b.q)+'</span></div>'+
-    '<div class="sub">'+b.desc+' (原価×'+b.mult.toFixed(2)+')</div></div>'+
-    (G.beanId===b.id?'<span class="tag">使用中</span>':
-      '<button class="btn sub" onclick="act.bean(\''+b.id+'\')">切替</button>')+'</div>'
-  ).join('');
-}
-function renderCampaigns(){
+  ).join(''):'<div class="muted">🎉 全商品を開発済みです</div>';
+  // 豆
+  const sc=G.beanSpot>1.3?'var(--bad)':G.beanSpot<0.85?'var(--good)':'var(--text)';
+  $('beans').innerHTML=
+    '<div class="row"><b>豆の相場</b><b style="color:'+sc+'">×'+G.beanSpot.toFixed(2)+'</b></div>'+
+    '<div class="row"><span class="muted">30日推移</span>'+spark(G.spotHist,140,22,sc)+'</div>'+
+    (G.beanContract?
+      '<div class="small-note" style="color:var(--good)">📜 長期契約中(×'+G.beanContract.rate.toFixed(2)+
+        '・残り'+G.beanContract.daysLeft+'日) — 相場高騰の影響を受けません</div>':
+      '<div class="row" style="margin-top:6px"><span class="muted">安値のうちに固定するのが定石</span>'+
+       '<button class="btn sub" onclick="act.contract()">90日契約 '+yen(500000*G.beanSpot)+'</button></div>')+
+    (G.ventures.includes('roast')?'<div class="small-note">🏭 自家焙煎工場により相場変動の影響が半減しています</div>':'')+
+    '<div class="sect"></div>'+
+    BEANS.map(b=>'<div class="prod"><div class="info"><div class="nm">'+(G.beanId===b.id?'✅ ':'')+b.name+
+      ' <span class="star">'+'★'.repeat(b.q)+'</span></div>'+
+      '<div class="sub">'+b.desc+' (基準原価×'+b.mult.toFixed(2)+')</div></div>'+
+      (G.beanId===b.id?'<span class="tag">使用中</span>':
+        '<button class="btn sub" onclick="act.bean(\''+b.id+'\')">切替</button>')+'</div>').join('');
   $('m-aw').textContent=Math.round(G.awareness);
   $('m-awbar').style.width=Math.round(G.awareness)+'%';
   $('campaigns').innerHTML=CAMPAIGNS.map(c=>{
-    const running=G.campaigns.find(x=>x.id===c.id);
-    return '<div class="card"><div class="row"><div>'+
-      '<b>'+c.e+' '+c.name+'</b><div class="muted">'+c.desc+' ('+c.days+'日間 / 認知度+'+c.power+')</div>'+
-      (running?'<div class="muted" style="color:var(--good)">実施中 残り'+running.daysLeft+'日</div>':'')+
-      '</div>'+
-      '<button class="btn" '+((running||G.cash<c.cost)?'disabled':'')+
+    const run=G.campaigns.find(x=>x.id===c.id);
+    return '<div class="card"><div class="row"><div style="flex:1"><b>'+c.e+' '+c.name+'</b>'+
+      '<div class="muted">'+c.desc+' ('+c.days+'日 / 認知度+'+c.power+')</div>'+
+      (run?'<div class="muted" style="color:var(--good)">実施中 残り'+run.daysLeft+'日</div>':'')+'</div>'+
+      '<button class="btn" '+((run||G.cash<c.cost)?'disabled':'')+
       ' onclick="act.campaign(\''+c.id+'\')">'+yen(c.cost)+'</button></div></div>';
   }).join('');
 }
 function renderMarket(){
-  // 時価総額ランキング
-  const rows=[{name:'コーヒー帝国 (あなた)', e:'☕', cap:G.lastVal,
-      stores:G.stores.length, me:true}]
-    .concat(G.comps.filter(c=>!c.acquired).map(c=>({name:c.name, e:c.e, cap:c.cap,
-      stores:Object.values(c.stores).reduce((a,b)=>a+b,0)})));
+  const rows=[{name:'コーヒー帝国 (あなた)',e:'☕',cap:G.lastVal,stores:G.stores.length,me:true}]
+    .concat(G.comps.filter(c=>!c.acquired).map(c=>({name:c.name,e:c.e,cap:c.cap,
+      stores:Object.values(c.stores).reduce((a,b)=>a+b,0),share:c.myShare})));
   rows.sort((a,b)=>b.cap-a.cap);
   $('ranking').innerHTML=rows.map((r,i)=>
-    '<div class="row" style="padding:5px 0;'+(r.me?'color:var(--gold);font-weight:800':'')+'">'+
-    '<span>'+(i+1)+'位 '+r.e+' '+r.name+'</span>'+
-    '<span>'+fmtBig(r.cap)+' <span class="muted">('+r.stores+'店)</span></span></div>').join('');
-  // 各社情報とM&A
+    '<div class="rank" style="'+(r.me?'color:var(--gold);font-weight:800':'')+'">'+
+    '<span>'+(i+1)+'位 '+r.e+' '+r.name+(r.share?' <span class="tag">保有'+r.share+'%</span>':'')+'</span>'+
+    '<span>'+fmtBig(r.cap)+' <span class="muted">('+r.stores+'店)</span></span></div>').join('')+
+    (G.topStreak>0?'<div class="small-note" style="color:var(--gold)">👑 首位を'+G.topStreak+'日連続で維持中(30日でクリア)</div>':'');
+  const sh=Math.round(industryStoreShare()*100);
+  $('antitrust').innerHTML='<div class="row"><span class="muted">業界の店舗シェア</span><b>'+sh+'%</b></div>'+
+    '<div class="bar"><i style="width:'+sh+'%;background:'+(sh>50?'var(--bad)':'var(--accent)')+'"></i></div>'+
+    (sh>50?'<div class="small-note" style="color:var(--bad)">⚖️ 独占禁止法の監視下:これ以上の経営権取得は認められず、68%を超えると分割命令のリスクがあります。</div>'
+          :'<div class="small-note">シェア50%を超えると公正取引委員会の監視対象になります。</div>');
   $('ma-list').innerHTML=G.comps.map(c=>{
+    if(c.acquired) return '<div class="card"><div class="row"><b>'+c.e+' '+c.name+'</b>'+
+      '<span class="tag good">✅ 支配下</span></div><div class="muted">'+c.desc+'</div></div>';
     const total=Object.values(c.stores).reduce((a,b)=>a+b,0);
     const where=DISTRICTS.filter(d=>c.stores[d.id]).map(d=>d.name+'×'+c.stores[d.id]).join('、')||'-';
-    const cost=Math.round(c.cap*1.3);
+    const cost=stakeCost(c);
+    const persona={capital:'資本力で潰しに来る',price:'価格戦争を仕掛ける',talent:'人材を引き抜く',buzz:'認知度を奪う'}[c.person];
     return '<div class="card">'+
-      '<div class="row"><b>'+c.e+' '+c.name+'</b>'+
-      (c.acquired?'<span class="tag" style="color:var(--good)">✅ 買収済み</span>':'<b>'+fmtBig(c.cap)+'</b>')+'</div>'+
+      '<div class="row"><b>'+c.e+' '+c.name+'</b><b>'+fmtBig(c.cap)+'</b></div>'+
       '<div class="muted" style="margin:4px 0">'+c.desc+'</div>'+
-      (c.acquired?'':
-        '<div class="row"><span class="muted">'+total+'店舗 ('+where+')</span>'+
-        '<button class="btn" '+(G.cash<cost?'disabled':'')+
-        ' onclick="act.acquire(\''+c.id+'\')">買収 '+fmtBig(cost)+'</button></div>')+
+      '<div class="stat-line"><span>'+total+'店舗 ('+where+')</span><span class="tag warn">'+persona+'</span></div>'+
+      '<div class="row" style="margin-top:4px"><span class="muted">あなたの持株</span><b>'+c.myShare+'%</b></div>'+
+      '<div class="bar"><i style="width:'+c.myShare+'%"></i></div>'+
+      '<div class="small-note">33%で拒否権(相手の動きが鈍る) / 50%で経営権(全店舗を吸収)。'+
+        '大型買収は<b>株式交換</b>が現実的ですが、持株が薄まり自分が狙われます。'+
+        (c.defended?' ・<span style="color:var(--bad)">防衛実施済み'+c.defended+'回</span>':'')+'</div>'+
+      '<div class="btnrow"><button class="btn" '+(G.cash<cost?'disabled':'')+
+        ' onclick="act.buyStake(\''+c.id+'\',\'cash\')">現金で5% '+fmtBig(cost)+'</button>'+
+        '<button class="btn sub" '+(G.listed?'':'disabled')+
+        ' onclick="act.buyStake(\''+c.id+'\',\'stock\')">株式交換で5%'+
+        (G.listed?' (希薄化 -'+(G.ownerShare*(cost/(G.lastVal+cost))).toFixed(1)+'pt)':' (要上場)')+'</button></div>'+
       '</div>';
   }).join('');
-  // 他業種進出
   $('ventures').innerHTML=VENTURES.map(v=>{
     const own=G.ventures.includes(v.id);
-    return '<div class="card"><div class="row"><div style="flex:1">'+
-      '<b>'+v.e+' '+v.name+'</b>'+
+    return '<div class="card"><div class="row"><div style="flex:1"><b>'+v.e+' '+v.name+'</b>'+
       '<div class="muted">'+v.desc+' (日収 約'+yen(v.income)+')</div>'+
       (own?'<div class="muted" style="color:var(--good)">✅ 進出済み</div>':'')+'</div>'+
       (own?'':'<button class="btn" '+(G.cash<v.cost?'disabled':'')+
-        ' onclick="act.venture(\''+v.id+'\')">'+fmtBig(v.cost)+'</button>')+
-      '</div></div>';
+        ' onclick="act.venture(\''+v.id+'\')">'+fmtBig(v.cost)+'</button>')+'</div></div>';
   }).join('');
-  // 不動産市場
   $('prop-market').innerHTML=PROPERTIES.map(p=>
     '<div class="prod"><div class="info"><div class="nm">'+p.e+' '+p.name+'</div>'+
     '<div class="sub">家賃収入 '+yen(p.rent)+'/日</div></div>'+
     '<button class="btn" '+(G.cash<p.price?'disabled':'')+
-    ' onclick="act.buyProp(\''+p.id+'\')">'+fmtBig(p.price)+'</button></div>'
-  ).join('');
-  // 保有物件
+    ' onclick="act.buyProp(\''+p.id+'\')">'+fmtBig(p.price)+'</button></div>').join('');
   $('prop-owned').innerHTML=G.properties.length?
     '<div class="card"><b>保有物件</b>'+G.properties.map(pp=>{
       const t=PROPERTIES.find(x=>x.id===pp.type);
+      const nm=t? t.e+' '+t.name : '🏬 '+(pp.label||'店舗物件');
       const diff=pp.curPrice-pp.boughtPrice;
-      return '<div class="prod"><div class="info"><div class="nm">'+t.e+' '+t.name+'</div>'+
-        '<div class="sub">時価 '+fmtBig(pp.curPrice)+
-        ' <span style="color:var(--'+(diff>=0?'good':'bad')+')">('+(diff>=0?'+':'')+yen(diff)+')</span></div></div>'+
-        '<button class="btn sub" onclick="act.sellProp(\''+pp.id+'\')">売却</button></div>';
+      return '<div class="prod"><div class="info"><div class="nm">'+nm+'</div>'+
+        '<div class="sub">時価 '+fmtBig(pp.curPrice)+' <span style="color:var(--'+(diff>=0?'good':'bad')+')">('+
+        (diff>=0?'+':'')+yen(diff)+')</span></div></div>'+
+        (t?'<button class="btn sub" onclick="act.sellProp(\''+pp.id+'\')">売却</button>':'<span class="tag">店舗</span>')+
+        '</div>';
     }).join('')+'</div>':'';
 }
-function renderCeo(){
-  $('c-cash').textContent=yen(G.personalCash);
-  $('c-salary').textContent=SALARIES[G.salaryIdx].name;
-  $('salary-sel').innerHTML=SALARIES.map((s,i)=>
-    '<button class="mini" style="'+(i===G.salaryIdx?'background:var(--accent);color:#241505;font-weight:700':'')+
-    '" onclick="act.salary('+i+')">'+s.name+'</button>').join('');
-  $('lux-list').innerHTML=LUXURY.map(l=>{
-    const own=G.luxOwned.includes(l.id);
-    return '<div class="prod"><div class="info"><div class="nm">'+l.e+' '+l.name+
-      (own?' <span class="tag" style="color:var(--good)">所有</span>':'')+'</div>'+
-      '<div class="sub">'+l.desc+' (認知度+'+l.aw+')</div></div>'+
-      (own?'':'<button class="btn" '+(G.personalCash<l.cost?'disabled':'')+
-        ' onclick="act.buyLux(\''+l.id+'\')">'+fmtBig(l.cost)+'</button>')+
-      '</div>';
-  }).join('');
-}
-function renderStock(){
-  const el=$('stock');
-  if(!G.listed){
-    const okStores=G.stores.length>=3;
-    const avg=G.hist.slice(-14).reduce((s,h)=>s+h.p,0)/Math.max(1,G.hist.slice(-14).length);
-    const okProfit=avg>0 && G.hist.length>=14;
-    const proceeds=Math.round(G.lastVal*0.3*0.9);
-    el.innerHTML='<b>未上場</b>'+
-      '<div class="muted" style="margin:6px 0">IPO(株式上場)すると企業価値の30%相当の資金を調達できます。'+
-      'ただし持株比率が70%に下がり、以後は株式市場と付き合うことになります。</div>'+
-      '<div class="small-note">'+(okStores?'✅':'❌')+' 店舗3店以上 / '+
-      (okProfit?'✅':'❌')+' 直近2週間の平均利益が黒字</div>'+
-      '<div class="row" style="margin-top:8px"><span class="muted">想定調達額 '+fmtBig(proceeds)+'</span>'+
-      '<button class="btn" '+((okStores&&okProfit)?'':'disabled')+' onclick="act.ipo()">上場する</button></div>';
-    return;
-  }
-  const own=Math.round(G.ownerShare), fund=Math.round(G.fundShare), float_=100-own-fund;
-  const dangerC=fund>=35?'var(--bad)':fund>=20?'var(--gold)':'var(--sub)';
-  el.innerHTML=
-    '<div class="row"><b>上場企業</b><b>'+fmtBig(G.lastVal)+'</b></div>'+
-    '<div class="row muted"><span>株価 (100万株)</span><span>'+yen(G.lastVal/1000000)+'</span></div>'+
-    '<div style="margin:8px 0 2px" class="muted">株主構成</div>'+
-    '<div class="bar" style="height:10px;display:flex">'+
-      '<i style="width:'+own+'%;background:var(--gold)"></i>'+
-      '<i style="width:'+fund+'%;background:var(--bad)"></i>'+
-      '<i style="width:'+Math.max(0,float_)+'%;background:#5a4a35"></i></div>'+
-    '<div class="small-note">👔 社長 '+own+'% / <span style="color:'+dangerC+'">🐻 ファンド '+fund+'%</span> / 市場 '+Math.max(0,float_)+'%</div>'+
-    (own<50?'<div class="small-note" style="color:var(--bad)">⚠️ 持株比率50%未満!業績が悪化するとファンドに買い占められます</div>':'')+
-    '<div class="btnrow">'+
-      '<button class="btn" onclick="act.raiseCap()">増資 +'+fmtBig(G.lastVal*0.05*0.95)+' (会社へ)</button>'+
-      '<button class="btn" '+(G.ownerShare<10?'disabled':'')+' onclick="act.sellShares()">持株売却 +'+fmtBig(G.lastVal*0.05*0.95)+' (社長へ)</button>'+
-      '<button class="btn sub" '+(G.cash<G.lastVal*0.05*1.05?'disabled':'')+' onclick="act.buyback()">自社株買い −'+fmtBig(G.lastVal*0.05*1.05)+'</button>'+
-    '</div>'+
-    '<div class="small-note">増資/売却は5%単位で持株比率が下がり、自社株買いで5%回復します。</div>';
-}
 function renderFin(){
-  $('f-cash').textContent=yen(G.cash);
-  $('f-cash').className='v '+(G.cash>=0?'':'bad');
+  $('f-cash').textContent=yen(G.cash); $('f-cash').className='v '+(G.cash>=0?'':'bad');
   $('f-loan').textContent=yen(G.loan);
   $('f-trev').textContent=yen(G.totalRev);
-  const tp=$('f-tpf'); tp.textContent=yen(G.totalProfit);
-  tp.className='v '+(G.totalProfit>=0?'good':'bad');
+  const tp=$('f-tpf'); tp.textContent=yen(G.totalProfit); tp.className='v '+(G.totalProfit>=0?'good':'bad');
   const t=G.today;
   $('pl').innerHTML=
-    plRow('売上',t.rev,'good')+
-    (t.biz?plRow('事業収入',t.biz,'good'):'')+
+    plRow('売上',t.rev,'good')+(t.biz?plRow('事業収入',t.biz,'good'):'')+
     (t.prop?plRow('不動産収入',t.prop,'good'):'')+
-    plRow('原価(材料費)',-t.cogs)+plRow('人件費',-t.wage)+
-    (t.salary?plRow('役員報酬',-t.salary):'')+
+    plRow('原価(材料費)',-t.cogs)+plRow('店舗人件費',-t.wage)+
+    plRow('本部・幹部コスト',-t.mgmt)+(t.salary?plRow('役員報酬',-t.salary):'')+
     plRow('家賃',-t.rent)+plRow('支払利息',-t.interest)+
     '<div class="row" style="border-top:1px solid var(--line);margin-top:6px;padding-top:6px">'+
     '<b>営業利益</b><b style="color:'+(t.profit>=0?'var(--good)':'var(--bad)')+'">'+yen(t.profit)+'</b></div>';
-  $('btn-borrow').disabled=G.loan+LOAN_STEP>LOAN_LIMIT;
-  $('btn-repay').disabled=G.loan<=0||G.cash<LOAN_STEP;
+  const lim=creditLimit();
+  $('bank').innerHTML=
+    '<div class="row"><span class="muted">借入枠(業績と資産に連動)</span><b>'+fmtBig(lim)+'</b></div>'+
+    '<div class="bar"><i style="width:'+Math.min(100,(G.loan/Math.max(1,lim))*100)+'%;background:'+
+      (G.loan>lim?'var(--bad)':'var(--accent)')+'"></i></div>'+
+    '<div class="row" style="margin-top:4px"><span class="muted">実効金利(レバレッジ連動)</span><b>'+
+      (loanRate()*100).toFixed(3)+'%/日</b></div>'+
+    (G.loan>lim?'<div class="small-note" style="color:var(--bad)">⚠️ 枠を超過('+G.covenantDays+
+      '日目)。15日で資産を強制売却されます。</div>':'')+
+    '<div class="btnrow"><button class="btn" onclick="act.borrow()">¥500,000 借りる</button>'+
+    '<button class="btn sub" onclick="act.repay()">¥500,000 返す</button></div>'+
+    '<div class="small-note">借入枠は直近30日の利益と資産で決まります。赤字が続くと枠が縮み、返済を迫られます。</div>';
   renderStock();
 }
 function plRow(n,v,cls){
   return '<div class="row"><span class="muted">'+n+'</span><span'+
     (cls?' style="color:var(--'+cls+')"':'')+'>'+yen(v)+'</span></div>';
 }
+function renderStock(){
+  const el=$('stock');
+  if(!G.listed){
+    const okS=G.stores.length>=3, okP=G.hist.length>=14&&avgProfit(14)>0;
+    const pr=Math.round(G.lastVal*0.3*0.9);
+    el.innerHTML='<b>未上場</b><div class="muted" style="margin:6px 0">'+
+      'IPOで企業価値の30%を調達できます。ただし持株比率が70%に下がり、以後は市場の目に晒されます。</div>'+
+      '<div class="small-note">'+(okS?'✅':'❌')+' 3店舗以上 / '+(okP?'✅':'❌')+' 直近14日の平均利益が黒字</div>'+
+      '<div class="row" style="margin-top:8px"><span class="muted">想定調達額 '+fmtBig(pr)+'</span>'+
+      '<button class="btn" '+((okS&&okP)?'':'disabled')+' onclick="act.ipo()">上場する</button></div>';
+    return;
+  }
+  const own=Math.round(G.ownerShare), fund=Math.round(G.holders.fund), stl=Math.round(G.holders.stella);
+  const pub=Math.max(0,100-own-fund-stl), threat=fund+stl;
+  el.innerHTML=
+    '<div class="row"><b>上場企業</b><b>'+fmtBig(G.lastVal)+'</b></div>'+
+    '<div class="row muted"><span>株価(100万株)</span><span>'+yen(G.lastVal/1000000)+'</span></div>'+
+    '<div style="margin:8px 0 2px" class="muted">株主構成</div>'+
+    '<div class="bar" style="height:12px">'+
+      '<i style="width:'+own+'%;background:var(--gold)"></i>'+
+      '<i style="width:'+fund+'%;background:var(--bad)"></i>'+
+      '<i style="width:'+stl+'%;background:#c76a3a"></i>'+
+      '<i style="width:'+pub+'%;background:#5a4a35"></i></div>'+
+    '<div class="small-note">👔 社長 '+own+'% / 🐻 ファンド '+fund+'% / 🌟 ステラ '+stl+'% / 市場 '+pub+'%</div>'+
+    (threat>=20?'<div class="small-note" style="color:var(--bad)">⚠️ 敵対的保有 '+threat+'%。50%で経営権を失います。</div>':'')+
+    (own<50?'<div class="small-note" style="color:var(--warn)">持株が50%未満です。赤字や株価下落が続くと買い進められます。</div>':'')+
+    '<div class="btnrow">'+
+      '<button class="btn" onclick="act.raiseCap()">増資 +'+fmtBig(G.lastVal*0.05*0.95)+'</button>'+
+      '<button class="btn" '+(G.ownerShare<15?'disabled':'')+' onclick="act.sellShares()">持株売却(社長へ)</button>'+
+      '<button class="btn sub" '+(G.cash<G.lastVal*0.05*1.05?'disabled':'')+' onclick="act.buyback()">自社株買い −'+fmtBig(G.lastVal*0.05*1.05)+'</button>'+
+    '</div>';
+}
+function renderCeo(){
+  $('c-cash').textContent=yen(G.personalCash);
+  $('c-salary').textContent=SALARIES[G.salaryIdx].name;
+  $('salary-sel').innerHTML=SALARIES.map((s,i)=>
+    '<button class="mini'+(i===G.salaryIdx?' hot':'')+'" onclick="act.salary('+i+')">'+s.name+'</button>').join('');
+  $('lux-list').innerHTML=LUXURY.map(l=>{
+    const own=G.luxOwned.includes(l.id);
+    return '<div class="prod"><div class="info"><div class="nm">'+l.e+' '+l.name+
+      (own?' <span class="tag good">所有</span>':'')+'</div>'+
+      '<div class="sub">'+l.desc+' (認知度+'+l.aw+')</div></div>'+
+      (own?'':'<button class="btn" '+(G.personalCash<l.cost?'disabled':'')+
+        ' onclick="act.buyLux(\''+l.id+'\')">'+fmtBig(l.cost)+'</button>')+'</div>';
+  }).join('');
+}
 function renderAll(){
-  renderHeader(); renderHome(); renderStores(); renderMenu(); renderCampaigns();
+  renderHeader(); renderHome(); renderStores(); renderOrg(); renderMenu();
   renderMarket(); renderFin(); renderCeo();
 }
 
 /* =====================  MODALS  ===================== */
 function showModal(html){ $('modal').innerHTML=html; $('modal-wrap').classList.add('show'); }
 function closeModal(){ $('modal-wrap').classList.remove('show'); }
+window.closeModal=closeModal;
 $('modal-wrap').addEventListener('click',e=>{ if(e.target.id==='modal-wrap')closeModal(); });
 function showNewStore(){
-  showModal('<h3>🏬 新規出店 - 立地を選ぶ</h3>'+DISTRICTS.map(d=>{
-    const cost=storeOpenCost(d);
-    const comp=compAttractIn(d.id);
-    const mine=G.stores.filter(s=>s.districtId===d.id).length;
-    return '<div class="card"><div class="row"><div>'+
-      '<b>'+d.name+'</b> <span class="tag">人通り '+d.traffic+'</span>'+
-      '<span class="tag">競合 '+(comp>80?'激戦':comp>30?'あり':'少ない')+'</span>'+
-      (mine?'<span class="tag">自店'+mine+'</span>':'')+
-      '<div class="muted">'+d.desc+' 家賃 '+yen(d.rent)+'/日</div></div>'+
-      '<button class="btn" '+(G.cash<cost?'disabled':'')+
-      ' onclick="openStore(\''+d.id+'\')">'+yen(cost)+'</button>'+
-      '</div></div>';
-  }).join('')+'<button class="btn sub" style="width:100%" onclick="closeModal()">閉じる</button>');
+  showModal('<h3>🏬 出店する立地を選ぶ</h3>'+
+    '<div class="small-note" style="margin-bottom:8px">同じ地区に店を増やすほど、自店同士で客を奪い合います。'+
+    '枠も有限です。</div>'+
+    DISTRICTS.map(d=>{
+      const cost=storeOpenCost(d), free=freeSlots(d.id);
+      const mine=myStoresIn(d.id), comp=compStoresIn(d.id);
+      return '<div class="card"><div class="row"><div style="flex:1">'+
+        '<b>'+d.name+'</b> <span class="tag">来客プール '+d.pool+'</span>'+
+        '<span class="tag'+(free>0?'':' bad')+'">空き'+free+'/'+d.slots+'枠</span>'+
+        '<div class="muted">'+d.desc+'</div>'+
+        '<div class="muted">家賃 '+yen(d.rent)+'/日 ・ 自店'+mine+' / 競合'+comp+'</div></div>'+
+        '<button class="btn" '+((G.cash<cost||free<=0)?'disabled':'')+
+        ' onclick="openStore(\''+d.id+'\')">'+fmtBig(cost)+'</button></div></div>';
+    }).join('')+'<button class="btn sub" style="width:100%" onclick="closeModal()">閉じる</button>');
 }
+function showStoreDetail(sid){
+  const st=G.stores.find(x=>x.id===sid); if(!st)return;
+  const d=districtOf(st), m=getMgr(st.managerId);
+  const w=wageOf(st), cap=Math.round(storeCapacity(st));
+  showModal('<h3>🏬 '+st.name+'</h3>'+
+    '<div class="card">'+storeBadges(st)+
+      '<div class="stat-line" style="margin-top:6px">'+
+      '<span>評判 <b>★'+st.rep.toFixed(1)+'</b></span>'+
+      '<span>本日の満足度 <b>★'+st.today.sat.toFixed(1)+'</b></span>'+
+      '<span>商圏シェア <b>'+Math.round(st.today.share*100)+'%</b></span></div>'+
+      '<div class="stat-line"><span>需要 <b>'+(st.lastPot||0)+'人</b></span>'+
+      '<span>提供能力 <b>'+cap+'人</b></span>'+
+      '<span>取りこぼし <b>'+st.today.lost+'人</b></span></div>'+
+      '<div class="row"><span class="muted">14日の利益推移</span>'+
+        spark(st.hist,150,26,st.today.profit>=0?'var(--good)':'var(--bad)')+'</div>'+
+    '</div>'+
+    '<div class="card"><b>本日の損益</b>'+
+      plRow('売上',st.today.rev,'good')+
+      plRow('人件費',-w)+plRow('家賃',st.owned?0:-d.rent)+
+      '<div class="row" style="border-top:1px solid var(--line);margin-top:6px;padding-top:6px">'+
+      '<b>店舗利益</b><b style="color:'+(st.today.profit>=0?'var(--good)':'var(--bad)')+'">'+
+      yen(st.today.profit)+'</b></div></div>'+
+    '<div class="card"><b>👔 店長</b>'+
+      '<div class="muted" style="margin:4px 0">'+(m? m.name+' / スキル'+m.skill+' / '+traitOf(m).e+traitOf(m).name+
+        ' / 給与'+yen(m.salary)+'（日）' : '不在 — 管理負荷が高く、効率も落ちます')+'</div>'+
+      '<button class="mini" onclick="showAssign(\''+st.id+'\')">配属・変更</button></div>'+
+    '<div class="card"><b>設備投資</b><div class="btnrow">'+
+      '<button class="mini" onclick="act.train(\''+st.id+'\');showStoreDetail(\''+st.id+'\')">📚研修 '+yen(80000)+'</button>'+
+      (st.equip<5?'<button class="mini" onclick="act.equip(\''+st.id+'\');showStoreDetail(\''+st.id+'\')">⚙️設備Lv'+(st.equip+1)+' '+yen(st.equip*500000)+'</button>':'')+
+      (st.interior<5?'<button class="mini" onclick="act.interior(\''+st.id+'\');showStoreDetail(\''+st.id+'\')">🛋️内装Lv'+(st.interior+1)+' '+yen(st.interior*400000)+'</button>':'')+
+      (!st.owned?'<button class="mini" onclick="act.buySite(\''+st.id+'\')">🏠物件を買取 '+fmtBig(d.rent*2500)+' (家賃0に)</button>':'<span class="tag good">物件所有・家賃ゼロ</span>')+
+    '</div></div>'+
+    '<div class="btnrow"><button class="btn sub" onclick="closeModal()">閉じる</button>'+
+    '<button class="btn danger" onclick="act.close(\''+st.id+'\')">閉店</button></div>');
+}
+window.showStoreDetail=showStoreDetail;
+function showAssign(sid){
+  const st=G.stores.find(x=>x.id===sid); if(!st)return;
+  const free=G.managers.filter(m=>!m.assign||m.assign===sid);
+  showModal('<h3>👔 '+st.name+' の店長</h3>'+
+    (free.length? free.map(m=>{
+      const t=traitOf(m);
+      return '<div class="card"><div class="row"><div style="flex:1"><b>'+m.name+'</b> '+
+        '<span class="skl">スキル'+m.skill+'</span><div class="muted">'+t.e+' '+t.name+' — '+t.desc+
+        '<br>給与 '+yen(m.salary)+'/日</div></div>'+
+        (st.managerId===m.id? '<span class="tag good">配属中</span>':
+        '<button class="btn" onclick="act.assign(\''+m.id+'\',\''+sid+'\')">配属</button>')+'</div></div>';
+    }).join('') : '<div class="card muted">待機中の人材がいません。組織タブの人材市場で採用してください。</div>')+
+    (st.managerId?'<button class="btn sub" style="width:100%;margin-bottom:6px" onclick="act.assign(\''+st.managerId+'\',\'none\')">店長を外す</button>':'')+
+    '<button class="btn sub" style="width:100%" onclick="closeModal()">閉じる</button>');
+}
+window.showAssign=showAssign;
+function showExecPick(role){
+  const r=EXEC_ROLES.find(x=>x.id===role);
+  const cur=getExec(role);
+  const free=G.managers.filter(m=>!m.assign||m.assign===role);
+  showModal('<h3>'+r.e+' '+r.name+'</h3>'+
+    '<div class="card muted">'+r.desc+'<br>役員報酬は通常給与の2.2倍です。</div>'+
+    (free.length? free.map(m=>{
+      const t=traitOf(m);
+      return '<div class="card"><div class="row"><div style="flex:1"><b>'+m.name+'</b> '+
+        '<span class="skl">スキル'+m.skill+'</span><div class="muted">'+t.e+' '+t.name+
+        '<br>役員報酬 '+yen(m.salary*2.2)+'/日</div></div>'+
+        (cur&&cur.id===m.id?'<span class="tag good">就任中</span>':
+        '<button class="btn" onclick="act.assign(\''+m.id+'\',\'exec:'+role+'\')">就任</button>')+'</div></div>';
+    }).join('') : '<div class="card muted">待機中の人材がいません。人材市場で採用してください。</div>')+
+    (cur?'<button class="btn danger" style="width:100%;margin-bottom:6px" onclick="act.fireMgr(\''+cur.id+'\')">'+cur.name+'を解任</button>':'')+
+    '<button class="btn sub" style="width:100%" onclick="closeModal()">閉じる</button>');
+}
+window.showExecPick=showExecPick;
 function showTutorial(){
-  showModal('<h3>☕ コーヒー帝国へようこそ!</h3>'+
-  '<div class="card">あなたは小さなコーヒーチェーンの社長。資金 <b>¥5,000,000</b> を元手に、'+
-  '街いちばんのコーヒー帝国を築きましょう!</div>'+
-  '<div class="card">🏬 <b>店舗</b>タブから1号店を出店<br>'+
-  '☕ <b>メニュー</b>タブで価格設定・新商品開発・豆の仕入れ<br>'+
-  '📣 <b>マーケ</b>タブでキャンペーンを実施して認知度アップ<br>'+
-  '💰 <b>財務</b>タブで収支確認と借入</div>'+
-  '<div class="card">📈 <b>市場</b>タブでは時価総額ランキングの確認、競合の<b>M&A買収</b>、'+
-  '他業種への進出、不動産投資ができます。<br>'+
-  '💰 財務タブから<b>株式上場(IPO)</b>すれば大型資金調達も。ただし持株比率を下げすぎて業績が傾くと、'+
-  '🐻投資ファンドに<b>敵対的買収</b>されてしまいます!<br>'+
-  '👔 <b>社長</b>タブで役員報酬を設定して、稼いだお金で豪遊も…?</div>'+
-  '<div class="card">⏸▶⏩ 画面上部で時間を進めます。スタッフが足りないと行列で客を逃し、'+
-  '価格が高すぎたり安い豆を使うと評判が下がります。バランスが鍵!</div>'+
+  showModal('<h3>☕ コーヒー帝国へようこそ</h3>'+
+  '<div class="card">資金 <b>¥5,000,000</b> を元手に、街いちばんのコーヒーチェーンを目指します。'+
+  '目標は<b>業界時価総額ランキング1位を30日連続で維持</b>すること。</div>'+
+  '<div class="card"><b>⚠️ 大事なルール</b><br>'+
+  '・各地区の<b>客数は有限</b>で、同じ地区に出店するほど<b>自店同士で客を奪い合います</b>。<br>'+
+  '・地区ごとに<b>出店枠</b>が決まっており、競合が埋めた枠には出られません。<br>'+
+  '・店舗が増えると<b>管理能力を超えて全店の効率が落ちます</b>。店長と幹部が必須です。</div>'+
+  '<div class="card"><b>🏛️ 組織タブ</b>で店長を採用・配属し、本部に幹部を就任させると、'+
+  '人員配置・研修・販促・仕入れ・買収防衛を<b>自動化(委任)</b>できます。規模が大きくなったら委任が生命線です。</div>'+
+  '<div class="card"><b>📈 市場タブ</b>で競合の株を買い集めれば、33%で拒否権、50%で経営権を握って'+
+  '全店舗を吸収できます。ただし相手は新株発行で対抗してきます。<br>'+
+  '<b>💰 財務タブ</b>で上場すると大型調達ができますが、持株が減ると逆に狙われます。</div>'+
   '<button class="btn" style="width:100%" onclick="closeModal();setSpeed(1)">開業する!</button>');
 }
 function showClear(){
   G.speed=0;
-  showModal('<h3>🎉🎉 ゲームクリア!! 🎉🎉</h3>'+
-  '<div class="card">10店舗を達成し、あなたのブランドは街を代表するコーヒーチェーンになりました!<br><br>'+
-  '<b>'+G.day+'日</b>での達成です。<br>累計利益: <b>'+yen(G.totalProfit)+'</b><br>評判: <b>★'+
-  G.reputation.toFixed(1)+'</b><br><br>このまま経営を続けることもできます。</div>'+
+  showModal('<h3>👑 業界の盟主に君臨!</h3>'+
+  '<div class="card">時価総額1位を30日連続で維持し、あなたは業界の頂点に立ちました!<br><br>'+
+  '<b>'+G.day+'日</b>での達成<br>時価総額: <b>'+fmtBig(G.lastVal)+'</b><br>'+
+  '店舗数: <b>'+G.stores.length+'</b>・評判 <b>★'+G.reputation.toFixed(1)+'</b><br>'+
+  '個人資産: <b>'+fmtBig(G.personalCash)+'</b><br><br>このまま経営を続けられます。</div>'+
   '<button class="btn" style="width:100%" onclick="closeModal()">経営を続ける</button>');
 }
-function gameOver(){
+function gameOver(reason){
   G.over=true; G.speed=0; save();
-  showModal('<h3>💀 倒産…</h3>'+
-  '<div class="card">資金繰りがつかず、会社は倒産してしまいました。<br>'+
-  '<b>'+G.day+'日間</b>の経営、おつかれさまでした。<br>累計売上: '+yen(G.totalRev)+'</div>'+
+  showModal('<h3>💀 ゲームオーバー</h3>'+
+  '<div class="card">'+reason+'<br><br><b>'+G.day+'日間</b>の経営、おつかれさまでした。<br>'+
+  '累計売上 '+fmtBig(G.totalRev)+' / 最高時価総額 '+fmtBig(Math.max.apply(null,G.valHist.concat([G.lastVal])))+'</div>'+
   '<button class="btn" style="width:100%" onclick="act.reset(true)">もう一度挑戦する</button>');
-}
-
-/* =====================  ACTION TABLE  ===================== */
-const act={
-  hire(sid){ const st=G.stores.find(x=>x.id===sid); if(st&&st.staff<12){st.staff++; st.skill=Math.max(10,st.skill-3); renderAll(); save();} },
-  fire(sid){ const st=G.stores.find(x=>x.id===sid); if(st&&st.staff>1){st.staff--; renderAll(); save();} },
-  train(sid){ const st=G.stores.find(x=>x.id===sid);
-    if(st&&tryPay(80000)){ st.skill=Math.min(100,st.skill+8); toast('📚 研修完了!スキル'+Math.round(st.skill)); renderAll(); save(); } },
-  equip(sid){ const st=G.stores.find(x=>x.id===sid);
-    if(st&&st.equip<5&&tryPay(st.equip*400000)){ st.equip++; toast('⚙️ 設備 Lv'+st.equip+'!'); renderAll(); save(); } },
-  interior(sid){ const st=G.stores.find(x=>x.id===sid);
-    if(st&&st.interior<5&&tryPay(st.interior*300000)){ st.interior++; toast('🛋️ 内装 Lv'+st.interior+'!'); renderAll(); save(); } },
-  manager(sid){ const st=G.stores.find(x=>x.id===sid); if(st){st.manager=true; toast('👔 店長を雇用しました'); renderAll(); save();} },
-  close(sid){ const st=G.stores.find(x=>x.id===sid); if(!st)return;
-    showModal('<h3>🚪 閉店の確認</h3><div class="card">'+st.name+'を本当に閉店しますか?</div>'+
-    '<div class="btnrow"><button class="btn danger" onclick="closeStore(\''+sid+'\')">閉店する</button>'+
-    '<button class="btn sub" onclick="closeModal()">やめる</button></div>'); },
-  toggle(pid){ const i=G.enabled.indexOf(pid);
-    if(i>=0)G.enabled.splice(i,1); else G.enabled.push(pid);
-    renderMenu(); save(); },
-  priceUp(pid){ G.prices[pid]=price(pid)+10; renderMenu(); save(); },
-  priceDn(pid){ G.prices[pid]=Math.max(50,price(pid)-10); renderMenu(); save(); },
-  unlock(pid){ unlockProduct(pid); },
-  bean(bid){ G.beanId=bid; toast('🌱 '+BEANS.find(b=>b.id===bid).name+'に切替'); renderMenu(); save(); },
-  campaign(cid){ const c=CAMPAIGNS.find(x=>x.id===cid);
-    if(G.campaigns.find(x=>x.id===cid))return;
-    if(!tryPay(c.cost))return;
-    G.campaigns.push({id:cid,daysLeft:c.days,perDay:c.power/c.days});
-    news('📣 <b>'+c.name+'</b>を開始しました!');
-    toast(c.e+' '+c.name+'開始!'); renderCampaigns(); renderHeader(); save(); },
-  ipo(){
-    if(G.listed)return;
-    const proceeds=Math.round(G.lastVal*0.3*0.9);
-    G.listed=true; G.ownerShare=70; G.cash+=proceeds;
-    news('🔔 <b>株式上場(IPO)!</b> '+fmtBig(proceeds)+'を調達しました!');
-    toast('🔔 上場おめでとうございます! +'+fmtBig(proceeds));
-    renderAll(); save(); },
-  raiseCap(){
-    if(!G.listed||G.ownerShare<5)return;
-    const proceeds=Math.round(G.lastVal*0.05*0.95);
-    G.ownerShare-=5; G.cash+=proceeds;
-    news('📈 増資で'+fmtBig(proceeds)+'を調達 (持株比率'+Math.round(G.ownerShare)+'%)');
-    renderAll(); save(); },
-  sellShares(){
-    if(!G.listed||G.ownerShare<10)return;
-    const proceeds=Math.round(G.lastVal*0.05*0.95);
-    G.ownerShare-=5; G.personalCash+=proceeds;
-    news('💼 社長が持株5%を売却し'+fmtBig(proceeds)+'を得ました (持株比率'+Math.round(G.ownerShare)+'%)');
-    renderAll(); save(); },
-  buyback(){
-    if(!G.listed||G.ownerShare>=100)return;
-    const cost=Math.round(G.lastVal*0.05*1.05);
-    if(!tryPay(cost))return;
-    G.ownerShare=Math.min(100,G.ownerShare+5);
-    G.fundShare=Math.min(G.fundShare,100-G.ownerShare);
-    news('🛡️ 自社株買いを実施 (持株比率'+Math.round(G.ownerShare)+'%)');
-    toast('🛡️ 自社株買い完了');
-    renderAll(); save(); },
-  acquire(cid){
-    const c=G.comps.find(x=>x.id===cid); if(!c||c.acquired)return;
-    const cost=Math.round(c.cap*1.3);
-    showModal('<h3>🤝 M&Aの確認</h3><div class="card"><b>'+c.e+' '+c.name+'</b>を'+
-      fmtBig(cost)+'で買収しますか?<br><span class="muted">'+c.desc+'<br>同社の全店舗があなたのチェーンになります。</span></div>'+
-      '<div class="btnrow"><button class="btn" onclick="act.doAcquire(\''+cid+'\')">買収する</button>'+
-      '<button class="btn sub" onclick="closeModal()">やめる</button></div>'); },
-  doAcquire(cid){
-    const c=G.comps.find(x=>x.id===cid); if(!c||c.acquired)return;
-    const cost=Math.round(c.cap*1.3);
-    if(!tryPay(cost)){closeModal();return;}
-    for(const d of DISTRICTS){
-      const n=c.stores[d.id]||0;
-      for(let i=0;i<n;i++){
-        G.stores.push({id:'s'+(G.seq++), districtId:d.id,
-          name:(G.stores.length+1)+'号店 ('+d.name+'・旧'+c.name+')',
-          staff:2, skill:30, manager:false, equip:2, interior:2, rep:3.2,
-          todayVisitors:0, todayRev:0, todaySat:3, todayLost:0});
-      }
-    }
-    c.stores={}; c.acquired=true;
-    news('🤝 <b>'+c.name+'を買収!</b> 全店舗がコーヒー帝国の傘下に入りました!');
-    toast('🤝 '+c.e+' '+c.name+'を買収成功!');
-    closeModal(); renderAll(); save(); },
-  venture(vid){
-    const v=VENTURES.find(x=>x.id===vid);
-    if(!v||G.ventures.includes(vid)||!tryPay(v.cost))return;
-    G.ventures.push(vid);
-    news('🏗️ <b>'+v.name+'</b>へ進出しました!');
-    toast(v.e+' '+v.name+'へ進出!');
-    renderAll(); save(); },
-  buyProp(tid){
-    const t=PROPERTIES.find(x=>x.id===tid);
-    if(!t||!tryPay(t.price))return;
-    G.properties.push({id:'pr'+(G.seq++), type:tid, boughtPrice:t.price, curPrice:t.price, rent:t.rent});
-    news('🏠 <b>'+t.name+'</b>を購入しました (家賃'+yen(t.rent)+'/日)');
-    toast(t.e+' '+t.name+'を購入!');
-    renderAll(); save(); },
-  sellProp(pid){
-    const i=G.properties.findIndex(x=>x.id===pid); if(i<0)return;
-    const pp=G.properties[i], t=PROPERTIES.find(x=>x.id===pp.type);
-    const proceeds=Math.round(pp.curPrice*0.97);
-    G.properties.splice(i,1); G.cash+=proceeds;
-    news('🏠 '+t.name+'を'+fmtBig(proceeds)+'で売却しました');
-    renderAll(); save(); },
-  salary(i){
-    G.salaryIdx=i;
-    toast('💼 役員報酬: '+SALARIES[i].name);
-    renderCeo(); save(); },
-  buyLux(id){
-    const l=LUXURY.find(x=>x.id===id);
-    if(!l||G.luxOwned.includes(id))return;
-    if(G.personalCash<l.cost){toast('💸 個人資産が足りません');return;}
-    G.personalCash-=l.cost; G.luxOwned.push(id);
-    G.awareness=Math.min(100,G.awareness+l.aw);
-    news('🛍️ 社長が<b>'+l.name+'</b>を購入!世間の注目を集めています (認知度+'+l.aw+')');
-    toast(l.e+' '+l.name+'を購入!');
-    renderAll(); save(); },
-  reset(force){
-    if(force===true){ doReset(); return; }
-    showModal('<h3>⚠️ 新規ゲーム</h3><div class="card">現在のセーブデータを消して最初からやり直しますか?</div>'+
-    '<div class="btnrow"><button class="btn danger" onclick="act.reset(true)">最初から</button>'+
-    '<button class="btn sub" onclick="closeModal()">やめる</button></div>');
-  },
-};
-window.act=act; window.openStore=openStore; window.closeStore=closeStore; window.closeModal=closeModal;
-function doReset(){
-  localStorage.removeItem(SAVE_KEY);
-  G=newGame(); closeModal(); renderAll(); showTutorial();
 }
 
 /* =====================  LOOP  ===================== */
@@ -1146,10 +1728,8 @@ let timer=null;
 function setSpeed(sp){
   if(G.over)return;
   G.speed=sp; renderHeader();
-  if(timer){clearInterval(timer);timer=null;}
-  if(sp>0){
-    timer=setInterval(()=>{ simDay(); renderAll(); }, sp===1?1800:600);
-  }
+  if(timer){ clearInterval(timer); timer=null; }
+  if(sp>0) timer=setInterval(()=>{ simDay(); renderAll(); }, sp===1?1800:600);
 }
 window.setSpeed=setSpeed;
 $('sp-pause').onclick=()=>setSpeed(0);
@@ -1157,25 +1737,20 @@ $('sp-1').onclick=()=>setSpeed(1);
 $('sp-3').onclick=()=>setSpeed(3);
 $('btn-newstore').onclick=showNewStore;
 $('btn-reset').onclick=()=>act.reset();
-$('btn-borrow').onclick=()=>{ if(G.loan+LOAN_STEP<=LOAN_LIMIT){G.loan+=LOAN_STEP;G.cash+=LOAN_STEP;
-  news('🏦 '+yen(LOAN_STEP)+'を借入'); renderAll(); save();} };
-$('btn-repay').onclick=()=>{ if(G.loan>0&&G.cash>=LOAN_STEP){G.loan-=LOAN_STEP;G.cash-=LOAN_STEP;
-  news('🏦 '+yen(LOAN_STEP)+'を返済'); renderAll(); save();} };
 document.querySelectorAll('.tab').forEach(t=>{
   t.onclick=()=>{
     document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));
     document.querySelectorAll('.page').forEach(x=>x.classList.remove('show'));
-    t.classList.add('on');
-    $('pg-'+t.dataset.pg).classList.add('show');
-    renderAll();
+    t.classList.add('on'); $('pg-'+t.dataset.pg).classList.add('show');
+    $('main').scrollTop=0; renderAll();
   };
 });
 window.addEventListener('beforeunload',save);
 
 /* =====================  BOOT  ===================== */
 const loaded=load();
-if(loaded){ G=migrate(loaded); G.speed=0; renderAll();
-  if(G.over)gameOver(); else toast('💾 セーブデータを読み込みました');
+if(loaded){ G=loaded; G.speed=0; renderAll();
+  if(G.over) gameOver('前回のゲームは終了しています。'); else toast('💾 セーブデータを読み込みました');
 }else{ G=newGame(); renderAll(); showTutorial(); }
 </script>
 </body>
