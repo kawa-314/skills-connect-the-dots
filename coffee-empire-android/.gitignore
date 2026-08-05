@@ -1,3 +1,4 @@
 build-tmp/
 tools/
 app/classes.dex
+app/build/
