@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>コーヒー帝国 - Coffee Empire</title>
+<style>
+:root{
+  --bg:#1a120b; --bg2:#241a10; --card:#2d2116; --card2:#3a2b1c;
+  --line:#4a3826; --text:#f3e9dc; --sub:#b9a58c; --accent:#d99a4e;
+  --accent2:#8c5a32; --good:#7fc97f; --bad:#e77c7c; --gold:#ffd27f;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{
+  background:var(--bg); color:var(--text);
+  font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif;
+  font-size:14px; overflow:hidden; user-select:none; -webkit-user-select:none;
+  padding-top:env(safe-area-inset-top);
+}
+#app{display:flex;flex-direction:column;height:100vh}
+/* ---------- header ---------- */
+#header{
+  background:linear-gradient(180deg,#33240f,#2a1d10);
+  border-bottom:1px solid var(--line); padding:8px 10px 6px;
+  flex:0 0 auto;
+}
+#hrow1{display:flex;justify-content:space-between;align-items:center;gap:8px}
+#day-label{font-weight:700;color:var(--gold);font-size:13px;white-space:nowrap}
+#weather{font-size:13px;color:var(--sub)}
+#cash{font-size:19px;font-weight:800;letter-spacing:.5px}
+#cash.neg{color:var(--bad)}
+#hrow2{display:flex;justify-content:space-between;align-items:center;margin-top:4px;gap:6px}
+#kpis{display:flex;gap:10px;font-size:11px;color:var(--sub);flex-wrap:wrap}
+#kpis b{color:var(--text)}
+#speed{display:flex;gap:5px}
+.spd{
+  background:var(--card2);border:1px solid var(--line);color:var(--text);
+  border-radius:8px;padding:4px 10px;font-size:13px;line-height:1;
+}
+.spd.on{background:var(--accent);color:#241505;border-color:var(--accent);font-weight:700}
+/* ---------- main ---------- */
+#main{flex:1 1 auto;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:10px 10px 20px}
+.page{display:none}
+.page.show{display:block}
+h2{font-size:15px;color:var(--gold);margin:14px 0 8px;display:flex;align-items:center;gap:6px}
+h2:first-child{margin-top:2px}
+.card{
+  background:var(--card);border:1px solid var(--line);border-radius:12px;
+  padding:10px 12px;margin-bottom:10px;
+}
+.muted{color:var(--sub);font-size:12px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px 10px}
+.kpi .v{font-size:17px;font-weight:800;margin-top:2px}
+.kpi .v.good{color:var(--good)} .kpi .v.bad{color:var(--bad)}
+button.btn{
+  background:var(--accent);color:#241505;border:0;border-radius:9px;
+  padding:8px 12px;font-size:13px;font-weight:700;
+}
+button.btn.sub{background:var(--card2);color:var(--text);border:1px solid var(--line);font-weight:600}
+button.btn.danger{background:#6e3030;color:#ffd9d9}
+button.btn:disabled{opacity:.38}
+button.mini{
+  background:var(--card2);border:1px solid var(--line);color:var(--text);
+  border-radius:8px;padding:5px 9px;font-size:12px;
+}
+.tag{display:inline-block;background:var(--card2);border:1px solid var(--line);
+  border-radius:6px;padding:1px 6px;font-size:11px;color:var(--sub);margin-right:4px}
+.bar{height:6px;background:#191007;border-radius:3px;overflow:hidden;margin-top:4px}
+.bar>i{display:block;height:100%;background:var(--accent)}
+/* log */
+#log{max-height:180px;overflow-y:auto;font-size:12px}
+#log div{padding:3px 0;border-bottom:1px dashed #3a2b1c;color:var(--sub)}
+#log div b{color:var(--text)}
+canvas{width:100%;height:110px;display:block}
+/* store card */
+.store-head{display:flex;justify-content:space-between;align-items:baseline}
+.store-head .nm{font-weight:800;font-size:15px}
+.stat-line{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:12px;color:var(--sub);margin:6px 0}
+.stat-line b{color:var(--text)}
+.btnrow{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+/* menu items */
+.prod{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px dashed var(--line)}
+.prod:last-child{border-bottom:0}
+.prod .info{flex:1 1 auto;min-width:0}
+.prod .nm{font-weight:700;font-size:13px}
+.prod .sub{font-size:11px;color:var(--sub)}
+.stepper{display:flex;align-items:center;gap:4px}
+.stepper button{width:30px;height:30px;border-radius:8px;border:1px solid var(--line);
+  background:var(--card2);color:var(--text);font-size:16px;font-weight:700}
+.stepper .pv{width:56px;text-align:center;font-weight:700;font-size:13px}
+.toggle{width:42px;height:24px;border-radius:12px;background:#191007;border:1px solid var(--line);position:relative}
+.toggle i{position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:#6b573f;transition:.15s}
+.toggle.on{background:var(--accent2)} .toggle.on i{left:20px;background:var(--gold)}
+/* tabs */
+#tabs{
+  flex:0 0 auto;display:flex;background:#241a10;border-top:1px solid var(--line);
+  padding-bottom:env(safe-area-inset-bottom);
+}
+.tab{flex:1;text-align:center;padding:8px 0 9px;font-size:10.5px;color:var(--sub)}
+.tab .ic{font-size:19px;display:block;margin-bottom:1px}
+.tab.on{color:var(--gold);background:linear-gradient(180deg,#33240f,transparent)}
+/* modal */
+#modal-wrap{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;
+  align-items:flex-end;justify-content:center;z-index:50}
+#modal-wrap.show{display:flex}
+#modal{background:var(--bg2);border:1px solid var(--line);border-radius:16px 16px 0 0;
+  width:100%;max-width:560px;max-height:82vh;overflow-y:auto;padding:16px 14px 26px}
+#modal h3{color:var(--gold);font-size:16px;margin-bottom:10px}
+/* toast */
+#toasts{position:fixed;top:calc(env(safe-area-inset-top) + 64px);left:0;right:0;
+  display:flex;flex-direction:column;align-items:center;gap:6px;z-index:60;pointer-events:none}
+.toast{background:rgba(20,12,5,.92);border:1px solid var(--accent2);color:var(--text);
+  border-radius:10px;padding:8px 14px;font-size:12.5px;max-width:88%;
+  animation:tin .2s ease-out}
+@keyframes tin{from{transform:translateY(-8px);opacity:0}to{transform:none;opacity:1}}
+.star{color:var(--gold)}
+.small-note{font-size:11px;color:var(--sub);margin-top:6px}
+.milestone{display:flex;gap:8px;align-items:center;padding:5px 0;font-size:12.5px}
+.milestone.done{color:var(--sub);text-decoration:line-through}
+.milestone .mk{width:18px}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="header">
+    <div id="hrow1">
+      <span id="day-label">1日目 (月)</span>
+      <span id="weather">☀️ 晴れ</span>
+      <span id="cash">¥5,000,000</span>
+    </div>
+    <div id="hrow2">
+      <div id="kpis">
+        <span>評判 <b id="k-rep">★3.0</b></span>
+        <span>認知度 <b id="k-aw">5</b></span>
+        <span>店舗 <b id="k-st">0</b></span>
+        <span>本日利益 <b id="k-pf">¥0</b></span>
+      </div>
+      <div id="speed">
+        <button class="spd" id="sp-pause">⏸</button>
+        <button class="spd" id="sp-1">▶</button>
+        <button class="spd" id="sp-3">⏩</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="main">
+    <!-- ============ HOME ============ -->
+    <div class="page show" id="pg-home">
+      <div class="grid2">
+        <div class="kpi"><div class="muted">本日の来客</div><div class="v" id="h-visitors">0人</div></div>
+        <div class="kpi"><div class="muted">本日の売上</div><div class="v" id="h-rev">¥0</div></div>
+        <div class="kpi"><div class="muted">本日の利益</div><div class="v" id="h-profit">¥0</div></div>
+        <div class="kpi"><div class="muted">機会損失(行列)</div><div class="v" id="h-lost">0人</div></div>
+      </div>
+      <h2>📈 利益の推移(30日)</h2>
+      <div class="card"><canvas id="chart" height="110"></canvas></div>
+      <h2>🏆 マイルストーン</h2>
+      <div class="card" id="milestones"></div>
+      <h2>📰 ニュース</h2>
+      <div class="card"><div id="log"></div></div>
+      <div class="card row">
+        <span class="muted">データは自動保存されます</span>
+        <button class="btn danger" id="btn-reset">新規ゲーム</button>
+      </div>
+    </div>
+
+    <!-- ============ STORES ============ -->
+    <div class="page" id="pg-stores">
+      <div class="card row">
+        <div><b>店舗一覧</b><div class="muted">出店して帝国を拡大しよう</div></div>
+        <button class="btn" id="btn-newstore">＋ 新規出店</button>
+      </div>
+      <div id="store-list"></div>
+    </div>
+
+    <!-- ============ MENU ============ -->
+    <div class="page" id="pg-menu">
+      <h2>☕ ドリンクメニュー</h2>
+      <div class="card" id="menu-drinks"></div>
+      <h2>🥐 フードメニュー</h2>
+      <div class="card" id="menu-foods"></div>
+      <h2>🔬 商品開発 (R&D)</h2>
+      <div class="card" id="menu-rnd"></div>
+      <h2>🌱 コーヒー豆の仕入れ</h2>
+      <div class="card" id="beans"></div>
+    </div>
+
+    <!-- ============ MARKETING ============ -->
+    <div class="page" id="pg-mkt">
+      <div class="card">
+        <div class="row"><b>ブランド認知度</b><b id="m-aw" class="star">5</b></div>
+        <div class="bar"><i id="m-awbar" style="width:5%"></i></div>
+        <div class="small-note">認知度が高いほど、全店舗の集客が増えます。毎日少しずつ低下します。</div>
+      </div>
+      <h2>📣 キャンペーン</h2>
+      <div id="campaigns"></div>
+      <h2>🏢 競合チェーン</h2>
+      <div class="card" id="competitors"></div>
+    </div>
+
+    <!-- ============ FINANCE ============ -->
+    <div class="page" id="pg-fin">
+      <div class="grid2">
+        <div class="kpi"><div class="muted">現金</div><div class="v" id="f-cash">¥0</div></div>
+        <div class="kpi"><div class="muted">借入残高</div><div class="v" id="f-loan">¥0</div></div>
+        <div class="kpi"><div class="muted">累計売上</div><div class="v" id="f-trev">¥0</div></div>
+        <div class="kpi"><div class="muted">累計利益</div><div class="v" id="f-tpf">¥0</div></div>
+      </div>
+      <h2>💰 本日の収支内訳</h2>
+      <div class="card" id="pl"></div>
+      <h2>🏦 銀行 (借入限度 ¥10,000,000 / 日利0.05%)</h2>
+      <div class="card">
+        <div class="btnrow">
+          <button class="btn" id="btn-borrow">¥500,000 借りる</button>
+          <button class="btn sub" id="btn-repay">¥500,000 返す</button>
+        </div>
+        <div class="small-note">現金がマイナスのまま7日経つと倒産します。</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="tabs">
+    <div class="tab on" data-pg="home"><span class="ic">🏠</span>ホーム</div>
+    <div class="tab" data-pg="stores"><span class="ic">🏬</span>店舗</div>
+    <div class="tab" data-pg="menu"><span class="ic">☕</span>メニュー</div>
+    <div class="tab" data-pg="mkt"><span class="ic">📣</span>マーケ</div>
+    <div class="tab" data-pg="fin"><span class="ic">💰</span>財務</div>
+  </div>
+</div>
+
+<div id="modal-wrap"><div id="modal"></div></div>
+<div id="toasts"></div>
+
+<script>
+'use strict';
+/* =====================  DATA  ===================== */
+const DISTRICTS=[
+ {id:'ekimae', name:'駅前',       traffic:520, rent:9000, tol:1.10, wd:1.0,  we:1.15, desc:'人通り最大。家賃も最高クラス。'},
+ {id:'office', name:'オフィス街', traffic:430, rent:7000, tol:1.25, wd:1.25, we:0.50, desc:'平日に強く客単価が高い。'},
+ {id:'shoten', name:'商店街',     traffic:330, rent:4800, tol:1.00, wd:1.0,  we:1.20, desc:'バランス型。常連がつきやすい。'},
+ {id:'campus', name:'大学前',     traffic:310, rent:3600, tol:0.80, wd:1.1,  we:0.65, desc:'学生街。価格に敏感。'},
+ {id:'suburb', name:'住宅街',     traffic:220, rent:2600, tol:0.95, wd:0.9,  we:1.35, desc:'家賃が安く週末に強い。'},
+ {id:'mall',   name:'郊外モール', traffic:400, rent:5600, tol:1.05, wd:0.75, we:1.60, desc:'週末の集客力は圧倒的。'},
+];
+const PRODUCTS=[
+ {id:'drip',     name:'ドリップコーヒー', e:'☕', cost:35,  fair:320, appeal:10, cat:'drink', bean:true,  temp:'hot',  rnd:0},
+ {id:'latte',    name:'カフェラテ',       e:'🥛', cost:55,  fair:420, appeal:12, cat:'drink', bean:true,  temp:'hot',  rnd:0},
+ {id:'ice',      name:'アイスコーヒー',   e:'🧊', cost:38,  fair:350, appeal:9,  cat:'drink', bean:true,  temp:'cold', rnd:0},
+ {id:'tea',      name:'紅茶',             e:'🫖', cost:30,  fair:340, appeal:6,  cat:'drink', bean:false, temp:'hot',  rnd:150000},
+ {id:'espresso', name:'エスプレッソ',     e:'🤎', cost:30,  fair:300, appeal:6,  cat:'drink', bean:true,  temp:'hot',  rnd:200000},
+ {id:'cappu',    name:'カプチーノ',       e:'🌫️', cost:55,  fair:450, appeal:10, cat:'drink', bean:true,  temp:'hot',  rnd:280000},
+ {id:'mocha',    name:'カフェモカ',       e:'🍫', cost:70,  fair:490, appeal:12, cat:'drink', bean:true,  temp:'hot',  rnd:380000},
+ {id:'matcha',   name:'抹茶ラテ',         e:'🍵', cost:75,  fair:520, appeal:13, cat:'drink', bean:false, temp:'hot',  rnd:480000},
+ {id:'frozen',   name:'フローズンラテ',   e:'🥤', cost:85,  fair:580, appeal:15, cat:'drink', bean:true,  temp:'cold', rnd:600000},
+ {id:'cookie',   name:'クッキー',         e:'🍪', cost:35,  fair:200, appeal:6,  cat:'food',  bean:false, temp:'',     rnd:120000},
+ {id:'croissant',name:'クロワッサン',     e:'🥐', cost:60,  fair:280, appeal:8,  cat:'food',  bean:false, temp:'',     rnd:220000},
+ {id:'sand',     name:'サンドイッチ',     e:'🥪', cost:120, fair:480, appeal:10, cat:'food',  bean:false, temp:'',     rnd:350000},
+ {id:'cake',     name:'チーズケーキ',     e:'🍰', cost:110, fair:520, appeal:12, cat:'food',  bean:false, temp:'',     rnd:450000},
+];
+const BEANS=[
+ {id:'robusta',  name:'ロブスタ豆',            q:1, mult:0.70, desc:'安いが味は値段なり。満足度に注意。'},
+ {id:'brazil',   name:'ブラジル ブレンド',     q:2, mult:1.00, desc:'定番のバランス型。'},
+ {id:'colombia', name:'コロンビア シングル',   q:3, mult:1.55, desc:'香り高く満足度アップ。'},
+ {id:'geisha',   name:'スペシャルティ ゲイシャ', q:4, mult:2.60, desc:'最高級。ブランド価値を押し上げる。'},
+];
+const CAMPAIGNS=[
+ {id:'flyer', name:'チラシ配布',           e:'📄', cost:60000,   days:5,  power:4,  desc:'ご近所に地道にアピール。'},
+ {id:'sns',   name:'SNSキャンペーン',      e:'📱', cost:150000,  days:7,  power:9,  desc:'話題化を狙う定番施策。'},
+ {id:'infl',  name:'インフルエンサー起用', e:'⭐', cost:450000,  days:10, power:18, desc:'一気に拡散を狙う。'},
+ {id:'tv',    name:'TV CM',               e:'📺', cost:1500000, days:14, power:38, desc:'全国区の知名度へ。'},
+];
+const COMPETITORS=[
+ {id:'stella', name:'ステラコーヒー', e:'🌟', power:60, stores:{ekimae:2, office:1, mall:1}},
+ {id:'dripgo', name:'ドリップ&ゴー',  e:'🚶', power:38, stores:{office:1, shoten:1, campus:1}},
+];
+const WEATHERS=[
+ {id:'sun',  e:'☀️', name:'晴れ',   w:46, traffic:1.0,  hot:1.0, cold:1.0},
+ {id:'cloud',e:'☁️', name:'くもり', w:24, traffic:0.95, hot:1.05,cold:0.95},
+ {id:'rain', e:'🌧️', name:'雨',     w:16, traffic:0.72, hot:1.15,cold:0.85},
+ {id:'heat', e:'🥵', name:'猛暑',   w:7,  traffic:0.92, hot:0.75,cold:1.65},
+ {id:'snow', e:'❄️', name:'寒波',   w:7,  traffic:0.80, hot:1.45,cold:0.55},
+];
+const WD=['月','火','水','木','金','土','日'];
+const WAGE_BARISTA=9000, WAGE_MANAGER=15000;
+const LOAN_LIMIT=10000000, LOAN_STEP=500000, LOAN_RATE=0.0005;
+const MILESTONES=[
+ {id:'m1', name:'1号店をオープンする',              reward:100000,  chk:g=>g.stores.length>=1},
+ {id:'m2', name:'累計来客 1,000人を達成',           reward:150000,  chk:g=>g.totalVisitors>=1000},
+ {id:'m3', name:'1日の利益 ¥100,000 を達成',        reward:200000,  chk:g=>g.bestDayProfit>=100000},
+ {id:'m4', name:'商品を8種類ラインナップする',      reward:250000,  chk:g=>g.unlocked.length>=8},
+ {id:'m5', name:'店舗を3店舗に拡大',                reward:400000,  chk:g=>g.stores.length>=3},
+ {id:'m6', name:'ブランド認知度 50 を達成',         reward:500000,  chk:g=>g.awareness>=50},
+ {id:'m7', name:'評判 ★4.5 を達成',                 reward:600000,  chk:g=>g.reputation>=4.5},
+ {id:'m8', name:'店舗を6店舗に拡大',                reward:1000000, chk:g=>g.stores.length>=6},
+ {id:'m9', name:'累計利益 ¥10,000,000 を達成',      reward:1500000, chk:g=>g.totalProfit>=10000000},
+ {id:'m10',name:'10店舗達成!コーヒー帝国の完成!', reward:3000000, chk:g=>g.stores.length>=10},
+];
+
+/* =====================  STATE  ===================== */
+let G=null;
+const SAVE_KEY='coffee_empire_save_v1';
+function newGame(){
+  return {
+    day:1, cash:5000000, loan:0, negDays:0,
+    awareness:10, reputation:3.0,
+    beanId:'brazil',
+    unlocked:['drip','latte','ice'],
+    enabled:['drip','latte','ice'],
+    prices:{},                       // id -> price (default fair)
+    stores:[],                       // see openStore
+    campaigns:[],                    // {id, daysLeft, perDay}
+    comps:JSON.parse(JSON.stringify(COMPETITORS)),
+    weather:WEATHERS[0].id,
+    hist:[],                         // last 30 {profit}
+    log:[],
+    milestonesDone:[],
+    today:{rev:0,cogs:0,wage:0,rent:0,mkt:0,interest:0,visitors:0,lost:0,profit:0},
+    totalVisitors:0, totalRev:0, totalProfit:0, bestDayProfit:0,
+    speed:0, cleared:false, over:false, seq:1,
+  };
+}
+function save(){ try{ localStorage.setItem(SAVE_KEY, JSON.stringify(G)); }catch(e){} }
+window.onAppPause=function(){ save(); };
+function load(){
+  try{
+    const s=localStorage.getItem(SAVE_KEY);
+    if(s){ const g=JSON.parse(s); if(g && g.day) return g; }
+  }catch(e){}
+  return null;
+}
+
+/* =====================  HELPERS  ===================== */
+const $=id=>document.getElementById(id);
+const yen=n=>'¥'+Math.round(n).toLocaleString('ja-JP');
+function price(pid){ const p=PRODUCTS.find(x=>x.id===pid); return (G.prices[pid]!=null)?G.prices[pid]:p.fair; }
+function bean(){ return BEANS.find(b=>b.id===G.beanId); }
+function weather(){ return WEATHERS.find(w=>w.id===G.weather); }
+function isWeekend(){ const d=(G.day-1)%7; return d>=5; }
+function toast(msg){
+  const box=$('toasts');
+  while(box.children.length>=3) box.removeChild(box.firstChild);
+  const t=document.createElement('div'); t.className='toast'; t.innerHTML=msg;
+  box.appendChild(t);
+  setTimeout(()=>{ t.style.opacity='0'; t.style.transition='opacity .4s'; setTimeout(()=>t.remove(),400); },2600);
+}
+function news(msg){
+  G.log.unshift('<b>'+G.day+'日目</b> '+msg);
+  if(G.log.length>60)G.log.length=60;
+}
+function districtOf(st){ return DISTRICTS.find(d=>d.id===st.districtId); }
+function storeOpenCost(d){ return 1200000 + d.rent*90; }
+function compAttractIn(did){
+  let a=0;
+  for(const c of G.comps){ a += (c.stores[did]||0) * c.power; }
+  return a;
+}
+function storeAttract(st){
+  return 40 + st.equip*15 + st.interior*10 + st.skill*0.5 + st.rep*10 + (st.manager?15:0);
+}
+
+/* =====================  SIMULATION  ===================== */
+function menuStats(){
+  // returns {avgPrice, avgCost, appealSum, gouge} over enabled drinks & foods
+  const b=bean(), w=weather();
+  let dw=0,dp=0,dc=0,dApp=0,gouge=0,cnt=0;
+  let fw=0,fp=0,fc=0,fApp=0;
+  for(const id of G.enabled){
+    const p=PRODUCTS.find(x=>x.id===id); if(!p)continue;
+    const pr=price(id);
+    const cost=p.bean? p.cost*b.mult : p.cost;
+    let ap=p.appeal;
+    if(p.cat==='drink'){
+      if(p.temp==='hot') ap*=w.hot; else if(p.temp==='cold') ap*=w.cold;
+      if(p.bean) ap*=(0.8+b.q*0.1);
+    }
+    const ratio=pr/p.fair;
+    ap*=Math.max(0.15, Math.pow(1/Math.max(ratio,0.5), 1.6));  // 高すぎると選ばれにくい
+    if(ratio>1.25){ gouge+=Math.min(0.5,(ratio-1.25)); cnt++; }
+    if(p.cat==='drink'){ dw+=ap; dp+=ap*pr; dc+=ap*cost; dApp+=p.appeal; }
+    else               { fw+=ap; fp+=ap*pr; fc+=ap*cost; fApp+=p.appeal; }
+  }
+  const hasDrink=dw>0, hasFood=fw>0;
+  const foodAttach=hasFood? Math.min(0.45, 0.15+fApp*0.02) : 0;
+  return {
+    avgPrice:(hasDrink? dp/dw:0) + foodAttach*(hasFood? fp/fw:0),
+    avgCost:(hasDrink? dc/dw:0) + foodAttach*(hasFood? fc/fw:0),
+    variety:Math.min(1.25, 0.85 + G.enabled.length*0.035),
+    gouge:cnt? gouge/cnt:0,
+    hasDrink,
+  };
+}
+function simDay(){
+  const w=WEATHERS[weightedPick(WEATHERS.map(x=>x.w))];
+  G.weather=w.id;
+  const menu=menuStats();
+  const b=bean();
+  const t={rev:0,cogs:0,wage:0,rent:0,mkt:0,interest:0,visitors:0,lost:0,profit:0};
+
+  for(const st of G.stores){
+    const d=districtOf(st);
+    const dayMult=isWeekend()? d.we : d.wd;
+    const awMult=0.55 + (G.awareness/100)*0.95;
+    const share=storeAttract(st) / (storeAttract(st)+compAttractIn(d.id)+30);
+    let pot=d.traffic * dayMult * w.traffic * awMult * share * menu.variety * (0.9+Math.random()*0.2);
+    if(!menu.hasDrink) pot*=0.15;
+    const capacity=st.staff*(42+st.skill*0.6)*(1+(st.equip-1)*0.15)*(st.manager?1.15:1);
+    const served=Math.round(Math.min(pot,capacity));
+    const lost=Math.max(0,Math.round(pot-served));
+    // 価格許容度: 地区の tol を平均価格に反映
+    const tolPenalty=Math.max(0, (menu.avgPrice/(420*d.tol))-1)*0.6;
+    const rev=served*menu.avgPrice*(1-Math.min(0.35,tolPenalty*0.3));
+    const cogs=served*menu.avgCost;
+    // 満足度
+    let sat=1.8 + b.q*0.45 + st.skill/100*1.0 + st.interior*0.12 + st.equip*0.08 + (st.manager?0.12:0);
+    sat -= (lost>0? Math.min(0.9,(lost/Math.max(pot,1))*1.2):0);
+    sat -= menu.gouge*1.1;
+    sat -= tolPenalty*0.8;
+    sat=Math.max(1,Math.min(5,sat));
+    st.rep=st.rep*0.9+sat*0.1;
+    st.todayVisitors=served; st.todayRev=rev; st.todaySat=sat; st.todayLost=lost;
+    t.visitors+=served; t.lost+=lost; t.rev+=rev; t.cogs+=cogs;
+    t.wage+=st.staff*WAGE_BARISTA + (st.manager?WAGE_MANAGER:0);
+    t.rent+=d.rent;
+  }
+  // marketing campaigns
+  for(const c of G.campaigns){ G.awareness=Math.min(100,G.awareness+c.perDay); c.daysLeft--; }
+  G.campaigns=G.campaigns.filter(c=>c.daysLeft>0);
+  G.awareness=Math.max(10,G.awareness-0.3);  // 常連ベースとして10は維持される
+  // interest
+  t.interest=G.loan*LOAN_RATE;
+  t.profit=t.rev-t.cogs-t.wage-t.rent-t.interest;
+  G.cash+=t.profit;
+  G.today=t;
+  G.totalVisitors+=t.visitors; G.totalRev+=t.rev; G.totalProfit+=t.profit;
+  if(t.profit>G.bestDayProfit)G.bestDayProfit=t.profit;
+  // reputation = 店舗平均
+  if(G.stores.length){
+    G.reputation=G.stores.reduce((s,x)=>s+x.rep,0)/G.stores.length;
+  }
+  G.hist.push({p:Math.round(t.profit)});
+  if(G.hist.length>30)G.hist.shift();
+  // events
+  randomEvent();
+  compExpand();
+  checkMilestones();
+  // bankruptcy
+  if(G.cash<0){ G.negDays++;
+    if(G.negDays===1) news('⚠️ 現金がマイナスです!7日以内に立て直さないと倒産します。');
+    if(G.negDays>=7){ gameOver(); return; }
+  } else G.negDays=0;
+  G.day++;
+  save();
+}
+function weightedPick(ws){
+  let sum=ws.reduce((a,b)=>a+b,0), r=Math.random()*sum;
+  for(let i=0;i<ws.length;i++){ r-=ws[i]; if(r<=0)return i; }
+  return ws.length-1;
+}
+function randomEvent(){
+  const r=Math.random();
+  if(r<0.03 && G.stores.length){
+    const st=G.stores[Math.floor(Math.random()*G.stores.length)];
+    const dmg=50000+Math.floor(Math.random()*100000);
+    G.cash-=dmg;
+    news('🔧 <b>'+st.name+'</b>のエスプレッソマシンが故障!修理費 '+yen(dmg));
+    toast('🔧 '+st.name+'のマシンが故障… '+yen(dmg));
+  } else if(r<0.05 && G.awareness<95){
+    G.awareness=Math.min(100,G.awareness+5);
+    news('📰 地元メディアに紹介されました!認知度+5');
+    toast('📰 メディア掲載!認知度アップ');
+  } else if(r<0.07 && G.stores.length){
+    const bonus=30000+Math.floor(Math.random()*70000);
+    G.cash+=bonus;
+    news('🎉 大口のケータリング注文が入りました! '+yen(bonus));
+    toast('🎉 ケータリング注文 +'+yen(bonus));
+  }
+}
+function compExpand(){
+  if(G.day%30!==0) return;
+  if(Math.random()<0.7){
+    const c=G.comps[Math.floor(Math.random()*G.comps.length)];
+    const d=DISTRICTS[Math.floor(Math.random()*DISTRICTS.length)];
+    c.stores[d.id]=(c.stores[d.id]||0)+1;
+    news('🏢 競合の<b>'+c.name+'</b>が'+d.name+'に新店舗をオープン!');
+    toast('🏢 '+c.name+'が'+d.name+'に出店…');
+  }
+}
+function checkMilestones(){
+  for(const m of MILESTONES){
+    if(G.milestonesDone.includes(m.id)) continue;
+    if(m.chk(G)){
+      G.milestonesDone.push(m.id);
+      G.cash+=m.reward;
+      news('🏆 マイルストーン達成:<b>'+m.name+'</b> 報酬 '+yen(m.reward));
+      toast('🏆 '+m.name+'達成! +'+yen(m.reward));
+      if(m.id==='m10' && !G.cleared){ G.cleared=true; showClear(); }
+    }
+  }
+}
+
+/* =====================  ACTIONS  ===================== */
+function openStore(did){
+  const d=DISTRICTS.find(x=>x.id===did);
+  const cost=storeOpenCost(d);
+  if(G.cash<cost){ toast('💸 現金が足りません('+yen(cost)+'必要)'); return; }
+  G.cash-=cost;
+  const st={
+    id:'s'+(G.seq++), districtId:did, name:G.stores.length+1+'号店 ('+d.name+')',
+    staff:2, skill:25, manager:false, equip:1, interior:1, rep:3.0,
+    todayVisitors:0, todayRev:0, todaySat:3, todayLost:0,
+  };
+  G.stores.push(st);
+  news('🎊 <b>'+st.name+'</b>をオープンしました!');
+  toast('🎊 '+st.name+'オープン!');
+  closeModal(); renderAll(); save();
+}
+function closeStore(sid){
+  const st=G.stores.find(x=>x.id===sid); if(!st)return;
+  G.stores=G.stores.filter(x=>x.id!==sid);
+  news('🚪 '+st.name+'を閉店しました。');
+  closeModal(); renderAll(); save();
+}
+function tryPay(cost){
+  if(G.cash<cost){ toast('💸 現金が足りません('+yen(cost)+'必要)'); return false; }
+  G.cash-=cost; return true;
+}
+function unlockProduct(pid){
+  const p=PRODUCTS.find(x=>x.id===pid);
+  if(!tryPay(p.rnd)) return;
+  G.unlocked.push(pid); G.enabled.push(pid);
+  news('🔬 新商品<b>'+p.name+'</b>を開発しました!');
+  toast('🔬 '+p.e+' '+p.name+'を開発!');
+  renderAll(); save();
+}
+
+/* =====================  UI: RENDER  ===================== */
+function renderHeader(){
+  const d=(G.day-1)%7;
+  $('day-label').textContent=G.day+'日目 ('+WD[d]+')';
+  const w=weather();
+  $('weather').textContent=w.e+' '+w.name;
+  $('cash').textContent=yen(G.cash);
+  $('cash').className=G.cash<0?'neg':'';
+  $('k-rep').textContent='★'+G.reputation.toFixed(1);
+  $('k-aw').textContent=Math.round(G.awareness);
+  $('k-st').textContent=G.stores.length;
+  const pf=$('k-pf'); pf.textContent=yen(G.today.profit);
+  pf.style.color=G.today.profit>=0?'var(--good)':'var(--bad)';
+  for(const [id,sp] of [['sp-pause',0],['sp-1',1],['sp-3',3]])
+    $(id).classList.toggle('on',G.speed===sp);
+}
+function renderHome(){
+  $('h-visitors').textContent=G.today.visitors.toLocaleString()+'人';
+  $('h-rev').textContent=yen(G.today.rev);
+  const hp=$('h-profit'); hp.textContent=yen(G.today.profit);
+  hp.className='v '+(G.today.profit>=0?'good':'bad');
+  $('h-lost').textContent=G.today.lost.toLocaleString()+'人';
+  $('log').innerHTML=G.log.map(x=>'<div>'+x+'</div>').join('')||'<div>まだニュースはありません。</div>';
+  // milestones
+  $('milestones').innerHTML=MILESTONES.map(m=>{
+    const done=G.milestonesDone.includes(m.id);
+    return '<div class="milestone'+(done?' done':'')+'"><span class="mk">'+(done?'✅':'⬜')+'</span>'+
+      m.name+' <span class="muted">('+yen(m.reward)+')</span></div>';
+  }).join('');
+  drawChart();
+}
+function drawChart(){
+  const cv=$('chart'); const dpr=window.devicePixelRatio||1;
+  const W=cv.clientWidth||300, H=110;
+  cv.width=W*dpr; cv.height=H*dpr;
+  const ctx=cv.getContext('2d'); ctx.scale(dpr,dpr);
+  ctx.clearRect(0,0,W,H);
+  const data=G.hist.map(h=>h.p);
+  if(data.length<2){ ctx.fillStyle='#b9a58c'; ctx.font='12px sans-serif';
+    ctx.fillText('営業データを蓄積中…',10,60); return; }
+  const mx=Math.max(...data,1), mn=Math.min(...data,0);
+  const y=v=>H-8-((v-mn)/(mx-mn||1))*(H-20);
+  const x=i=>8+i*(W-16)/(data.length-1);
+  // zero line
+  ctx.strokeStyle='#4a3826'; ctx.setLineDash([3,3]);
+  ctx.beginPath(); ctx.moveTo(0,y(0)); ctx.lineTo(W,y(0)); ctx.stroke(); ctx.setLineDash([]);
+  ctx.strokeStyle='#d99a4e'; ctx.lineWidth=2; ctx.beginPath();
+  data.forEach((v,i)=>{ i?ctx.lineTo(x(i),y(v)):ctx.moveTo(x(i),y(v)); });
+  ctx.stroke();
+  ctx.fillStyle='#7fc97f'; ctx.font='10px sans-serif';
+  ctx.fillText('最高 '+yen(mx),8,12);
+  ctx.fillStyle='#e77c7c';
+  ctx.fillText('最低 '+yen(mn),8,H-2);
+}
+function renderStores(){
+  const el=$('store-list');
+  if(!G.stores.length){
+    el.innerHTML='<div class="card muted">まだ店舗がありません。「＋ 新規出店」から1号店を開きましょう!</div>';
+    return;
+  }
+  el.innerHTML=G.stores.map(st=>{
+    const d=districtOf(st);
+    return '<div class="card">'+
+      '<div class="store-head"><span class="nm">🏬 '+st.name+'</span>'+
+      '<span class="star">★'+st.rep.toFixed(1)+'</span></div>'+
+      '<div class="stat-line">'+
+        '<span>本日 <b>'+st.todayVisitors+'人</b> / '+yen(st.todayRev)+'</span>'+
+        (st.todayLost>0?'<span style="color:var(--bad)">行列で'+st.todayLost+'人逃す</span>':'')+
+      '</div>'+
+      '<div class="stat-line">'+
+        '<span>スタッフ <b>'+st.staff+'人</b></span>'+
+        '<span>スキル <b>'+Math.round(st.skill)+'</b></span>'+
+        '<span>設備 Lv<b>'+st.equip+'</b></span>'+
+        '<span>内装 Lv<b>'+st.interior+'</b></span>'+
+        '<span>'+(st.manager?'👔店長あり':'店長なし')+'</span>'+
+      '</div>'+
+      '<div class="stat-line"><span class="muted">家賃 '+yen(d.rent)+'/日・人件費 '+
+        yen(st.staff*WAGE_BARISTA+(st.manager?WAGE_MANAGER:0))+'/日</span></div>'+
+      '<div class="btnrow">'+
+        '<button class="mini" onclick="act.hire(\''+st.id+'\')">➕採用 (日給'+yen(WAGE_BARISTA)+')</button>'+
+        '<button class="mini" onclick="act.fire(\''+st.id+'\')">➖削減</button>'+
+        '<button class="mini" onclick="act.train(\''+st.id+'\')">📚研修 '+yen(80000)+'</button>'+
+        (st.equip<5?'<button class="mini" onclick="act.equip(\''+st.id+'\')">⚙️設備強化 '+yen(st.equip*400000)+'</button>':'')+
+        (st.interior<5?'<button class="mini" onclick="act.interior(\''+st.id+'\')">🛋️内装改装 '+yen(st.interior*300000)+'</button>':'')+
+        (!st.manager?'<button class="mini" onclick="act.manager(\''+st.id+'\')">👔店長雇用 (日給'+yen(WAGE_MANAGER)+')</button>':'')+
+        '<button class="mini" style="color:var(--bad)" onclick="act.close(\''+st.id+'\')">閉店</button>'+
+      '</div></div>';
+  }).join('');
+}
+function renderMenu(){
+  const drinks=[],foods=[];
+  for(const p of PRODUCTS){
+    if(!G.unlocked.includes(p.id))continue;
+    const on=G.enabled.includes(p.id);
+    const pr=price(p.id);
+    const cost=p.bean? p.cost*bean().mult:p.cost;
+    const html='<div class="prod">'+
+      '<div class="toggle'+(on?' on':'')+'" onclick="act.toggle(\''+p.id+'\')"><i></i></div>'+
+      '<div class="info"><div class="nm">'+p.e+' '+p.name+'</div>'+
+      '<div class="sub">原価 '+yen(cost)+' / 適正 '+yen(p.fair)+
+      (pr>p.fair*1.25?' <span style="color:var(--bad)">⚠️高すぎ</span>':'')+'</div></div>'+
+      '<div class="stepper">'+
+        '<button onclick="act.priceDn(\''+p.id+'\')">−</button>'+
+        '<span class="pv">'+yen(pr)+'</span>'+
+        '<button onclick="act.priceUp(\''+p.id+'\')">＋</button>'+
+      '</div></div>';
+    (p.cat==='drink'?drinks:foods).push(html);
+  }
+  $('menu-drinks').innerHTML=drinks.join('')||'<div class="muted">ドリンクがありません</div>';
+  $('menu-foods').innerHTML=foods.join('')||'<div class="muted">開発タブからフードを開発しましょう</div>';
+  // R&D
+  const locked=PRODUCTS.filter(p=>!G.unlocked.includes(p.id));
+  $('menu-rnd').innerHTML=locked.length? locked.map(p=>
+    '<div class="prod"><div class="info"><div class="nm">'+p.e+' '+p.name+'</div>'+
+    '<div class="sub">'+(p.cat==='drink'?'ドリンク':'フード')+' / 適正価格 '+yen(p.fair)+'</div></div>'+
+    '<button class="btn" '+(G.cash<p.rnd?'disabled':'')+' onclick="act.unlock(\''+p.id+'\')">開発 '+yen(p.rnd)+'</button></div>'
+  ).join(''):'<div class="muted">🎉 全商品を開発済みです!</div>';
+  // beans
+  $('beans').innerHTML=BEANS.map(b=>
+    '<div class="prod"><div class="info"><div class="nm">'+(G.beanId===b.id?'✅ ':'')+b.name+
+    ' <span class="star">'+'★'.repeat(b.q)+'</span></div>'+
+    '<div class="sub">'+b.desc+' (原価×'+b.mult.toFixed(2)+')</div></div>'+
+    (G.beanId===b.id?'<span class="tag">使用中</span>':
+      '<button class="btn sub" onclick="act.bean(\''+b.id+'\')">切替</button>')+'</div>'
+  ).join('');
+}
+function renderMkt(){
+  $('m-aw').textContent=Math.round(G.awareness);
+  $('m-awbar').style.width=Math.round(G.awareness)+'%';
+  $('campaigns').innerHTML=CAMPAIGNS.map(c=>{
+    const running=G.campaigns.find(x=>x.id===c.id);
+    return '<div class="card"><div class="row"><div>'+
+      '<b>'+c.e+' '+c.name+'</b><div class="muted">'+c.desc+' ('+c.days+'日間 / 認知度+'+c.power+')</div>'+
+      (running?'<div class="muted" style="color:var(--good)">実施中 残り'+running.daysLeft+'日</div>':'')+
+      '</div>'+
+      '<button class="btn" '+((running||G.cash<c.cost)?'disabled':'')+
+      ' onclick="act.campaign(\''+c.id+'\')">'+yen(c.cost)+'</button></div></div>';
+  }).join('');
+  $('competitors').innerHTML=G.comps.map(c=>{
+    const total=Object.values(c.stores).reduce((a,b)=>a+b,0);
+    const where=DISTRICTS.filter(d=>c.stores[d.id]).map(d=>d.name+'×'+c.stores[d.id]).join('、')||'なし';
+    return '<div class="prod"><div class="info"><div class="nm">'+c.e+' '+c.name+'</div>'+
+      '<div class="sub">'+total+'店舗: '+where+'</div></div></div>';
+  }).join('');
+}
+function renderFin(){
+  $('f-cash').textContent=yen(G.cash);
+  $('f-cash').className='v '+(G.cash>=0?'':'bad');
+  $('f-loan').textContent=yen(G.loan);
+  $('f-trev').textContent=yen(G.totalRev);
+  const tp=$('f-tpf'); tp.textContent=yen(G.totalProfit);
+  tp.className='v '+(G.totalProfit>=0?'good':'bad');
+  const t=G.today;
+  $('pl').innerHTML=
+    plRow('売上',t.rev,'good')+plRow('原価(材料費)',-t.cogs)+plRow('人件費',-t.wage)+
+    plRow('家賃',-t.rent)+plRow('支払利息',-t.interest)+
+    '<div class="row" style="border-top:1px solid var(--line);margin-top:6px;padding-top:6px">'+
+    '<b>営業利益</b><b style="color:'+(t.profit>=0?'var(--good)':'var(--bad)')+'">'+yen(t.profit)+'</b></div>';
+  $('btn-borrow').disabled=G.loan+LOAN_STEP>LOAN_LIMIT;
+  $('btn-repay').disabled=G.loan<=0||G.cash<LOAN_STEP;
+}
+function plRow(n,v,cls){
+  return '<div class="row"><span class="muted">'+n+'</span><span'+
+    (cls?' style="color:var(--'+cls+')"':'')+'>'+yen(v)+'</span></div>';
+}
+function renderAll(){
+  renderHeader(); renderHome(); renderStores(); renderMenu(); renderMkt(); renderFin();
+}
+
+/* =====================  MODALS  ===================== */
+function showModal(html){ $('modal').innerHTML=html; $('modal-wrap').classList.add('show'); }
+function closeModal(){ $('modal-wrap').classList.remove('show'); }
+$('modal-wrap').addEventListener('click',e=>{ if(e.target.id==='modal-wrap')closeModal(); });
+function showNewStore(){
+  showModal('<h3>🏬 新規出店 - 立地を選ぶ</h3>'+DISTRICTS.map(d=>{
+    const cost=storeOpenCost(d);
+    const comp=compAttractIn(d.id);
+    const mine=G.stores.filter(s=>s.districtId===d.id).length;
+    return '<div class="card"><div class="row"><div>'+
+      '<b>'+d.name+'</b> <span class="tag">人通り '+d.traffic+'</span>'+
+      '<span class="tag">競合 '+(comp>80?'激戦':comp>30?'あり':'少ない')+'</span>'+
+      (mine?'<span class="tag">自店'+mine+'</span>':'')+
+      '<div class="muted">'+d.desc+' 家賃 '+yen(d.rent)+'/日</div></div>'+
+      '<button class="btn" '+(G.cash<cost?'disabled':'')+
+      ' onclick="openStore(\''+d.id+'\')">'+yen(cost)+'</button>'+
+      '</div></div>';
+  }).join('')+'<button class="btn sub" style="width:100%" onclick="closeModal()">閉じる</button>');
+}
+function showTutorial(){
+  showModal('<h3>☕ コーヒー帝国へようこそ!</h3>'+
+  '<div class="card">あなたは小さなコーヒーチェーンの社長。資金 <b>¥5,000,000</b> を元手に、'+
+  '街いちばんのコーヒー帝国を築きましょう!</div>'+
+  '<div class="card">🏬 <b>店舗</b>タブから1号店を出店<br>'+
+  '☕ <b>メニュー</b>タブで価格設定・新商品開発・豆の仕入れ<br>'+
+  '📣 <b>マーケ</b>タブでキャンペーンを実施して認知度アップ<br>'+
+  '💰 <b>財務</b>タブで収支確認と借入</div>'+
+  '<div class="card">⏸▶⏩ 画面上部で時間を進めます。スタッフが足りないと行列で客を逃し、'+
+  '価格が高すぎたり安い豆を使うと評判が下がります。バランスが鍵!</div>'+
+  '<button class="btn" style="width:100%" onclick="closeModal();setSpeed(1)">開業する!</button>');
+}
+function showClear(){
+  G.speed=0;
+  showModal('<h3>🎉🎉 ゲームクリア!! 🎉🎉</h3>'+
+  '<div class="card">10店舗を達成し、あなたのブランドは街を代表するコーヒーチェーンになりました!<br><br>'+
+  '<b>'+G.day+'日</b>での達成です。<br>累計利益: <b>'+yen(G.totalProfit)+'</b><br>評判: <b>★'+
+  G.reputation.toFixed(1)+'</b><br><br>このまま経営を続けることもできます。</div>'+
+  '<button class="btn" style="width:100%" onclick="closeModal()">経営を続ける</button>');
+}
+function gameOver(){
+  G.over=true; G.speed=0; save();
+  showModal('<h3>💀 倒産…</h3>'+
+  '<div class="card">資金繰りがつかず、会社は倒産してしまいました。<br>'+
+  '<b>'+G.day+'日間</b>の経営、おつかれさまでした。<br>累計売上: '+yen(G.totalRev)+'</div>'+
+  '<button class="btn" style="width:100%" onclick="act.reset(true)">もう一度挑戦する</button>');
+}
+
+/* =====================  ACTION TABLE  ===================== */
+const act={
+  hire(sid){ const st=G.stores.find(x=>x.id===sid); if(st&&st.staff<12){st.staff++; st.skill=Math.max(10,st.skill-3); renderAll(); save();} },
+  fire(sid){ const st=G.stores.find(x=>x.id===sid); if(st&&st.staff>1){st.staff--; renderAll(); save();} },
+  train(sid){ const st=G.stores.find(x=>x.id===sid);
+    if(st&&tryPay(80000)){ st.skill=Math.min(100,st.skill+8); toast('📚 研修完了!スキル'+Math.round(st.skill)); renderAll(); save(); } },
+  equip(sid){ const st=G.stores.find(x=>x.id===sid);
+    if(st&&st.equip<5&&tryPay(st.equip*400000)){ st.equip++; toast('⚙️ 設備 Lv'+st.equip+'!'); renderAll(); save(); } },
+  interior(sid){ const st=G.stores.find(x=>x.id===sid);
+    if(st&&st.interior<5&&tryPay(st.interior*300000)){ st.interior++; toast('🛋️ 内装 Lv'+st.interior+'!'); renderAll(); save(); } },
+  manager(sid){ const st=G.stores.find(x=>x.id===sid); if(st){st.manager=true; toast('👔 店長を雇用しました'); renderAll(); save();} },
+  close(sid){ const st=G.stores.find(x=>x.id===sid); if(!st)return;
+    showModal('<h3>🚪 閉店の確認</h3><div class="card">'+st.name+'を本当に閉店しますか?</div>'+
+    '<div class="btnrow"><button class="btn danger" onclick="closeStore(\''+sid+'\')">閉店する</button>'+
+    '<button class="btn sub" onclick="closeModal()">やめる</button></div>'); },
+  toggle(pid){ const i=G.enabled.indexOf(pid);
+    if(i>=0)G.enabled.splice(i,1); else G.enabled.push(pid);
+    renderMenu(); save(); },
+  priceUp(pid){ G.prices[pid]=price(pid)+10; renderMenu(); save(); },
+  priceDn(pid){ G.prices[pid]=Math.max(50,price(pid)-10); renderMenu(); save(); },
+  unlock(pid){ unlockProduct(pid); },
+  bean(bid){ G.beanId=bid; toast('🌱 '+BEANS.find(b=>b.id===bid).name+'に切替'); renderMenu(); save(); },
+  campaign(cid){ const c=CAMPAIGNS.find(x=>x.id===cid);
+    if(G.campaigns.find(x=>x.id===cid))return;
+    if(!tryPay(c.cost))return;
+    G.campaigns.push({id:cid,daysLeft:c.days,perDay:c.power/c.days});
+    news('📣 <b>'+c.name+'</b>を開始しました!');
+    toast(c.e+' '+c.name+'開始!'); renderMkt(); renderHeader(); save(); },
+  reset(force){
+    if(force===true){ doReset(); return; }
+    showModal('<h3>⚠️ 新規ゲーム</h3><div class="card">現在のセーブデータを消して最初からやり直しますか?</div>'+
+    '<div class="btnrow"><button class="btn danger" onclick="act.reset(true)">最初から</button>'+
+    '<button class="btn sub" onclick="closeModal()">やめる</button></div>');
+  },
+};
+window.act=act; window.openStore=openStore; window.closeStore=closeStore; window.closeModal=closeModal;
+function doReset(){
+  localStorage.removeItem(SAVE_KEY);
+  G=newGame(); closeModal(); renderAll(); showTutorial();
+}
+
+/* =====================  LOOP  ===================== */
+let timer=null;
+function setSpeed(sp){
+  if(G.over)return;
+  G.speed=sp; renderHeader();
+  if(timer){clearInterval(timer);timer=null;}
+  if(sp>0){
+    timer=setInterval(()=>{ simDay(); renderAll(); }, sp===1?1800:600);
+  }
+}
+window.setSpeed=setSpeed;
+$('sp-pause').onclick=()=>setSpeed(0);
+$('sp-1').onclick=()=>setSpeed(1);
+$('sp-3').onclick=()=>setSpeed(3);
+$('btn-newstore').onclick=showNewStore;
+$('btn-reset').onclick=()=>act.reset();
+$('btn-borrow').onclick=()=>{ if(G.loan+LOAN_STEP<=LOAN_LIMIT){G.loan+=LOAN_STEP;G.cash+=LOAN_STEP;
+  news('🏦 '+yen(LOAN_STEP)+'を借入'); renderAll(); save();} };
+$('btn-repay').onclick=()=>{ if(G.loan>0&&G.cash>=LOAN_STEP){G.loan-=LOAN_STEP;G.cash-=LOAN_STEP;
+  news('🏦 '+yen(LOAN_STEP)+'を返済'); renderAll(); save();} };
+document.querySelectorAll('.tab').forEach(t=>{
+  t.onclick=()=>{
+    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));
+    document.querySelectorAll('.page').forEach(x=>x.classList.remove('show'));
+    t.classList.add('on');
+    $('pg-'+t.dataset.pg).classList.add('show');
+    renderAll();
+  };
+});
+window.addEventListener('beforeunload',save);
+
+/* =====================  BOOT  ===================== */
+const loaded=load();
+if(loaded){ G=loaded; G.speed=0; renderAll();
+  if(G.over)gameOver(); else toast('💾 セーブデータを読み込みました');
+}else{ G=newGame(); renderAll(); showTutorial(); }
+</script>
+</body>
+</html>
