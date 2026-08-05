@@ -136,6 +136,7 @@ canvas{width:100%;height:110px;display:block}
         <span>評判 <b id="k-rep">★3.0</b></span>
         <span>認知度 <b id="k-aw">5</b></span>
         <span>店舗 <b id="k-st">0</b></span>
+        <span>時価総額 <b id="k-cap">-</b></span>
         <span>本日利益 <b id="k-pf">¥0</b></span>
       </div>
       <div id="speed">
@@ -186,19 +187,26 @@ canvas{width:100%;height:110px;display:block}
       <div class="card" id="menu-rnd"></div>
       <h2>🌱 コーヒー豆の仕入れ</h2>
       <div class="card" id="beans"></div>
-    </div>
-
-    <!-- ============ MARKETING ============ -->
-    <div class="page" id="pg-mkt">
+      <h2>📣 販促キャンペーン</h2>
       <div class="card">
-        <div class="row"><b>ブランド認知度</b><b id="m-aw" class="star">5</b></div>
-        <div class="bar"><i id="m-awbar" style="width:5%"></i></div>
+        <div class="row"><b>ブランド認知度</b><b id="m-aw" class="star">10</b></div>
+        <div class="bar"><i id="m-awbar" style="width:10%"></i></div>
         <div class="small-note">認知度が高いほど、全店舗の集客が増えます。毎日少しずつ低下します。</div>
       </div>
-      <h2>📣 キャンペーン</h2>
       <div id="campaigns"></div>
-      <h2>🏢 競合チェーン</h2>
-      <div class="card" id="competitors"></div>
+    </div>
+
+    <!-- ============ MARKET (ランキング / M&A / 事業 / 不動産) ============ -->
+    <div class="page" id="pg-mkt">
+      <h2>🏆 業界時価総額ランキング</h2>
+      <div class="card" id="ranking"></div>
+      <h2>🏢 各社の情報とM&A</h2>
+      <div id="ma-list"></div>
+      <h2>🏗️ 他業種への進出</h2>
+      <div id="ventures"></div>
+      <h2>🏠 不動産投資</h2>
+      <div class="card" id="prop-market"></div>
+      <div id="prop-owned"></div>
     </div>
 
     <!-- ============ FINANCE ============ -->
@@ -219,15 +227,34 @@ canvas{width:100%;height:110px;display:block}
         </div>
         <div class="small-note">現金がマイナスのまま7日経つと倒産します。</div>
       </div>
+      <h2>📊 株式</h2>
+      <div class="card" id="stock"></div>
+    </div>
+
+    <!-- ============ CEO ============ -->
+    <div class="page" id="pg-ceo">
+      <div class="grid2">
+        <div class="kpi"><div class="muted">社長の個人資産</div><div class="v" id="c-cash">¥0</div></div>
+        <div class="kpi"><div class="muted">役員報酬</div><div class="v" id="c-salary">無報酬</div></div>
+      </div>
+      <h2>💼 役員報酬の設定</h2>
+      <div class="card">
+        <div class="btnrow" id="salary-sel"></div>
+        <div class="small-note">報酬は会社の経費です。上げすぎると利益と株価を圧迫します。</div>
+      </div>
+      <h2>🛍️ 社長のショッピング</h2>
+      <div class="card" id="lux-list"></div>
+      <div class="small-note">上場後は「持株売却」(財務タブ)で個人資産を増やせます。ただし持株比率の下げすぎに注意…</div>
     </div>
   </div>
 
   <div id="tabs">
     <div class="tab on" data-pg="home"><span class="ic">🏠</span>ホーム</div>
     <div class="tab" data-pg="stores"><span class="ic">🏬</span>店舗</div>
-    <div class="tab" data-pg="menu"><span class="ic">☕</span>メニュー</div>
-    <div class="tab" data-pg="mkt"><span class="ic">📣</span>マーケ</div>
+    <div class="tab" data-pg="menu"><span class="ic">☕</span>商品</div>
+    <div class="tab" data-pg="mkt"><span class="ic">📈</span>市場</div>
     <div class="tab" data-pg="fin"><span class="ic">💰</span>財務</div>
+    <div class="tab" data-pg="ceo"><span class="ic">👔</span>社長</div>
   </div>
 </div>
 
@@ -273,8 +300,46 @@ const CAMPAIGNS=[
  {id:'tv',    name:'TV CM',               e:'📺', cost:1500000, days:14, power:38, desc:'全国区の知名度へ。'},
 ];
 const COMPETITORS=[
- {id:'stella', name:'ステラコーヒー', e:'🌟', power:60, stores:{ekimae:2, office:1, mall:1}},
- {id:'dripgo', name:'ドリップ&ゴー',  e:'🚶', power:38, stores:{office:1, shoten:1, campus:1}},
+ {id:'stella',   name:'ステラコーヒー', e:'🌟', power:60, cap:800000000, stores:{ekimae:2, office:1, mall:1},
+  desc:'外資系の全国チェーン。プレミアム路線で資金力は圧倒的、業界の絶対王者。'},
+ {id:'dripgo',   name:'ドリップ&ゴー',  e:'🚶', power:38, cap:250000000, stores:{office:1, shoten:1, campus:1},
+  desc:'テイクアウト特化の格安チェーン。回転率で稼ぐ薄利多売モデルで急成長中。'},
+ {id:'mamezen',  name:'珈琲豆善',       e:'🫘', power:30, cap:120000000, stores:{shoten:1, suburb:1},
+  desc:'昭和創業の老舗喫茶チェーン。固定客は厚いが、後継者不足に悩んでいる。'},
+ {id:'nekomado', name:'ねこまど珈琲',   e:'🐱', power:24, cap:60000000, stores:{campus:1},
+  desc:'猫カフェ併設の新興チェーン。SNSでバズり続ける業界の台風の目。'},
+];
+const FUND={name:'グレートベア投資ファンド', e:'🐻'};
+const VENTURES=[
+ {id:'bakery', name:'ベーカリー工房',   e:'🥖', cost:15000000,  income:45000,
+  desc:'自社工房で焼きたてパンを供給。フード原価が20%下がる。'},
+ {id:'roast',  name:'自家焙煎工場',     e:'🏭', cost:40000000,  income:70000,
+  desc:'豆を自社焙煎して外販も。コーヒー原価が25%下がる。'},
+ {id:'conv',   name:'コンビニFC事業',   e:'🏪', cost:100000000, income:220000,
+  desc:'コンビニのフランチャイズ本部に出資。安定した収益源。'},
+ {id:'hotel',  name:'ホテル&カフェ事業', e:'🏨', cost:300000000, income:700000,
+  desc:'ラウンジカフェ併設の高級ホテル。ブランドの頂点へ。'},
+];
+const PROPERTIES=[
+ {id:'room',     name:'ワンルームマンション', e:'🚪', price:8000000,   rent:4000},
+ {id:'apart',    name:'アパート一棟',         e:'🏘️', price:35000000,  rent:20000},
+ {id:'building', name:'商業ビル',             e:'🏢', price:150000000, rent:90000},
+ {id:'tower',    name:'オフィスタワー',       e:'🌆', price:600000000, rent:380000},
+];
+const LUXURY=[
+ {id:'suit',      name:'オーダースーツ',           e:'🤵', cost:1500000,    aw:1,  desc:'一流の身だしなみから。'},
+ {id:'watch',     name:'高級腕時計',               e:'⌚', cost:5000000,    aw:2,  desc:'商談相手が一目置く。'},
+ {id:'car',       name:'スーパーカー',             e:'🏎️', cost:40000000,   aw:4,  desc:'街中の視線を独り占め。'},
+ {id:'penthouse', name:'タワマン最上階',           e:'🏙️', cost:150000000,  aw:6,  desc:'成功者の証。'},
+ {id:'cruiser',   name:'大型クルーザー',           e:'🛥️', cost:300000000,  aw:8,  desc:'週末は海の上で役員会議を。'},
+ {id:'jet',       name:'プライベートジェット',     e:'✈️', cost:1000000000, aw:10, desc:'世界中の豆産地へひとっ飛び。'},
+ {id:'island',    name:'プライベートアイランド',   e:'🏝️', cost:3000000000, aw:15, desc:'いつかは自分の島を。'},
+];
+const SALARIES=[
+ {name:'無報酬',            amt:0},
+ {name:'堅実 ¥5万/日',      amt:50000},
+ {name:'高給 ¥20万/日',     amt:200000},
+ {name:'豪遊 ¥100万/日',    amt:1000000},
 ];
 const WEATHERS=[
  {id:'sun',  e:'☀️', name:'晴れ',   w:46, traffic:1.0,  hot:1.0, cold:1.0},
@@ -297,6 +362,13 @@ const MILESTONES=[
  {id:'m8', name:'店舗を6店舗に拡大',                reward:1000000, chk:g=>g.stores.length>=6},
  {id:'m9', name:'累計利益 ¥10,000,000 を達成',      reward:1500000, chk:g=>g.totalProfit>=10000000},
  {id:'m10',name:'10店舗達成!コーヒー帝国の完成!', reward:3000000, chk:g=>g.stores.length>=10},
+ {id:'m11',name:'株式上場(IPO)を果たす',           reward:800000,  chk:g=>g.listed},
+ {id:'m12',name:'不動産オーナーになる',             reward:300000,  chk:g=>g.properties.length>=1},
+ {id:'m13',name:'他業種へ進出する',                 reward:500000,  chk:g=>g.ventures.length>=1},
+ {id:'m14',name:'初のM&Aを成立させる',              reward:2000000, chk:g=>g.comps.some(c=>c.acquired)},
+ {id:'m15',name:'時価総額10億円を達成',             reward:3000000, chk:g=>g.lastVal>=1000000000},
+ {id:'m16',name:'業界時価総額ランキング1位',        reward:5000000, chk:g=>g.stores.length>0&&g.comps.filter(c=>!c.acquired).every(c=>g.lastVal>c.cap)},
+ {id:'m17',name:'社長コレクション全制覇「伝説の社長」', reward:10000000, chk:g=>g.luxOwned.length>=LUXURY.length},
 ];
 
 /* =====================  STATE  ===================== */
@@ -317,10 +389,26 @@ function newGame(){
     hist:[],                         // last 30 {profit}
     log:[],
     milestonesDone:[],
-    today:{rev:0,cogs:0,wage:0,rent:0,mkt:0,interest:0,visitors:0,lost:0,profit:0},
+    today:{rev:0,cogs:0,wage:0,rent:0,mkt:0,interest:0,visitors:0,lost:0,profit:0,biz:0,prop:0,salary:0},
     totalVisitors:0, totalRev:0, totalProfit:0, bestDayProfit:0,
+    listed:false, ownerShare:100, fundShare:0, lastFundWarn:0,
+    lastVal:20000000, valHist:[],
+    personalCash:2000000, salaryIdx:0, luxOwned:[],
+    ventures:[], properties:[],
     speed:0, cleared:false, over:false, seq:1,
   };
+}
+function migrate(g){
+  // 旧バージョンのセーブデータに新フィールドを補完する
+  const d=newGame();
+  for(const k in d) if(g[k]===undefined) g[k]=d[k];
+  for(const k in d.today) if(g.today[k]===undefined) g.today[k]=d.today[k];
+  for(const c of COMPETITORS){
+    const e=g.comps.find(x=>x.id===c.id);
+    if(!e) g.comps.push(JSON.parse(JSON.stringify(c)));
+    else{ if(e.cap===undefined)e.cap=c.cap; if(!e.desc)e.desc=c.desc; }
+  }
+  return g;
 }
 function save(){ try{ localStorage.setItem(SAVE_KEY, JSON.stringify(G)); }catch(e){} }
 window.onAppPause=function(){ save(); };
@@ -335,6 +423,17 @@ function load(){
 /* =====================  HELPERS  ===================== */
 const $=id=>document.getElementById(id);
 const yen=n=>'¥'+Math.round(n).toLocaleString('ja-JP');
+const fmtBig=n=>{ n=Math.round(n); return Math.abs(n)>=100000000 ? (n/100000000).toFixed(2)+'億円' : yen(n); };
+function calcValuation(){
+  const hist=G.hist.slice(-14);
+  const avg=hist.length? hist.reduce((s,h)=>s+h.p,0)/hist.length : 0;
+  const per=10 + G.reputation*1.6 + G.awareness/25;      // おおよそ13〜21
+  const earnVal=Math.max(0,avg)*365*per;
+  const propVal=G.properties.reduce((s,p)=>s+p.curPrice,0);
+  const ventVal=G.ventures.reduce((s,v)=>{const x=VENTURES.find(y=>y.id===v);return s+(x?x.cost*0.7:0);},0);
+  const assets=G.cash-G.loan+propVal+ventVal;
+  return Math.round(Math.max(5000000, earnVal + Math.max(0,assets)*0.9 + G.stores.length*15000000));
+}
 function price(pid){ const p=PRODUCTS.find(x=>x.id===pid); return (G.prices[pid]!=null)?G.prices[pid]:p.fair; }
 function bean(){ return BEANS.find(b=>b.id===G.beanId); }
 function weather(){ return WEATHERS.find(w=>w.id===G.weather); }
@@ -360,6 +459,12 @@ function compAttractIn(did){
 function storeAttract(st){
   return 40 + st.equip*15 + st.interior*10 + st.skill*0.5 + st.rep*10 + (st.manager?15:0);
 }
+function prodCost(p){
+  // 事業シナジー: 焙煎工場で豆原価-25%、ベーカリーでフード原価-20%
+  if(p.bean) return p.cost*bean().mult*(G.ventures.includes('roast')?0.75:1);
+  if(p.cat==='food') return p.cost*(G.ventures.includes('bakery')?0.8:1);
+  return p.cost;
+}
 
 /* =====================  SIMULATION  ===================== */
 function menuStats(){
@@ -370,7 +475,7 @@ function menuStats(){
   for(const id of G.enabled){
     const p=PRODUCTS.find(x=>x.id===id); if(!p)continue;
     const pr=price(id);
-    const cost=p.bean? p.cost*b.mult : p.cost;
+    const cost=prodCost(p);
     let ap=p.appeal;
     if(p.cat==='drink'){
       if(p.temp==='hot') ap*=w.hot; else if(p.temp==='cold') ap*=w.cold;
@@ -397,7 +502,7 @@ function simDay(){
   G.weather=w.id;
   const menu=menuStats();
   const b=bean();
-  const t={rev:0,cogs:0,wage:0,rent:0,mkt:0,interest:0,visitors:0,lost:0,profit:0};
+  const t={rev:0,cogs:0,wage:0,rent:0,mkt:0,interest:0,visitors:0,lost:0,profit:0,biz:0,prop:0,salary:0};
 
   for(const st of G.stores){
     const d=districtOf(st);
@@ -429,9 +534,22 @@ function simDay(){
   for(const c of G.campaigns){ G.awareness=Math.min(100,G.awareness+c.perDay); c.daysLeft--; }
   G.campaigns=G.campaigns.filter(c=>c.daysLeft>0);
   G.awareness=Math.max(10,G.awareness-0.3);  // 常連ベースとして10は維持される
+  // 他業種事業の収入
+  for(const vid of G.ventures){
+    const v=VENTURES.find(x=>x.id===vid);
+    if(v) t.biz+=v.income*(0.75+Math.random()*0.5);
+  }
+  // 不動産: 家賃収入と価格変動 (やや上昇バイアス)
+  for(const p of G.properties){
+    t.prop+=p.rent;
+    p.curPrice=Math.max(1000000,Math.round(p.curPrice*(1+(Math.random()-0.485)*0.008)));
+  }
+  // 役員報酬 (会社→社長個人へ)
+  t.salary=SALARIES[G.salaryIdx].amt;
+  G.personalCash+=t.salary;
   // interest
   t.interest=G.loan*LOAN_RATE;
-  t.profit=t.rev-t.cogs-t.wage-t.rent-t.interest;
+  t.profit=t.rev-t.cogs-t.wage-t.rent-t.interest+t.biz+t.prop-t.salary;
   G.cash+=t.profit;
   G.today=t;
   G.totalVisitors+=t.visitors; G.totalRev+=t.rev; G.totalProfit+=t.profit;
@@ -442,6 +560,28 @@ function simDay(){
   }
   G.hist.push({p:Math.round(t.profit)});
   if(G.hist.length>30)G.hist.shift();
+  // 競合の時価総額はゆるやかに変動
+  for(const c of G.comps){ if(!c.acquired) c.cap=Math.round(c.cap*(1+(Math.random()-0.48)*0.01)); }
+  // 自社の企業価値と株式市場
+  G.lastVal=calcValuation();
+  G.valHist.push(G.lastVal); if(G.valHist.length>30)G.valHist.shift();
+  if(G.listed){
+    const bad=(t.profit<0)||(G.valHist.length>=15 && G.lastVal<G.valHist[0]*0.85);
+    if(G.ownerShare<50){
+      const float=100-G.ownerShare;
+      G.fundShare=Math.min(float, G.fundShare+(bad?0.8:0.25));
+    }else{
+      G.fundShare=Math.max(0,G.fundShare-0.3);
+    }
+    const f=Math.floor(G.fundShare/10)*10;
+    if(f>=20 && f>G.lastFundWarn){
+      G.lastFundWarn=f;
+      news('🐻 <b>'+FUND.name+'</b>が株式を買い進めています(保有率'+Math.round(G.fundShare)+'%)!');
+      toast('🐻 ファンド保有率 '+Math.round(G.fundShare)+'%…自社株買いで防衛を!');
+    }
+    if(G.fundShare<20) G.lastFundWarn=0;
+    if(G.fundShare>=50){ takeoverOver(); return; }
+  }
   // events
   randomEvent();
   compExpand();
@@ -480,13 +620,23 @@ function randomEvent(){
 }
 function compExpand(){
   if(G.day%30!==0) return;
-  if(Math.random()<0.7){
-    const c=G.comps[Math.floor(Math.random()*G.comps.length)];
+  const alive=G.comps.filter(c=>!c.acquired);
+  if(alive.length && Math.random()<0.7){
+    const c=alive[Math.floor(Math.random()*alive.length)];
     const d=DISTRICTS[Math.floor(Math.random()*DISTRICTS.length)];
     c.stores[d.id]=(c.stores[d.id]||0)+1;
+    c.cap=Math.round(c.cap*1.05);
     news('🏢 競合の<b>'+c.name+'</b>が'+d.name+'に新店舗をオープン!');
     toast('🏢 '+c.name+'が'+d.name+'に出店…');
   }
+}
+function takeoverOver(){
+  G.over=true; G.speed=0; save();
+  showModal('<h3>🐻 敵対的買収成立…</h3>'+
+  '<div class="card">'+FUND.name+'があなたの会社の株式50%を取得し、経営権を失いました。<br><br>'+
+  '持株比率を50%以上に保つか、業績と株価を維持していれば防げたはず…。<br>'+
+  '<b>'+G.day+'日間</b>の経営、おつかれさまでした。</div>'+
+  '<button class="btn" style="width:100%" onclick="act.reset(true)">もう一度挑戦する</button>');
 }
 function checkMilestones(){
   for(const m of MILESTONES){
@@ -547,6 +697,7 @@ function renderHeader(){
   $('k-rep').textContent='★'+G.reputation.toFixed(1);
   $('k-aw').textContent=Math.round(G.awareness);
   $('k-st').textContent=G.stores.length;
+  $('k-cap').textContent=fmtBig(G.lastVal);
   const pf=$('k-pf'); pf.textContent=yen(G.today.profit);
   pf.style.color=G.today.profit>=0?'var(--good)':'var(--bad)';
   for(const [id,sp] of [['sp-pause',0],['sp-1',1],['sp-3',3]])
@@ -631,7 +782,7 @@ function renderMenu(){
     if(!G.unlocked.includes(p.id))continue;
     const on=G.enabled.includes(p.id);
     const pr=price(p.id);
-    const cost=p.bean? p.cost*bean().mult:p.cost;
+    const cost=prodCost(p);
     const html='<div class="prod">'+
       '<div class="toggle'+(on?' on':'')+'" onclick="act.toggle(\''+p.id+'\')"><i></i></div>'+
       '<div class="info"><div class="nm">'+p.e+' '+p.name+'</div>'+
@@ -662,7 +813,7 @@ function renderMenu(){
       '<button class="btn sub" onclick="act.bean(\''+b.id+'\')">切替</button>')+'</div>'
   ).join('');
 }
-function renderMkt(){
+function renderCampaigns(){
   $('m-aw').textContent=Math.round(G.awareness);
   $('m-awbar').style.width=Math.round(G.awareness)+'%';
   $('campaigns').innerHTML=CAMPAIGNS.map(c=>{
@@ -674,12 +825,112 @@ function renderMkt(){
       '<button class="btn" '+((running||G.cash<c.cost)?'disabled':'')+
       ' onclick="act.campaign(\''+c.id+'\')">'+yen(c.cost)+'</button></div></div>';
   }).join('');
-  $('competitors').innerHTML=G.comps.map(c=>{
+}
+function renderMarket(){
+  // 時価総額ランキング
+  const rows=[{name:'コーヒー帝国 (あなた)', e:'☕', cap:G.lastVal,
+      stores:G.stores.length, me:true}]
+    .concat(G.comps.filter(c=>!c.acquired).map(c=>({name:c.name, e:c.e, cap:c.cap,
+      stores:Object.values(c.stores).reduce((a,b)=>a+b,0)})));
+  rows.sort((a,b)=>b.cap-a.cap);
+  $('ranking').innerHTML=rows.map((r,i)=>
+    '<div class="row" style="padding:5px 0;'+(r.me?'color:var(--gold);font-weight:800':'')+'">'+
+    '<span>'+(i+1)+'位 '+r.e+' '+r.name+'</span>'+
+    '<span>'+fmtBig(r.cap)+' <span class="muted">('+r.stores+'店)</span></span></div>').join('');
+  // 各社情報とM&A
+  $('ma-list').innerHTML=G.comps.map(c=>{
     const total=Object.values(c.stores).reduce((a,b)=>a+b,0);
-    const where=DISTRICTS.filter(d=>c.stores[d.id]).map(d=>d.name+'×'+c.stores[d.id]).join('、')||'なし';
-    return '<div class="prod"><div class="info"><div class="nm">'+c.e+' '+c.name+'</div>'+
-      '<div class="sub">'+total+'店舗: '+where+'</div></div></div>';
+    const where=DISTRICTS.filter(d=>c.stores[d.id]).map(d=>d.name+'×'+c.stores[d.id]).join('、')||'-';
+    const cost=Math.round(c.cap*1.3);
+    return '<div class="card">'+
+      '<div class="row"><b>'+c.e+' '+c.name+'</b>'+
+      (c.acquired?'<span class="tag" style="color:var(--good)">✅ 買収済み</span>':'<b>'+fmtBig(c.cap)+'</b>')+'</div>'+
+      '<div class="muted" style="margin:4px 0">'+c.desc+'</div>'+
+      (c.acquired?'':
+        '<div class="row"><span class="muted">'+total+'店舗 ('+where+')</span>'+
+        '<button class="btn" '+(G.cash<cost?'disabled':'')+
+        ' onclick="act.acquire(\''+c.id+'\')">買収 '+fmtBig(cost)+'</button></div>')+
+      '</div>';
   }).join('');
+  // 他業種進出
+  $('ventures').innerHTML=VENTURES.map(v=>{
+    const own=G.ventures.includes(v.id);
+    return '<div class="card"><div class="row"><div style="flex:1">'+
+      '<b>'+v.e+' '+v.name+'</b>'+
+      '<div class="muted">'+v.desc+' (日収 約'+yen(v.income)+')</div>'+
+      (own?'<div class="muted" style="color:var(--good)">✅ 進出済み</div>':'')+'</div>'+
+      (own?'':'<button class="btn" '+(G.cash<v.cost?'disabled':'')+
+        ' onclick="act.venture(\''+v.id+'\')">'+fmtBig(v.cost)+'</button>')+
+      '</div></div>';
+  }).join('');
+  // 不動産市場
+  $('prop-market').innerHTML=PROPERTIES.map(p=>
+    '<div class="prod"><div class="info"><div class="nm">'+p.e+' '+p.name+'</div>'+
+    '<div class="sub">家賃収入 '+yen(p.rent)+'/日</div></div>'+
+    '<button class="btn" '+(G.cash<p.price?'disabled':'')+
+    ' onclick="act.buyProp(\''+p.id+'\')">'+fmtBig(p.price)+'</button></div>'
+  ).join('');
+  // 保有物件
+  $('prop-owned').innerHTML=G.properties.length?
+    '<div class="card"><b>保有物件</b>'+G.properties.map(pp=>{
+      const t=PROPERTIES.find(x=>x.id===pp.type);
+      const diff=pp.curPrice-pp.boughtPrice;
+      return '<div class="prod"><div class="info"><div class="nm">'+t.e+' '+t.name+'</div>'+
+        '<div class="sub">時価 '+fmtBig(pp.curPrice)+
+        ' <span style="color:var(--'+(diff>=0?'good':'bad')+')">('+(diff>=0?'+':'')+yen(diff)+')</span></div></div>'+
+        '<button class="btn sub" onclick="act.sellProp(\''+pp.id+'\')">売却</button></div>';
+    }).join('')+'</div>':'';
+}
+function renderCeo(){
+  $('c-cash').textContent=yen(G.personalCash);
+  $('c-salary').textContent=SALARIES[G.salaryIdx].name;
+  $('salary-sel').innerHTML=SALARIES.map((s,i)=>
+    '<button class="mini" style="'+(i===G.salaryIdx?'background:var(--accent);color:#241505;font-weight:700':'')+
+    '" onclick="act.salary('+i+')">'+s.name+'</button>').join('');
+  $('lux-list').innerHTML=LUXURY.map(l=>{
+    const own=G.luxOwned.includes(l.id);
+    return '<div class="prod"><div class="info"><div class="nm">'+l.e+' '+l.name+
+      (own?' <span class="tag" style="color:var(--good)">所有</span>':'')+'</div>'+
+      '<div class="sub">'+l.desc+' (認知度+'+l.aw+')</div></div>'+
+      (own?'':'<button class="btn" '+(G.personalCash<l.cost?'disabled':'')+
+        ' onclick="act.buyLux(\''+l.id+'\')">'+fmtBig(l.cost)+'</button>')+
+      '</div>';
+  }).join('');
+}
+function renderStock(){
+  const el=$('stock');
+  if(!G.listed){
+    const okStores=G.stores.length>=3;
+    const avg=G.hist.slice(-14).reduce((s,h)=>s+h.p,0)/Math.max(1,G.hist.slice(-14).length);
+    const okProfit=avg>0 && G.hist.length>=14;
+    const proceeds=Math.round(G.lastVal*0.3*0.9);
+    el.innerHTML='<b>未上場</b>'+
+      '<div class="muted" style="margin:6px 0">IPO(株式上場)すると企業価値の30%相当の資金を調達できます。'+
+      'ただし持株比率が70%に下がり、以後は株式市場と付き合うことになります。</div>'+
+      '<div class="small-note">'+(okStores?'✅':'❌')+' 店舗3店以上 / '+
+      (okProfit?'✅':'❌')+' 直近2週間の平均利益が黒字</div>'+
+      '<div class="row" style="margin-top:8px"><span class="muted">想定調達額 '+fmtBig(proceeds)+'</span>'+
+      '<button class="btn" '+((okStores&&okProfit)?'':'disabled')+' onclick="act.ipo()">上場する</button></div>';
+    return;
+  }
+  const own=Math.round(G.ownerShare), fund=Math.round(G.fundShare), float_=100-own-fund;
+  const dangerC=fund>=35?'var(--bad)':fund>=20?'var(--gold)':'var(--sub)';
+  el.innerHTML=
+    '<div class="row"><b>上場企業</b><b>'+fmtBig(G.lastVal)+'</b></div>'+
+    '<div class="row muted"><span>株価 (100万株)</span><span>'+yen(G.lastVal/1000000)+'</span></div>'+
+    '<div style="margin:8px 0 2px" class="muted">株主構成</div>'+
+    '<div class="bar" style="height:10px;display:flex">'+
+      '<i style="width:'+own+'%;background:var(--gold)"></i>'+
+      '<i style="width:'+fund+'%;background:var(--bad)"></i>'+
+      '<i style="width:'+Math.max(0,float_)+'%;background:#5a4a35"></i></div>'+
+    '<div class="small-note">👔 社長 '+own+'% / <span style="color:'+dangerC+'">🐻 ファンド '+fund+'%</span> / 市場 '+Math.max(0,float_)+'%</div>'+
+    (own<50?'<div class="small-note" style="color:var(--bad)">⚠️ 持株比率50%未満!業績が悪化するとファンドに買い占められます</div>':'')+
+    '<div class="btnrow">'+
+      '<button class="btn" onclick="act.raiseCap()">増資 +'+fmtBig(G.lastVal*0.05*0.95)+' (会社へ)</button>'+
+      '<button class="btn" '+(G.ownerShare<10?'disabled':'')+' onclick="act.sellShares()">持株売却 +'+fmtBig(G.lastVal*0.05*0.95)+' (社長へ)</button>'+
+      '<button class="btn sub" '+(G.cash<G.lastVal*0.05*1.05?'disabled':'')+' onclick="act.buyback()">自社株買い −'+fmtBig(G.lastVal*0.05*1.05)+'</button>'+
+    '</div>'+
+    '<div class="small-note">増資/売却は5%単位で持株比率が下がり、自社株買いで5%回復します。</div>';
 }
 function renderFin(){
   $('f-cash').textContent=yen(G.cash);
@@ -690,19 +941,25 @@ function renderFin(){
   tp.className='v '+(G.totalProfit>=0?'good':'bad');
   const t=G.today;
   $('pl').innerHTML=
-    plRow('売上',t.rev,'good')+plRow('原価(材料費)',-t.cogs)+plRow('人件費',-t.wage)+
+    plRow('売上',t.rev,'good')+
+    (t.biz?plRow('事業収入',t.biz,'good'):'')+
+    (t.prop?plRow('不動産収入',t.prop,'good'):'')+
+    plRow('原価(材料費)',-t.cogs)+plRow('人件費',-t.wage)+
+    (t.salary?plRow('役員報酬',-t.salary):'')+
     plRow('家賃',-t.rent)+plRow('支払利息',-t.interest)+
     '<div class="row" style="border-top:1px solid var(--line);margin-top:6px;padding-top:6px">'+
     '<b>営業利益</b><b style="color:'+(t.profit>=0?'var(--good)':'var(--bad)')+'">'+yen(t.profit)+'</b></div>';
   $('btn-borrow').disabled=G.loan+LOAN_STEP>LOAN_LIMIT;
   $('btn-repay').disabled=G.loan<=0||G.cash<LOAN_STEP;
+  renderStock();
 }
 function plRow(n,v,cls){
   return '<div class="row"><span class="muted">'+n+'</span><span'+
     (cls?' style="color:var(--'+cls+')"':'')+'>'+yen(v)+'</span></div>';
 }
 function renderAll(){
-  renderHeader(); renderHome(); renderStores(); renderMenu(); renderMkt(); renderFin();
+  renderHeader(); renderHome(); renderStores(); renderMenu(); renderCampaigns();
+  renderMarket(); renderFin(); renderCeo();
 }
 
 /* =====================  MODALS  ===================== */
@@ -732,6 +989,11 @@ function showTutorial(){
   '☕ <b>メニュー</b>タブで価格設定・新商品開発・豆の仕入れ<br>'+
   '📣 <b>マーケ</b>タブでキャンペーンを実施して認知度アップ<br>'+
   '💰 <b>財務</b>タブで収支確認と借入</div>'+
+  '<div class="card">📈 <b>市場</b>タブでは時価総額ランキングの確認、競合の<b>M&A買収</b>、'+
+  '他業種への進出、不動産投資ができます。<br>'+
+  '💰 財務タブから<b>株式上場(IPO)</b>すれば大型資金調達も。ただし持株比率を下げすぎて業績が傾くと、'+
+  '🐻投資ファンドに<b>敵対的買収</b>されてしまいます!<br>'+
+  '👔 <b>社長</b>タブで役員報酬を設定して、稼いだお金で豪遊も…?</div>'+
   '<div class="card">⏸▶⏩ 画面上部で時間を進めます。スタッフが足りないと行列で客を逃し、'+
   '価格が高すぎたり安い豆を使うと評判が下がります。バランスが鍵!</div>'+
   '<button class="btn" style="width:100%" onclick="closeModal();setSpeed(1)">開業する!</button>');
@@ -779,7 +1041,93 @@ const act={
     if(!tryPay(c.cost))return;
     G.campaigns.push({id:cid,daysLeft:c.days,perDay:c.power/c.days});
     news('📣 <b>'+c.name+'</b>を開始しました!');
-    toast(c.e+' '+c.name+'開始!'); renderMkt(); renderHeader(); save(); },
+    toast(c.e+' '+c.name+'開始!'); renderCampaigns(); renderHeader(); save(); },
+  ipo(){
+    if(G.listed)return;
+    const proceeds=Math.round(G.lastVal*0.3*0.9);
+    G.listed=true; G.ownerShare=70; G.cash+=proceeds;
+    news('🔔 <b>株式上場(IPO)!</b> '+fmtBig(proceeds)+'を調達しました!');
+    toast('🔔 上場おめでとうございます! +'+fmtBig(proceeds));
+    renderAll(); save(); },
+  raiseCap(){
+    if(!G.listed||G.ownerShare<5)return;
+    const proceeds=Math.round(G.lastVal*0.05*0.95);
+    G.ownerShare-=5; G.cash+=proceeds;
+    news('📈 増資で'+fmtBig(proceeds)+'を調達 (持株比率'+Math.round(G.ownerShare)+'%)');
+    renderAll(); save(); },
+  sellShares(){
+    if(!G.listed||G.ownerShare<10)return;
+    const proceeds=Math.round(G.lastVal*0.05*0.95);
+    G.ownerShare-=5; G.personalCash+=proceeds;
+    news('💼 社長が持株5%を売却し'+fmtBig(proceeds)+'を得ました (持株比率'+Math.round(G.ownerShare)+'%)');
+    renderAll(); save(); },
+  buyback(){
+    if(!G.listed||G.ownerShare>=100)return;
+    const cost=Math.round(G.lastVal*0.05*1.05);
+    if(!tryPay(cost))return;
+    G.ownerShare=Math.min(100,G.ownerShare+5);
+    G.fundShare=Math.min(G.fundShare,100-G.ownerShare);
+    news('🛡️ 自社株買いを実施 (持株比率'+Math.round(G.ownerShare)+'%)');
+    toast('🛡️ 自社株買い完了');
+    renderAll(); save(); },
+  acquire(cid){
+    const c=G.comps.find(x=>x.id===cid); if(!c||c.acquired)return;
+    const cost=Math.round(c.cap*1.3);
+    showModal('<h3>🤝 M&Aの確認</h3><div class="card"><b>'+c.e+' '+c.name+'</b>を'+
+      fmtBig(cost)+'で買収しますか?<br><span class="muted">'+c.desc+'<br>同社の全店舗があなたのチェーンになります。</span></div>'+
+      '<div class="btnrow"><button class="btn" onclick="act.doAcquire(\''+cid+'\')">買収する</button>'+
+      '<button class="btn sub" onclick="closeModal()">やめる</button></div>'); },
+  doAcquire(cid){
+    const c=G.comps.find(x=>x.id===cid); if(!c||c.acquired)return;
+    const cost=Math.round(c.cap*1.3);
+    if(!tryPay(cost)){closeModal();return;}
+    for(const d of DISTRICTS){
+      const n=c.stores[d.id]||0;
+      for(let i=0;i<n;i++){
+        G.stores.push({id:'s'+(G.seq++), districtId:d.id,
+          name:(G.stores.length+1)+'号店 ('+d.name+'・旧'+c.name+')',
+          staff:2, skill:30, manager:false, equip:2, interior:2, rep:3.2,
+          todayVisitors:0, todayRev:0, todaySat:3, todayLost:0});
+      }
+    }
+    c.stores={}; c.acquired=true;
+    news('🤝 <b>'+c.name+'を買収!</b> 全店舗がコーヒー帝国の傘下に入りました!');
+    toast('🤝 '+c.e+' '+c.name+'を買収成功!');
+    closeModal(); renderAll(); save(); },
+  venture(vid){
+    const v=VENTURES.find(x=>x.id===vid);
+    if(!v||G.ventures.includes(vid)||!tryPay(v.cost))return;
+    G.ventures.push(vid);
+    news('🏗️ <b>'+v.name+'</b>へ進出しました!');
+    toast(v.e+' '+v.name+'へ進出!');
+    renderAll(); save(); },
+  buyProp(tid){
+    const t=PROPERTIES.find(x=>x.id===tid);
+    if(!t||!tryPay(t.price))return;
+    G.properties.push({id:'pr'+(G.seq++), type:tid, boughtPrice:t.price, curPrice:t.price, rent:t.rent});
+    news('🏠 <b>'+t.name+'</b>を購入しました (家賃'+yen(t.rent)+'/日)');
+    toast(t.e+' '+t.name+'を購入!');
+    renderAll(); save(); },
+  sellProp(pid){
+    const i=G.properties.findIndex(x=>x.id===pid); if(i<0)return;
+    const pp=G.properties[i], t=PROPERTIES.find(x=>x.id===pp.type);
+    const proceeds=Math.round(pp.curPrice*0.97);
+    G.properties.splice(i,1); G.cash+=proceeds;
+    news('🏠 '+t.name+'を'+fmtBig(proceeds)+'で売却しました');
+    renderAll(); save(); },
+  salary(i){
+    G.salaryIdx=i;
+    toast('💼 役員報酬: '+SALARIES[i].name);
+    renderCeo(); save(); },
+  buyLux(id){
+    const l=LUXURY.find(x=>x.id===id);
+    if(!l||G.luxOwned.includes(id))return;
+    if(G.personalCash<l.cost){toast('💸 個人資産が足りません');return;}
+    G.personalCash-=l.cost; G.luxOwned.push(id);
+    G.awareness=Math.min(100,G.awareness+l.aw);
+    news('🛍️ 社長が<b>'+l.name+'</b>を購入!世間の注目を集めています (認知度+'+l.aw+')');
+    toast(l.e+' '+l.name+'を購入!');
+    renderAll(); save(); },
   reset(force){
     if(force===true){ doReset(); return; }
     showModal('<h3>⚠️ 新規ゲーム</h3><div class="card">現在のセーブデータを消して最初からやり直しますか?</div>'+
@@ -826,7 +1174,7 @@ window.addEventListener('beforeunload',save);
 
 /* =====================  BOOT  ===================== */
 const loaded=load();
-if(loaded){ G=loaded; G.speed=0; renderAll();
+if(loaded){ G=migrate(loaded); G.speed=0; renderAll();
   if(G.over)gameOver(); else toast('💾 セーブデータを読み込みました');
 }else{ G=newGame(); renderAll(); showTutorial(); }
 </script>
