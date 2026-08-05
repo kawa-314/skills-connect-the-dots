@@ -121,6 +121,40 @@ canvas{width:100%;height:104px;display:block}
 .cand{border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin-bottom:7px;background:var(--card2)}
 .skl{font-weight:800;color:var(--gold)}
 .sect{border-top:1px solid var(--line);margin-top:8px;padding-top:8px}
+/* ---------- ビジュアル ---------- */
+.shopwrap{background:linear-gradient(180deg,#20170e,#2b1f13);border:1px solid var(--line);
+  border-radius:10px;overflow:hidden;margin:6px 0}
+.shopwrap svg{display:block;width:100%;height:auto}
+.mapgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.mapcell{background:linear-gradient(160deg,#2f2317,#241a10);border:1px solid var(--line);
+  border-radius:12px;padding:8px 9px;position:relative;overflow:hidden}
+.mapcell.mine{border-color:var(--accent)}
+.mapcell .mc-nm{font-weight:800;font-size:12.5px;display:flex;justify-content:space-between;align-items:center}
+.mapcell .mc-sub{font-size:10px;color:var(--sub);margin-top:1px}
+.pips{display:flex;gap:3px;margin-top:6px;flex-wrap:wrap}
+.pip{width:17px;height:17px;border-radius:5px;display:flex;align-items:center;justify-content:center;
+  font-size:10px;line-height:1;border:1px solid var(--line);background:#191007}
+.pip.me{background:var(--accent);border-color:var(--accent)}
+.pip.rv{background:#5b3a2a;border-color:#7a4d34}
+.pip.free{border-style:dashed;color:#6b573f}
+.ring{display:flex;align-items:center;gap:7px}
+.ring svg{flex:0 0 auto}
+.ring .rv{font-size:15px;font-weight:800;line-height:1.1}
+.ring .rl{font-size:10px;color:var(--sub)}
+.gaugerow{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:9px}
+.gaugecard{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px 6px;
+  display:flex;flex-direction:column;align-items:center;gap:3px}
+.gaugecard .gl{font-size:10px;color:var(--sub)}
+.barrow{display:flex;align-items:center;gap:6px;padding:4px 0;font-size:11.5px}
+.barrow .bn{width:96px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.barrow .bb{flex:1;height:14px;background:#191007;border-radius:4px;overflow:hidden}
+.barrow .bb>i{display:block;height:100%;background:linear-gradient(90deg,#8c5a32,#d99a4e)}
+.barrow.me .bb>i{background:linear-gradient(90deg,#c98a2e,#ffd27f)}
+.barrow .bv{width:64px;text-align:right;font-size:10.5px}
+.donut{display:flex;align-items:center;gap:8px}
+.dlegend{font-size:10px;color:var(--sub);line-height:1.5}
+.dlegend i{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:3px}
+
 </style>
 </head>
 <body>
@@ -151,6 +185,7 @@ canvas{width:100%;height:104px;display:block}
     <!-- ============ HOME ============ -->
     <div class="page show" id="pg-home">
       <div id="alerts"></div>
+      <div class="gaugerow" id="gauges"></div>
       <div class="grid2">
         <div class="kpi"><div class="muted">本日の来客</div><div class="v" id="h-visitors">0人</div></div>
         <div class="kpi"><div class="muted">本日の売上</div><div class="v" id="h-rev">¥0</div></div>
@@ -177,6 +212,9 @@ canvas{width:100%;height:104px;display:block}
         <div><b>店舗一覧</b><div class="muted" id="slot-note">空き物件を探して出店しよう</div></div>
         <button class="btn" id="btn-newstore">＋ 出店</button>
       </div>
+      <h2>🗺️ 街と出店枠</h2>
+      <div id="district-map"></div>
+      <h2>🏬 店舗</h2>
       <div id="store-list"></div>
     </div>
 
@@ -190,6 +228,8 @@ canvas{width:100%;height:104px;display:block}
       <div class="card" id="mgr-assign"></div>
       <h2>💴 賃金水準</h2>
       <div class="card" id="wage-card"></div>
+      <h2>🔬 経営研究</h2>
+      <div class="card" id="research"></div>
       <h2>🧑‍💼 人材市場</h2>
       <div class="card" id="candidates"></div>
     </div>
@@ -232,7 +272,7 @@ canvas{width:100%;height:104px;display:block}
     <div class="page" id="pg-fin">
       <div class="grid2">
         <div class="kpi"><div class="muted">現金</div><div class="v" id="f-cash">¥0</div></div>
-        <div class="kpi"><div class="muted">借入残高</div><div class="v" id="f-loan">¥0</div></div>
+        <div class="kpi"><div class="muted">借入残高 / 格付け</div><div class="v" id="f-loan">¥0</div></div>
         <div class="kpi"><div class="muted">累計売上</div><div class="v" id="f-trev">¥0</div></div>
         <div class="kpi"><div class="muted">累計利益</div><div class="v" id="f-tpf">¥0</div></div>
       </div>
@@ -278,18 +318,26 @@ canvas{width:100%;height:104px;display:block}
 'use strict';
 /* =====================  DATA  ===================== */
 const DISTRICTS=[
- {id:'ekimae', name:'駅前',       pool:980, slots:4, rent:9000, tol:1.10, wd:1.0,  we:1.15,
+ {id:'ekimae', name:'駅前',       city:1, pool:980, slots:4, seg:{student:.15,office:.35,family:.20,senior:.10,trend:.20}, rent:9000, tol:1.10, wd:1.0,  we:1.15,
   desc:'人通り最大の一等地。枠は4つしかなく、ステラが既に押さえている。'},
- {id:'office', name:'オフィス街', pool:810, slots:4, rent:7000, tol:1.25, wd:1.25, we:0.50,
+ {id:'office', name:'オフィス街', city:1, pool:810, slots:4, seg:{student:.05,office:.70,family:.05,senior:.05,trend:.15}, rent:7000, tol:1.25, wd:1.25, we:0.50,
   desc:'客単価が高く平日に強い。週末はほぼ人がいない。'},
- {id:'shoten', name:'商店街',     pool:620, slots:5, rent:4800, tol:1.00, wd:1.0,  we:1.20,
+ {id:'shoten', name:'商店街',     city:1, pool:620, slots:5, seg:{student:.15,office:.15,family:.30,senior:.30,trend:.10}, rent:4800, tol:1.00, wd:1.0,  we:1.20,
   desc:'バランス型。枠が多く、拠点を築きやすい。'},
- {id:'campus', name:'大学前',     pool:590, slots:3, rent:3600, tol:0.80, wd:1.1,  we:0.65,
+ {id:'campus', name:'大学前',     city:1, pool:590, slots:3, seg:{student:.65,office:.10,family:.05,senior:.05,trend:.15}, rent:3600, tol:0.80, wd:1.1,  we:0.65,
   desc:'学生街。価格に非常に敏感で、高値をつけると一気に離れる。'},
- {id:'suburb', name:'住宅街',     pool:420, slots:6, rent:2600, tol:0.95, wd:0.9,  we:1.35,
+ {id:'suburb', name:'住宅街',     city:1, pool:420, slots:6, seg:{student:.05,office:.10,family:.45,senior:.35,trend:.05}, rent:2600, tol:0.95, wd:0.9,  we:1.35,
   desc:'家賃が安く枠も多い。週末に強いが人通りは少ない。'},
- {id:'mall',   name:'郊外モール', pool:750, slots:3, rent:5600, tol:1.05, wd:0.75, we:1.60,
+ {id:'mall',   name:'郊外モール', city:1, pool:750, slots:3, seg:{student:.15,office:.05,family:.55,senior:.15,trend:.10}, rent:5600, tol:1.05, wd:0.75, we:1.60,
   desc:'週末の集客力は圧倒的。平日は閑散とする。'},
+ {id:'c2core', name:'新都心',     city:2, pool:1150, slots:4, seg:{student:.10,office:.45,family:.10,senior:.05,trend:.30}, rent:12000, tol:1.20, wd:1.15, we:1.10,
+  desc:'第2都市の中心。感度層とビジネス客が集まる最大の商圏。'},
+ {id:'c2bay',  name:'ベイエリア', city:2, pool:900, slots:4, seg:{student:.10,office:.15,family:.35,senior:.05,trend:.35}, rent:9500, tol:1.15, wd:0.85, we:1.55,
+  desc:'週末のデートスポット。トレンドに敏感な客層が多い。'},
+ {id:'c2old',  name:'旧市街',     city:2, pool:640, slots:5, seg:{student:.10,office:.15,family:.25,senior:.45,trend:.05}, rent:5200, tol:0.95, wd:1.0,  we:1.15,
+  desc:'シニアが半分近くを占める落ち着いた街。'},
+ {id:'c2stn',  name:'新幹線駅',   city:2, pool:980, slots:3, seg:{student:.15,office:.55,family:.15,senior:.10,trend:.05}, rent:11000, tol:1.15, wd:1.20, we:0.85,
+  desc:'出張客と通勤客の巨大な流動。テイクアウトが強い。'},
 ];
 const PRODUCTS=[
  {id:'drip',     name:'ドリップコーヒー', e:'☕', cost:35,  fair:320, appeal:10, cat:'drink', bean:true,  temp:'hot',  rnd:0},
@@ -331,6 +379,27 @@ const COMPETITORS=[
  {id:'nekomado', name:'ねこまど珈琲',   e:'🐱', power:26, cap:800000000, person:'buzz',
   stores:{campus:1},
   desc:'猫カフェ併設の新興チェーン。SNSでバズを起こしては、あなたの認知度を奪っていく。'},
+];
+const SEGMENTS=[
+ {id:'student',name:'学生',      e:'🎓', sens:1.75, spend:0.80, base:34, likes:['frozen','ice','cookie','latte']},
+ {id:'office', name:'ビジネス',  e:'💼', sens:0.65, spend:1.30, base:30, likes:['drip','espresso','sand','latte']},
+ {id:'family', name:'ファミリー',e:'👨‍👩‍👧', sens:1.15, spend:1.15, base:32, likes:['cake','cookie','tea','mocha']},
+ {id:'senior', name:'シニア',    e:'👴', sens:1.05, spend:0.95, base:28, likes:['drip','tea','croissant']},
+ {id:'trend',  name:'感度層',    e:'✨', sens:0.80, spend:1.35, base:30, likes:['matcha','frozen','mocha','cappu']},
+];
+const CONCEPTS=[
+ {id:'std',   name:'スタンダード',      e:'☕', cap:1.00, build:1.00, rent:1.00, appeal:1.00, food:1.00,
+  seg:{}, desc:'どの客層にも無難に対応できる基本形。'},
+ {id:'togo',  name:'テイクアウト特化',  e:'🥤', cap:1.50, build:0.75, rent:0.70, appeal:0.88, food:0.55,
+  seg:{office:1.35,student:1.20,senior:0.75,family:0.70}, desc:'回転率が高く家賃も安い。滞在客には弱い。'},
+ {id:'lounge',name:'大型ラウンジ',      e:'🛋️', cap:0.85, build:1.70, rent:1.45, appeal:1.30, food:1.45,
+  seg:{family:1.40,senior:1.35,office:0.85}, desc:'ゆったり滞在。フードが強く家族と年配客に刺さる。'},
+ {id:'drive', name:'ドライブスルー',    e:'🚗', cap:1.35, build:1.30, rent:1.10, appeal:1.05, food:0.85,
+  seg:{family:1.40,senior:1.10,student:0.80}, only:['mall','suburb'],
+  desc:'車客を捕まえる。郊外モールと住宅街でのみ出店可。'},
+ {id:'flag',  name:'ロースタリー旗艦店',e:'🏭', cap:0.90, build:2.60, rent:1.30, appeal:1.75, food:1.20,
+  seg:{trend:1.65,office:1.10,student:0.85}, needs:'roast',
+  desc:'焙煎設備を備えた旗艦店。ブランドの象徴。自家焙煎工場が必要。'},
 ];
 const FUND={name:'グレートベア投資ファンド', e:'🐻'};
 const EXEC_ROLES=[
@@ -403,6 +472,33 @@ const WEATHERS=[
 ];
 const WD=['月','火','水','木','金','土','日'];
 const BASE_WAGE=9000;
+const RATINGS=['D','CCC','B','BB','BBB','A','AA','AAA'];
+const RATE_MULT={AAA:0.55,AA:0.7,A:0.85,BBB:1.0,BB:1.25,B:1.55,CCC:2.0,D:2.8};
+const LOAN_PRODUCTS=[
+ {id:'short', name:'短期運転資金', e:'⚡', term:180, rate:0.00085, minR:1,
+  desc:'審査が緩く即日実行。金利は高く期間も短い。急場をしのぐ資金。',
+  cap:g=>Math.max(3000000, Math.round(avgProfit(30)*70))},
+ {id:'growth',name:'事業拡大ローン', e:'📈', term:730, rate:0.00042, minR:3,
+  desc:'2年かけて返す標準的な設備資金。BB以上の格付けが必要。',
+  cap:g=>Math.max(0, Math.round(avgProfit(30)*220+totalAssets()*0.25))},
+ {id:'synd', name:'シンジケートローン', e:'🏦', term:1095, rate:0.00026, minR:5,
+  desc:'銀行団による大型・低利の協調融資。A以上かつ担保となる資産が必要。',
+  cap:g=>Math.max(0, Math.round(avgProfit(30)*450+totalAssets()*0.55)), needAsset:true},
+ {id:'bond', name:'社債の発行', e:'📜', term:1095, rate:0.00033, minR:4, bullet:true, listed:true,
+  desc:'3年後に元本を一括償還。毎日の返済は不要だが、満期に払えなければ致命傷。',
+  cap:g=>Math.round(G.lastVal*0.22)},
+];
+const RESEARCH=[
+ {id:'pos',   name:'POSシステム導入',   e:'🖥️', cost:8000000,   days:30, desc:'管理能力+2。本部の統制が効くようになる。'},
+ {id:'mobile',name:'モバイルオーダー',   e:'📱', cost:20000000,  days:45, desc:'提供能力+18%。行列を大きく減らせる。'},
+ {id:'sub',   name:'サブスクリプション', e:'🎫', cost:35000000,  days:50, desc:'常連が固定化し、全店の集客+12%。'},
+ {id:'self',  name:'セルフレジ',         e:'🤖', cost:28000000,  days:40, desc:'店舗の人件費-14%。'},
+ {id:'train', name:'研修センター設立',   e:'🏫', cost:45000000,  days:60, desc:'管理能力+2、全店のスキルが毎日伸びる。'},
+ {id:'supply',name:'サプライチェーン改革',e:'🚚', cost:60000000,  days:70, desc:'材料原価-10%。'},
+ {id:'brand', name:'ブランド戦略室',     e:'💎', cost:80000000,  days:80, desc:'評判+0.3、認知度の低下が半減。'},
+ {id:'ai',    name:'需要予測AI',         e:'🧠', cost:120000000, days:90, desc:'全店の人員が常に最適化され、廃棄も減る。'},
+];
+function hasR(id){ return G.research.indexOf(id)>=0; }
 const MILESTONES=[
  {id:'m1', name:'1号店をオープンする',            reward:100000,  chk:g=>g.stores.length>=1},
  {id:'m2', name:'店長を配属する',                 reward:150000,  chk:g=>g.stores.some(s=>s.managerId)},
@@ -427,11 +523,12 @@ let G=null;
 const SAVE_KEY='coffee_empire_save_v3';
 function blankToday(){
   return {rev:0,cogs:0,wage:0,rent:0,hq:0,interest:0,visitors:0,lost:0,profit:0,
-          biz:0,prop:0,salary:0,mgmt:0,fine:0};
+          biz:0,prop:0,salary:0,mgmt:0,fine:0,princ:0};
 }
 function newGame(){
   const g={
     day:1, cash:5000000, loan:0, negDays:0, baseRate:0.0005, covenantDays:0,
+    loans:[], rating:'BB', missed:0, lseq:1,
     awareness:10, reputation:3.0,
     beanId:'brazil', beanSpot:1.0, spotHist:[], beanContract:null,
     unlocked:['drip','latte','ice'], enabled:['drip','latte','ice'], prices:{}, fresh:{},
@@ -444,6 +541,8 @@ function newGame(){
     today:blankToday(),
     totalVisitors:0, totalRev:0, totalProfit:0, bestDayProfit:0,
     listed:false, ownerShare:100, holders:{fund:0,stella:0}, lastWarn:0,
+    pressure:0, tob:null, tobCool:0, warned55:false, vcDone:false, vcShare:0,
+    pendingChoice:false, hidden:0, contract:null, city2:false,
     lastVal:20000000, valHist:[], everTop:false, topStreak:0,
     antitrustWarned:false,
     personalCash:2000000, salaryIdx:0, luxOwned:[],
@@ -451,6 +550,7 @@ function newGame(){
     speed:0, cleared:false, over:false, seq:1, mseq:1,
   };
   for(const p of PRODUCTS) g.fresh[p.id]=1;
+  g.research=[]; g.researching=null;
   for(const c of g.comps){ c.myShare=0; c.acquired=false; c.cd=15+Math.floor(Math.random()*20); c.defended=0; }
   for(let i=0;i<6;i++) g.candidates.push(makeCandidate(g));
   return g;
@@ -471,12 +571,58 @@ function rnd(a,b){ return a+Math.random()*(b-a); }
 function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
 function weightedPick(ws){ let s=ws.reduce((a,b)=>a+b,0), r=Math.random()*s;
   for(let i=0;i<ws.length;i++){ r-=ws[i]; if(r<=0)return i; } return ws.length-1; }
-function price(pid){ const p=PRODUCTS.find(x=>x.id===pid); return (G.prices[pid]!=null)?G.prices[pid]:p.fair; }
+function price(pid,st){ const p=PRODUCTS.find(x=>x.id===pid);
+  let v=(G.prices[pid]!=null)?G.prices[pid]:p.fair;
+  if(st&&st.priceMode) v=Math.round(v*(st.priceMode>0?1.15:0.88));
+  return v; }
+function seasonInfo(){
+  const doy=(G.day-1)%365; let x;
+  if(doy<90) x={name:'春',e:'🌸',traffic:1.05,hot:1.0,cold:1.0};
+  else if(doy<182) x={name:'夏',e:'🌻',traffic:1.0,hot:0.70,cold:1.70};
+  else if(doy<273) x={name:'秋',e:'🍁',traffic:1.08,hot:1.15,cold:0.90};
+  else x={name:'冬',e:'⛄',traffic:0.92,hot:1.55,cold:0.50};
+  x.ev=null;
+  if(doy<4){ x.ev='正月'; x.traffic*=0.72; }
+  else if(doy>=43&&doy<47){ x.ev='バレンタイン'; x.traffic*=1.30; }
+  else if(doy>=118&&doy<126){ x.ev='GW'; x.traffic*=1.35; }
+  else if(doy>=200&&doy<232){ x.ev='夏休み'; x.traffic*=1.12; }
+  else if(doy>=298&&doy<304){ x.ev='ハロウィン'; x.traffic*=1.20; }
+  else if(doy>=352&&doy<360){ x.ev='クリスマス'; x.traffic*=1.45; }
+  return x;
+}
+function menuBySeg(st){
+  const b=bean(), w=weather(), se=seasonInfo(), cc=conceptOf(st);
+  const out={};
+  for(const g of SEGMENTS){
+    let sw=0,sp=0,sc=0;
+    for(const id of G.enabled){
+      const p=PRODUCTS.find(x=>x.id===id); if(!p)continue;
+      const pr=price(id,st), cost=prodCost(p);
+      let a=p.appeal*(G.fresh[id]||1);
+      if(g.likes.indexOf(id)>=0) a*=1.65;
+      if(G.trend&&G.trend.pid===id) a*=1.8;
+      if(p.cat==='drink'){
+        if(p.temp==='hot') a*=w.hot*se.hot; else if(p.temp==='cold') a*=w.cold*se.cold;
+        if(p.bean) a*=(0.8+b.q*0.1);
+      } else a*=cc.food;
+      a*=Math.max(0.06,Math.pow(1/Math.max(pr/p.fair,0.5),1.5*g.sens));
+      sw+=a; sp+=a*pr; sc+=a*cost;
+    }
+    let waste=1+Math.max(0,G.enabled.length-6)*0.02;
+    if(hasR('ai')) waste=1+(waste-1)*0.5;
+    const cm=hasR('supply')?0.90:1;
+    out[g.id]={appeal:sw, price:sw?(sp/sw)*g.spend:0, cost:sw?(sc/sw)*waste*cm:0};
+  }
+  return out;
+}
 function bean(){ return BEANS.find(b=>b.id===G.beanId); }
 function weather(){ return WEATHERS.find(w=>w.id===G.weather); }
 function isWeekend(){ const d=(G.day-1)%7; return d>=5; }
 function dayLabel(){ const y=Math.floor((G.day-1)/365)+1, dd=(G.day-1)%365+1;
   return y+'年目 '+dd+'日 ('+WD[(G.day-1)%7]+')'; }
+function conceptOf(st){ return CONCEPTS.find(c=>c.id===(st&&st.concept||'std'))||CONCEPTS[0]; }
+function conceptAvailable(c,did){ if(c.only&&c.only.indexOf(did)<0) return false;
+  if(c.needs&&!G.ventures.includes(c.needs)) return false; return true; }
 function districtOf(st){ return DISTRICTS.find(d=>d.id===st.districtId); }
 function getMgr(id){ return id? G.managers.find(m=>m.id===id) : null; }
 function getExec(role){ return G.execs[role]? getMgr(G.execs[role]) : null; }
@@ -506,14 +652,18 @@ function avgProfit(n){
 /* --- 出店枠 --- */
 function compStoresIn(did){ let n=0; for(const c of G.comps){ if(!c.acquired) n+=(c.stores[did]||0); } return n; }
 function myStoresIn(did){ return G.stores.filter(s=>s.districtId===did).length; }
+function activeDistricts(){ return DISTRICTS.filter(d=>d.city===1||G.city2); }
 function freeSlots(did){ const d=DISTRICTS.find(x=>x.id===did);
   return Math.max(0, d.slots - myStoresIn(did) - compStoresIn(did)); }
-function totalFreeSlots(){ return DISTRICTS.reduce((s,d)=>s+freeSlots(d.id),0); }
-function storeOpenCost(d){ return 2000000 + d.rent*150; }
+function totalFreeSlots(){ return activeDistricts().reduce((s,d)=>s+freeSlots(d.id),0); }
+function storeOpenCost(d,cid){ const c=CONCEPTS.find(x=>x.id===(cid||'std'))||CONCEPTS[0];
+  return Math.round((2000000 + d.rent*150)*c.build); }
 /* --- 管理能力 --- */
 function mgmtLoad(){ return G.stores.reduce((s,st)=>s+(st.managerId?0.3:1.15),0); }
 function mgmtCap(){
   let c=3;
+  if(hasR('pos')) c+=2;
+  if(hasR('train')) c+=2;
   const ops=getExec('ops'); if(ops) c+=3+ops.skill/12;
   for(const r of EXEC_ROLES){ if(r.id!=='ops'&&G.execs[r.id]) c+=0.8; }
   return c;
@@ -533,19 +683,20 @@ function wageOf(st){
   const m=getMgr(st.managerId);
   let w=st.staff*BASE_WAGE*(G.wageDrift||1)*WAGE_LEVELS[G.wageIdx].mult;
   if(m&&m.traitId==='cost') w*=0.85;
+  if(hasR('self')) w*=0.86;
   return w;
 }
 function rentOf(d){ return Math.round(d.rent*((G.rentMod&&G.rentMod[d.id])||1)); }
 function perStaffCapacity(st){
   const m=getMgr(st.managerId);
-  return (75+st.skill*0.9)*(1+(st.equip-1)*0.15)*(m?1+m.skill/250:0.90)*menuComplexity();
+  return (75+st.skill*0.9)*(1+(st.equip-1)*0.15)*(m?1+m.skill/250:0.90)*menuComplexity()*conceptOf(st).cap*(hasR('mobile')?1.18:1);
 }
 function storeCapacity(st){ return st.staff*perStaffCapacity(st); }
 function idealStaff(st){ return clamp(Math.ceil((st.lastPot||60)/Math.max(1,perStaffCapacity(st))),1,12); }
 function storeAttract(st){
   if(st.closedDays>0) return 0;
   const m=getMgr(st.managerId);
-  let a=40+st.equip*15+st.interior*10+st.skill*0.5+st.rep*12+(m?12+m.skill*0.22:0);
+  let a=(40+st.equip*15+st.interior*10+st.skill*0.5+st.rep*12+(m?12+m.skill*0.22:0))*conceptOf(st).appeal*(hasR('sub')?1.12:1);
   if(m&&m.traitId==='magnet') a*=1.2;
   return Math.max(1,a);
 }
@@ -564,10 +715,61 @@ function calcValuation(){
   return Math.round(Math.max(5000000, earn+Math.max(0,assets)*0.9+G.stores.length*12000000));
 }
 function industryStoreShare(){
-  const mine=G.stores.length, comp=DISTRICTS.reduce((s,d)=>s+compStoresIn(d.id),0);
+  const mine=G.stores.length, comp=activeDistricts().reduce((s,d)=>s+compStoresIn(d.id),0);
   return mine/Math.max(1,mine+comp);
 }
 function stakeCost(c){ return Math.round(c.cap*0.05*(1.15+(c.myShare/100)*1.2)); }
+function totalAssets(){
+  return G.properties.reduce((a,p)=>a+p.curPrice,0)+G.stores.length*2500000+
+    G.ventures.reduce((a,v)=>{const x=VENTURES.find(y=>y.id===v);return a+(x?x.cost*0.7:0);},0);
+}
+function totalDebt(){ return G.loans.reduce((a,l)=>a+l.balance,0); }
+function calcRating(){
+  const avg=avgProfit(30), debt=totalDebt(), assets=Math.max(1,totalAssets());
+  const dailyInt=G.loans.reduce((a,l)=>a+l.balance*l.rate,0);
+  let sc=3.2;
+  sc+=clamp(avg/120000,-2.5,2.5);
+  sc-=clamp((debt/assets)*2.6,0,3);
+  sc+=debt>0? clamp((avg/Math.max(1,dailyInt))/8,0,1.5) : 0.8;
+  sc+=G.listed?0.4:0;
+  sc+=clamp(G.stores.length*0.06,0,0.7);
+  sc-=G.missed*0.9;
+  sc-=clamp(G.hist.filter(h=>h.p<0).length*0.05,0,1.2);
+  return RATINGS[clamp(Math.round(sc),0,7)];
+}
+function ratingIdx(){ return RATINGS.indexOf(G.rating); }
+function loanRateFor(prod){ return prod.rate*(RATE_MULT[G.rating]||1.2); }
+function loanCapacity(prod){
+  const already=G.loans.filter(l=>l.pid===prod.id).reduce((a,l)=>a+l.balance,0);
+  return Math.max(0, prod.cap()-already);
+}
+function processLoans(t){
+  let princ=0;
+  for(const l of G.loans){
+    const int=l.balance*l.rate;
+    t.interest+=int;
+    l.daysLeft--;
+    if(l.bullet){
+      if(l.daysLeft<=0){
+        if(G.cash>=l.balance){ G.cash-=l.balance; princ+=l.balance; l.balance=0;
+          news('📜 社債を満期償還しました('+fmtBig(l.principal)+')'); }
+        else { l.missed=(l.missed||0)+1; G.missed++; l.daysLeft=30;
+          news('🚨 <b>社債の償還ができません!</b>格付けが急落しました'); toast('🚨 社債の償還不能!',true); }
+      }
+    } else {
+      const due=l.principal/l.term;
+      if(G.cash>=due){ G.cash-=due; l.balance-=due; princ+=due; }
+      else { l.missed=(l.missed||0)+1; G.missed++;
+        if(l.missed===1){ news('🚨 <b>'+l.name+'の返済が滞りました</b>。格付けが下がります');
+          toast('🚨 返済が滞りました',true); }
+        if(l.missed>=20) return {princ:princ, default:true};
+      }
+    }
+  }
+  G.loans=G.loans.filter(l=>l.balance>1);
+  G.loan=totalDebt();
+  return {princ:princ, default:false};
+}
 function creditLimit(){
   const avg=avgProfit(30);
   const assets=G.properties.reduce((s,p)=>s+p.curPrice,0)+G.stores.length*2500000;
@@ -647,11 +849,13 @@ function runDelegation(){
   }
   // 買収防衛
   if(D.defense && getExec('cfo') && G.listed){
-    const threat=G.holders.fund+G.holders.stella;
     const cost=Math.round(G.lastVal*0.05*1.05);
-    if(threat>=22 && G.ownerShare<62 && G.cash>cost*2.5){
-      G.cash-=cost; G.ownerShare=Math.min(100,G.ownerShare+5); shrinkHolders(5);
-      news('🛡️ 財務本部長が防衛のため自社株買いを実施 (持株'+Math.round(G.ownerShare)+'%)');
+    if(G.tob){
+      const un=DEFENSES.filter(d=>G.tob.used.indexOf(d.id)<0&&d.cost()<=G.cash*0.6&&d.id!=='pill');
+      if(G.tob.support>=42&&un.length) useDefense(un.sort((a,b)=>b.eff-a.eff)[0].id);
+    } else if(G.pressure>=60 && G.ownerShare<62 && G.cash>cost*2.5){
+      G.cash-=cost; G.ownerShare=Math.min(100,G.ownerShare+5);
+      news('🛡️ 財務本部長が予防的に自社株買いを実施 (持株'+Math.round(G.ownerShare)+'%)');
     }
   }
 }
@@ -718,10 +922,115 @@ function menuStats(){
   };
 }
 
+
+/* =====================  VISUALS (inline SVG)  ===================== */
+const SEGCOL={student:'#7fb0c9',office:'#d99a4e',family:'#7fc97f',senior:'#c9a37f',trend:'#c98ac9'};
+function esc(t){ return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function personSvg(x,y,c,sc){
+  sc=sc||1;
+  return '<g transform="translate('+x+','+y+') scale('+sc+')">'+
+    '<circle cx="0" cy="-9" r="3.4" fill="'+c+'"/>'+
+    '<path d="M-3.6,-5 Q0,-6.6 3.6,-5 L3,4 L-3,4 Z" fill="'+c+'"/>'+
+    '<rect x="-2.6" y="4" width="2" height="5" fill="'+c+'"/>'+
+    '<rect x="0.6" y="4" width="2" height="5" fill="'+c+'"/></g>';
+}
+function storeSvg(st){
+  const d=districtOf(st), cc=conceptOf(st);
+  const W=300,H=104;
+  const busy=st.today.visitors/Math.max(1,st.lastPot||1);
+  const closed=st.closedDays>0;
+  const night=closed;
+  const wall=night?'#3a2b1c':'#4a3524', glass=night?'#241a10':'#f0d9a8';
+  let g='<svg viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="xMidYMid meet">';
+  // 空と地面
+  g+='<defs><linearGradient id="sky'+st.id+'" x1="0" y1="0" x2="0" y2="1">'+
+     '<stop offset="0" stop-color="'+(night?'#1b1209':'#3a2a17')+'"/>'+
+     '<stop offset="1" stop-color="#241a10"/></linearGradient></defs>';
+  g+='<rect width="'+W+'" height="'+H+'" fill="url(#sky'+st.id+')"/>';
+  g+='<rect y="86" width="'+W+'" height="18" fill="#1a120b"/>';
+  // 背景の街並み
+  for(let i=0;i<7;i++){
+    const bh=18+((i*37)%26), bx=i*44;
+    g+='<rect x="'+bx+'" y="'+(86-bh)+'" width="34" height="'+bh+'" fill="#2a1e13" opacity="0.8"/>';
+  }
+  // 店舗本体
+  const sx=92,sw=118;
+  g+='<rect x="'+sx+'" y="30" width="'+sw+'" height="56" fill="'+wall+'"/>';
+  // 窓
+  g+='<rect x="'+(sx+9)+'" y="42" width="'+(sw-18)+'" height="30" rx="2" fill="'+glass+'" opacity="'+(night?0.5:0.92)+'"/>';
+  // オーニング(コンセプト色)
+  const awn={std:'#8c5a32',togo:'#3f7a6b',lounge:'#7a4a6b',drive:'#4a5f8c',flag:'#8c3a2a'}[cc.id]||'#8c5a32';
+  for(let i=0;i<7;i++)
+    g+='<rect x="'+(sx+i*(sw/7))+'" y="24" width="'+(sw/7)+'" height="10" fill="'+(i%2?awn:'#e8dcc8')+'"/>';
+  g+='<rect x="'+sx+'" y="22" width="'+sw+'" height="4" fill="#20160d"/>';
+  // 看板
+  g+='<rect x="'+(sx+26)+'" y="6" width="'+(sw-52)+'" height="14" rx="3" fill="#20160d" stroke="'+awn+'"/>';
+  g+='<text x="'+(sx+sw/2)+'" y="16.5" font-size="9" fill="'+(closed?'#8a7a68':'#ffd27f')+
+     '" text-anchor="middle" font-family="sans-serif">'+esc(cc.e+' '+(closed?'CLOSED':'OPEN'))+'</text>';
+  // ドア
+  g+='<rect x="'+(sx+sw/2-11)+'" y="58" width="22" height="28" fill="#2a1c10"/>';
+  // 店内のスタッフ
+  const nst=Math.min(6,st.staff);
+  for(let i=0;i<nst;i++)
+    g+=personSvg(sx+22+i*((sw-44)/Math.max(1,nst-1||1)),68,'#6b4a2a',0.8);
+  // 行列(取りこぼしが多いほど長い)
+  const q=closed?0:Math.min(7,Math.round((st.today.lost||0)/14));
+  for(let i=0;i<q;i++)
+    g+=personSvg(sx-14-i*13,84,i<3?'#e0c9a8':'#a8917a',0.95);
+  // 入店中の客
+  const inn=closed?0:Math.min(5,Math.round(busy*5));
+  for(let i=0;i<inn;i++)
+    g+=personSvg(sx+sw+14+i*13,84,'#c9b092',0.9);
+  // 湯気(繁盛時)
+  if(!closed&&busy>0.5){
+    for(let i=0;i<3;i++)
+      g+='<path d="M'+(sx+40+i*20)+',22 q4,-7 0,-13 q-4,-6 0,-11" stroke="#ffffff" stroke-opacity="0.18" stroke-width="2.5" fill="none"/>';
+  }
+  // 地区ラベル
+  g+='<text x="6" y="99" font-size="9" fill="#b9a58c" font-family="sans-serif">'+esc(d.name)+' / '+esc(cc.name)+'</text>';
+  g+='<text x="'+(W-6)+'" y="99" font-size="9" fill="'+(st.today.profit>=0?'#7fc97f':'#e77c7c')+
+     '" text-anchor="end" font-family="sans-serif">'+esc(yen(st.today.profit))+'</text>';
+  return g+'</svg>';
+}
+function ringSvg(pct,color,label,size){
+  size=size||46;
+  const r=(size-8)/2, c=2*Math.PI*r, off=c*(1-clamp(pct,0,1));
+  return '<svg width="'+size+'" height="'+size+'" viewBox="0 0 '+size+' '+size+'">'+
+    '<circle cx="'+size/2+'" cy="'+size/2+'" r="'+r+'" fill="none" stroke="#191007" stroke-width="6"/>'+
+    '<circle cx="'+size/2+'" cy="'+size/2+'" r="'+r+'" fill="none" stroke="'+color+'" stroke-width="6"'+
+    ' stroke-dasharray="'+c.toFixed(1)+'" stroke-dashoffset="'+off.toFixed(1)+'" stroke-linecap="round"'+
+    ' transform="rotate(-90 '+size/2+' '+size/2+')"/>'+
+    '<text x="'+size/2+'" y="'+(size/2+3.5)+'" font-size="11" font-weight="700" fill="#f3e9dc"'+
+    ' text-anchor="middle" font-family="sans-serif">'+esc(label)+'</text></svg>';
+}
+function donutSvg(mix,size){
+  size=size||54;
+  const r=size/2-3, cx=size/2, cy=size/2;
+  let a=-Math.PI/2, g='<svg width="'+size+'" height="'+size+'" viewBox="0 0 '+size+' '+size+'">';
+  for(const k in mix){
+    const v=mix[k]; if(v<=0) continue;
+    const a2=a+v*Math.PI*2;
+    const x1=cx+r*Math.cos(a), y1=cy+r*Math.sin(a), x2=cx+r*Math.cos(a2), y2=cy+r*Math.sin(a2);
+    g+='<path d="M'+cx+','+cy+' L'+x1.toFixed(2)+','+y1.toFixed(2)+
+       ' A'+r+','+r+' 0 '+(v>0.5?1:0)+',1 '+x2.toFixed(2)+','+y2.toFixed(2)+' Z" fill="'+(SEGCOL[k]||'#888')+'"/>';
+    a=a2;
+  }
+  g+='<circle cx="'+cx+'" cy="'+cy+'" r="'+(r*0.5)+'" fill="#2d2116"/>';
+  return g+'</svg>';
+}
+
 /* =====================  SIMULATION  ===================== */
 function simDay(){
   const w=WEATHERS[weightedPick(WEATHERS.map(x=>x.w))]; G.weather=w.id;
   refreshCandidates();
+  if(G.researching){ G.researching.daysLeft--;
+    if(G.researching.daysLeft<=0){ const R=RESEARCH.find(x=>x.id===G.researching.id);
+      G.research.push(R.id); G.researching=null;
+      news('🔬 <b>'+R.name+'</b>が完成しました! '+R.desc);
+      toast('🔬 '+R.e+' '+R.name+'が完成!'); } }
+  if(hasR('train')) for(const st of G.stores) st.skill=Math.min(100,st.skill+0.25);
+  if(hasR('ai')) for(const st of G.stores) st.staff=idealStaff(st);
+  if(hasR('brand')) G.reputation=Math.min(5,G.reputation);
   runDelegation();
   updateBeanMarket();
   updateTrends();
@@ -729,38 +1038,65 @@ function simDay(){
   const t=blankToday();
   const pen=mgmtPenalty();
 
-  for(const d of DISTRICTS){
+  for(const d of activeDistricts()){
     const mine=G.stores.filter(s=>s.districtId===d.id);
     if(!mine.length) continue;
-    const pool=d.pool*(isWeekend()?d.we:d.wd)*w.traffic*(0.92+Math.random()*0.16);
+    const se=seasonInfo();
+    const pool=d.pool*(isWeekend()?d.we:d.wd)*w.traffic*se.traffic*(0.92+Math.random()*0.16);
     const awMult=0.62+(G.awareness/100)*0.95;
-    const at=mine.map(s=>storeAttract(s)*menu.variety*(1-pen));
-    const total=at.reduce((a,x)=>a+x,0)+compAttractIn(d.id)+35;
+    const compA=compAttractIn(d.id);
+    // 客層ごとに需要を奪い合う
+    const segData=mine.map(st=>menuBySeg(st));
+    const potBy=mine.map(()=>({}));
+    const pots=mine.map(()=>0);
+    for(const g of SEGMENTS){
+      const segShare=(d.seg&&d.seg[g.id])||0; if(segShare<=0) continue;
+      const segPool=pool*segShare*awMult;
+      const at=mine.map((st,i)=>{
+        const cc=conceptOf(st);
+        const cm=(cc.seg&&cc.seg[g.id])||1;
+        const ms=segData[i][g.id];
+        // その客層にとってのメニュー魅力(価格感度込み)を正規化して反映
+        const fit=clamp(ms.appeal/Math.max(1,g.base),0.25,1.6);
+        return storeAttract(st)*menu.variety*(1-pen)*cm*fit;
+      });
+      const tot=at.reduce((a,x)=>a+x,0)+compA+35;
+      mine.forEach((st,i)=>{ const v=segPool*(at[i]/tot); potBy[i][g.id]=v; pots[i]+=v; });
+    }
     mine.forEach((st,i)=>{
-      const rent=st.owned?0:rentOf(d);
+      const rent=st.owned?0:Math.round(rentOf(d)*conceptOf(st).rent);
       if(st.closedDays>0){
-        st.closedDays--; st.today={rev:0,profit:-(rent+wageOf(st)),visitors:0,lost:0,sat:st.rep,share:0};
+        st.closedDays--; st.today={rev:0,profit:-(rent+wageOf(st)),visitors:0,lost:0,sat:st.rep,share:0,seg:{}};
         t.rent+=rent; t.wage+=wageOf(st);
         pushStoreHist(st);
         return;
       }
-      const share=at[i]/total;
-      const pot=Math.round(pool*share*awMult);
+      const pot=Math.round(pots[i]);
       st.lastPot=pot;
       const cap=Math.round(storeCapacity(st));
       const served=Math.min(pot,cap), lost=Math.max(0,pot-cap);
-      // 価格許容度(価格戦争中は厳しくなる)
+      const ratio=pot>0? served/pot : 0;
+      // 客層構成に応じた客単価と原価
+      let rev=0,cogs=0,mixTot=0; const mix={};
+      for(const g of SEGMENTS){
+        const v=(potBy[i][g.id]||0)*ratio; if(v<=0) continue;
+        const ms=segData[i][g.id];
+        rev+=v*ms.price; cogs+=v*ms.cost; mix[g.id]=v; mixTot+=v;
+      }
+      for(const k in mix) mix[k]=mix[k]/Math.max(1,mixTot);
+      st.today={seg:mix};
+      const avgP=served>0? rev/served : 0;
       const tolBase=d.tol*(G.priceWar>0?0.82:1);
-      const tolPen=Math.max(0,(menu.avgPrice/(430*tolBase))-1)*0.6;
-      const rev=served*menu.avgPrice*(1-Math.min(0.35,tolPen*0.3));
-      const cogs=served*menu.avgCost;
+      const tolPen=Math.max(0,(avgP/(470*tolBase))-1)*0.6;
+      rev*=(1-Math.min(0.35,tolPen*0.3));
+      const menuAvg={avgPrice:avgP};
       const wage=wageOf(st);
       const m=getMgr(st.managerId);
       // 満足度
       let sat=1.9+b.q*0.42+st.skill/100*1.0+st.interior*0.12+st.equip*0.08+(st.morale-60)/160;
       if(m){ sat+=0.15+m.skill/250; if(m.traitId==='service') sat+=0.4; }
       sat-=lost>0? Math.min(0.9,(lost/Math.max(pot,1))*1.2):0;
-      sat-=menu.gouge*1.1; sat-=tolPen*0.8; sat-=pen*1.2;
+      sat-=tolPen*0.9; sat-=pen*1.2;
       sat=clamp(sat,1,5);
       st.rep=st.rep*0.9+sat*0.1;
       // 士気と離職
@@ -772,7 +1108,8 @@ function simDay(){
         news('😞 <b>'+st.name+'</b>でスタッフが1人退職しました(士気低下)');
       }
       if(m&&m.traitId==='coach') st.skill=Math.min(100,st.skill+0.5);
-      st.today={rev:rev,profit:rev-cogs-wage-rent,visitors:served,lost:lost,sat:sat,share:share};
+      st.today={rev:rev,profit:rev-cogs-wage-rent,visitors:served,lost:lost,sat:sat,
+        share:pot>0?served/Math.max(1,pot):0,seg:st.today.seg||{},avgP:avgP};
       pushStoreHist(st);
       t.visitors+=served; t.lost+=lost; t.rev+=rev; t.cogs+=cogs; t.wage+=wage; t.rent+=rent;
     });
@@ -780,9 +1117,11 @@ function simDay(){
   // キャンペーン
   for(const c of G.campaigns){ G.awareness=Math.min(100,G.awareness+c.perDay); c.daysLeft--; }
   G.campaigns=G.campaigns.filter(c=>c.daysLeft>0);
-  G.awareness=Math.max(8,G.awareness-0.35);
+  G.awareness=Math.max(8,G.awareness-(hasR('brand')?0.18:0.35));
   // 事業・不動産
   for(const vid of G.ventures){ const v=VENTURES.find(x=>x.id===vid); if(v) t.biz+=v.income*(0.75+Math.random()*0.5); }
+  if(G.contract){ t.biz+=G.contract.income; G.contract.days--;
+    if(G.contract.days<=0){ G.contract=null; news('🏢 法人契約が満了しました。'); } }
   for(const p of G.properties){ t.prop+=p.rent;
     p.curPrice=Math.max(1000000,Math.round(p.curPrice*(1+(Math.random()-0.485)*0.008))); }
   // 本部コスト・給与
@@ -790,7 +1129,10 @@ function simDay(){
   for(const m of G.managers) mgrPay += m.role==='exec'? m.salary*2.2 : m.salary;
   t.mgmt=mgrPay+Math.pow(G.stores.length,1.35)*6000;
   t.salary=SALARIES[G.salaryIdx].amt; G.personalCash+=t.salary;
-  t.interest=G.loan*loanRate();
+  const lp=processLoans(t);
+  t.princ=lp.princ;
+  G.rating=calcRating();
+  if(lp.default){ gameOver('返済不能に陥り、銀行団により会社は清算されました。'); return; }
   t.profit=t.rev-t.cogs-t.wage-t.rent-t.mgmt-t.interest-t.salary-t.fine+t.biz+t.prop;
   G.cash+=t.profit;
   G.today=t;
@@ -806,7 +1148,7 @@ function simDay(){
   const top=G.comps.filter(c=>!c.acquired).every(c=>G.lastVal>c.cap) && G.stores.length>0;
   if(top){ G.everTop=true; G.topStreak++; } else G.topStreak=0;
 
-  bankCovenant();
+
   stockMarket();
   if(G.over) return;
   randomEvent();
@@ -847,38 +1189,123 @@ function bankCovenant(){
     }
   } else G.covenantDays=0;
 }
+const DEFENSES=[
+ {id:'buyback', name:'大規模自社株買い', e:'🛡️', eff:16,
+  cost:g=>Math.round(G.lastVal*0.08), desc:'市場から株を買い戻し、TOBに応じる株を減らす。'},
+ {id:'knight',  name:'ホワイトナイト要請', e:'🤍', eff:22,
+  cost:g=>0, desc:'友好的な同業に株式15%を引き受けてもらう。自分の持株も薄まる。'},
+ {id:'pill',    name:'ポイズンピル発動', e:'💊', eff:26,
+  cost:g=>Math.round(G.lastVal*0.02), desc:'新株予約権で買収者を希薄化。株価と評判は大きく傷つく。'},
+ {id:'divid',   name:'特別配当', e:'💴', eff:12,
+  cost:g=>Math.round(G.lastVal*0.05), desc:'株主に報いて支持を取り戻す。現金を大量に失う。'},
+ {id:'ir',      name:'緊急IR説明会', e:'📢', eff:9,
+  cost:g=>2000000, desc:'成長戦略を訴える。直近の業績が良いほど効果が高い。'},
+ {id:'sell',    name:'資産売却で株価対策', e:'🏷️', eff:14,
+  cost:g=>0, desc:'不動産を1件売却して財務を改善する。物件が必要。'},
+];
+function tobPressure(){
+  // 持株が過半数なら、そもそもTOBは仕掛けられない
+  if(!G.listed || G.ownerShare>=50) return 0;
+  let p=1.0+(50-G.ownerShare)*0.06;
+  const avg=avgProfit(14);
+  if(avg<0) p+=2.2;
+  if(G.lastVal<totalAssets()*0.75) p+=1.4;
+  if(G.cash>G.lastVal*0.4&&avg<=0) p+=1.0;
+  if(G.rating==='D'||G.rating==='CCC') p+=1.2;
+  if(G.missed>0) p+=0.8;
+  return p;
+}
 function stockMarket(){
-  if(!G.listed) return;
-  const bad=avgProfit(14)<0 || (G.valHist.length>=20 && G.lastVal<G.valHist[0]*0.85);
+  if(!G.listed){ G.pressure=0; return; }
+  if(G.tob){ runTob(); return; }
+  if(G.tobCool>0){ G.tobCool--; }
+  const p=tobPressure();
+  G.pressure=clamp(G.pressure+(p>0? p*0.55 : -1.4),0,100);
+  if(G.pressure>=55&&G.pressure<58&&!G.warned55){ G.warned55=true;
+    news('📰 市場で<b>「あの会社は買収の標的になるのでは」</b>と噂が流れています。');
+    toast('📰 買収の噂が流れています',true); }
+  if(G.pressure<40) G.warned55=false;
+  if(G.pressure>=100&&G.tobCool<=0) declareTob();
+}
+function declareTob(){
   const stella=G.comps.find(c=>c.id==='stella');
-  const stellaAlive=stella&&!stella.acquired;
-  const float_=Math.max(0,100-G.ownerShare-G.holders.fund-G.holders.stella);
-  if(G.ownerShare<50){
-    if(float_>0.5){
-      G.holders.fund=Math.min(G.holders.fund+(bad?0.55:0.2),G.holders.fund+float_);
-      // ステラは自分が格上のときだけ参戦
-      if(stellaAlive && stella.cap>G.lastVal*0.7 && bad){
-        G.holders.stella=Math.min(G.holders.stella+0.35,G.holders.stella+Math.max(0,float_-0.5));
-      }
-    }
-  } else {
-    G.holders.fund=Math.max(0,G.holders.fund-0.3);
-    G.holders.stella=Math.max(0,G.holders.stella-0.2);
-  }
-  const threat=G.holders.fund+G.holders.stella;
-  const step=Math.floor(threat/10)*10;
-  if(step>=20 && step>G.lastWarn){
-    G.lastWarn=step;
-    const who=G.holders.stella>G.holders.fund? ('🌟 '+stella.name) : (FUND.e+' '+FUND.name);
-    news('⚠️ <b>'+who+'があなたの株を買い進めています</b>(敵対的保有 '+Math.round(threat)+'%)!');
-    toast('⚠️ 敵対的保有 '+Math.round(threat)+'%!自社株買いで防衛を',true);
-  }
-  if(threat<20) G.lastWarn=0;
-  if(threat>=50){
-    const who=G.holders.stella>G.holders.fund? stella.name : FUND.name;
-    gameOver(who+'に株式の過半数を握られ、経営権を失いました。');
+  const useStella=stella&&!stella.acquired&&stella.cap>G.lastVal*0.8&&Math.random()<0.5;
+  const raider=useStella? {id:'stella',name:stella.name,e:stella.e} : {id:'fund',name:FUND.name,e:FUND.e};
+  const prem=Math.round(rnd(25,55));
+  G.tob={raider:raider, prem:prem, days:30, support:Math.round(rnd(18,30)), used:[]};
+  G.pressure=0; G.speed=0;
+  news('🚨 <b>'+raider.name+'があなたの会社にTOB(株式公開買付)を宣言しました!</b>買付価格は市場価格+'+prem+'%');
+  showTobModal(true);
+}
+function runTob(){
+  const T=G.tob;
+  T.days--;
+  // 買付価格が魅力的なほど株主は応じる。防衛策と業績で押し戻す
+  const perf=avgProfit(14)>0? -0.9 : 0.7;
+  const resist=Math.min(0.75,(T.used.length||0)*0.22);
+  T.support=clamp(T.support+((T.prem/34)+perf+rnd(-0.4,0.7))*(1-resist),0,100);
+  if(G.ownerShare>=50){ G.tob=null; G.tobCool=120;
+    news('🛡️ 持株比率が過半数に達し、TOBは不成立となりました。'); toast('🛡️ TOBを無力化しました'); return; }
+  if(T.days<=0){
+    if(T.support>=50){ gameOver(T.raider.name+'のTOBが成立し、会社は買収されました。'); return; }
+    G.tob=null; G.tobCool=180; G.lastVal=Math.round(G.lastVal*1.12);
+    G.awareness=Math.min(100,G.awareness+8);
+    news('🎉 <b>TOBを撃退しました!</b>経営陣への信認が高まり、株価が上昇しています。');
+    toast('🎉 TOBを撃退!'); G.speed=0; showModal('<h3>🎉 TOB撃退</h3>'+
+      '<div class="card">株主はあなたの経営を支持しました。株価は12%上昇し、認知度も上がりました。<br>'+
+      'しばらく次のTOBは起きません。</div>'+
+      '<button class="btn" style="width:100%" onclick="closeModal()">経営に戻る</button>');
   }
 }
+function useDefense(did){
+  const T=G.tob; if(!T)return;
+  const D=DEFENSES.find(x=>x.id===did); if(!D||T.used.indexOf(did)>=0)return;
+  const cost=D.cost();
+  if(did==='sell'&&!G.properties.length){ toast('🚫 売却できる不動産がありません',true); return; }
+  if(cost>0&&G.cash<cost){ toast('💸 現金が足りません('+fmtBig(cost)+')',true); return; }
+  if(cost>0) G.cash-=cost;
+  let eff=D.eff;
+  if(did==='buyback'){ G.ownerShare=Math.min(100,G.ownerShare+6); }
+  if(did==='knight'){ G.ownerShare=Math.max(5,G.ownerShare*0.85);
+    news('🤍 友好的な同業が株式15%を引き受けました(あなたの持株は薄まりました)'); }
+  if(did==='pill'){ G.lastVal=Math.round(G.lastVal*0.88); G.reputation=Math.max(1,G.reputation-0.3);
+    for(const st of G.stores) st.rep=Math.max(1,st.rep-0.3); }
+  if(did==='ir'){ eff+= avgProfit(14)>0? 8:-3; }
+  if(did==='sell'){ const pp=G.properties.shift(); G.cash+=Math.round(pp.curPrice*0.95); }
+  T.used.push(did);
+  T.support=clamp(T.support-eff,0,100);
+  news(D.e+' <b>'+D.name+'</b>を実施(賛同率 -'+Math.round(eff)+'pt → '+Math.round(T.support)+'%)');
+  toast(D.e+' '+D.name+'を実施');
+  showTobModal(false); renderAll(); save();
+}
+window.useDefense=useDefense;
+function showTobModal(first){
+  const T=G.tob; if(!T){ closeModal(); return; }
+  const danger=T.support>=50;
+  showModal((first?'<h3>🚨 TOB(株式公開買付)を仕掛けられました</h3>':'<h3>⚔️ TOB防衛戦</h3>')+
+    '<div class="card'+(danger?' alert':' warn')+'">'+
+      '<div class="row"><b>'+T.raider.e+' '+T.raider.name+'</b>'+
+      '<span class="tag warn">買付価格 +'+T.prem+'%</span></div>'+
+      '<div class="small-note">残り<b>'+T.days+'日</b>。期限までに株主の賛同率を50%未満に抑えれば撃退できます。</div>'+
+      '<div style="margin-top:8px" class="muted">株主の賛同率</div>'+
+      '<div class="bar" style="height:16px"><i style="width:'+Math.round(T.support)+
+        '%;background:'+(danger?'var(--bad)':'var(--warn)')+'"></i></div>'+
+      '<div class="small-note" style="color:'+(danger?'var(--bad)':'var(--sub)')+'">'+
+        Math.round(T.support)+'% '+(danger?'— このままでは買収されます!':'— 50%未満を維持中')+'</div>'+
+    '</div>'+
+    '<div class="small-note" style="margin-bottom:6px">防衛策はそれぞれ1回のみ使えます。</div>'+
+    DEFENSES.map(D=>{
+      const used=T.used.indexOf(D.id)>=0, cost=D.cost();
+      return '<div class="card"><div class="row"><div style="flex:1">'+
+        '<b>'+D.e+' '+D.name+'</b><div class="muted">'+D.desc+'</div>'+
+        '<div class="small-note">賛同率 -'+D.eff+'pt'+(cost?' ・ 費用 '+fmtBig(cost):' ・ 費用なし')+'</div></div>'+
+        (used?'<span class="tag">使用済</span>':
+          '<button class="btn" onclick="useDefense(\''+D.id+'\')">実施</button>')+
+        '</div></div>';
+    }).join('')+
+    '<button class="btn sub" style="width:100%" onclick="closeModal()">閉じて経営を続ける</button>');
+}
+window.showTobModal=showTobModal;
 function checkAntitrust(){
   const sh=industryStoreShare();
   if(sh>0.5 && !G.antitrustWarned){
@@ -895,46 +1322,126 @@ function checkAntitrust(){
     toast('⚖️ 独禁法違反で分割命令!',true);
   }
 }
-/* ---- ランダムイベント(牙あり) ---- */
+/* ---- 危機イベント: プレイヤーに選択を迫る ---- */
+function askChoice(title,body,opts){
+  G.speed=0; if(timer){clearInterval(timer);timer=null;}
+  G.pendingChoice=true;
+  showModal('<h3>'+title+'</h3><div class="card">'+body+'</div>'+
+    opts.map((o,i)=>'<div class="card"><div class="row"><div style="flex:1"><b>'+o.label+'</b>'+
+      '<div class="muted">'+o.desc+'</div></div>'+
+      '<button class="btn'+(o.danger?' danger':'')+'" onclick="resolveChoice('+i+')">選ぶ</button>'+
+      '</div></div>').join(''));
+  G._opts=opts;
+}
+function resolveChoice(i){
+  const o=G._opts&&G._opts[i]; G.pendingChoice=false; G._opts=null;
+  closeModal();
+  if(o&&o.act) o.act();
+  renderAll(); save();
+}
+window.resolveChoice=resolveChoice;
 function randomEvent(){
+  if(!G.stores.length||G.pendingChoice||G.tob) return;
   const r=Math.random();
-  if(!G.stores.length) return;
-  if(r<0.008){ // 保健所
+  if(r<0.010){ // 保健所
     const st=G.stores.filter(s=>s.closedDays<=0).sort((a,b)=>a.rep-b.rep)[0];
-    if(st && st.rep<3.0){
-      st.closedDays=3; st.rep=Math.max(1,st.rep-0.8);
-      const fine=200000+Math.floor(Math.random()*300000); G.cash-=fine;
-      news('🚨 <b>'+st.name+'が保健所の抜き打ち検査で3日間の営業停止</b>!罰金'+yen(fine));
-      toast('🚨 '+st.name+'が営業停止に!',true);
-    }
-  } else if(r<0.022){ // 炎上
-    G.reputation=Math.max(1,G.reputation-0.5);
-    for(const s of G.stores) s.rep=Math.max(1,s.rep-0.5);
-    G.awareness=Math.min(100,G.awareness+8);
-    news('💥 <b>SNSで接客対応が炎上</b>!名前は広まりましたが評判が急落しました。');
-    toast('💥 SNS炎上!評判が急落',true);
-  } else if(r<0.032){ // 家賃更新
-    const d=pick(DISTRICTS);
+    if(!st||st.rep>=3.2) return;
+    askChoice('🚨 保健所の抜き打ち検査',
+      '<b>'+st.name+'</b>で衛生管理の不備が指摘されました。対応を決めてください。',[
+      {label:'全店を自主休業して総点検', desc:'全店1日休業。誠実な対応で評判はむしろ上がる。',
+       act:()=>{ for(const x of G.stores) x.closedDays=Math.max(x.closedDays,1);
+         for(const x of G.stores) x.rep=Math.min(5,x.rep+0.25);
+         news('🧼 全店休業で総点検を実施。誠実な対応が評価されました。'); }},
+      {label:'該当店のみ3日間の営業停止', desc:'標準的な対応。その店の評判は下がる。',
+       act:()=>{ st.closedDays=3; st.rep=Math.max(1,st.rep-0.7);
+         const f=250000; G.cash-=f;
+         news('🚨 '+st.name+'が3日間の営業停止。罰金'+yen(f)); }},
+      {label:'報告を伏せて営業を続ける', desc:'今は無傷。ただし後で発覚すると壊滅的。', danger:true,
+       act:()=>{ G.hidden=(G.hidden||0)+1;
+         news('🤫 指摘を伏せて営業を継続しました…'); }},
+    ]);
+  } else if(r<0.020){ // 炎上
+    askChoice('💥 SNSで接客対応が炎上',
+      'ある店舗での接客動画が拡散し、批判が殺到しています。認知度は跳ね上がりましたが評判は急落中です。',[
+      {label:'即日、社長が謝罪会見を開く', desc:'費用がかかるが評判の傷を最小限に。',
+       act:()=>{ G.cash-=800000; G.awareness=Math.min(100,G.awareness+10);
+         for(const x of G.stores) x.rep=Math.max(1,x.rep-0.15);
+         news('🎤 社長の謝罪会見。誠実さが伝わり、傷は浅く済みました。'); }},
+      {label:'当該店の店長を更迭する', desc:'店長を1人失うが、幕引きは早い。',
+       act:()=>{ const m=G.managers.filter(x=>x.role==='store')[0];
+         if(m){ const st=G.stores.find(x=>x.managerId===m.id); if(st)st.managerId=null;
+           G.managers=G.managers.filter(x=>x.id!==m.id);
+           news('👤 責任者として店長'+m.name+'を更迭しました。'); }
+         G.awareness=Math.min(100,G.awareness+8);
+         for(const x of G.stores) x.rep=Math.max(1,x.rep-0.25); }},
+      {label:'沈黙して嵐が過ぎるのを待つ', desc:'出費ゼロ。ただし評判は大きく傷つく。', danger:true,
+       act:()=>{ G.awareness=Math.min(100,G.awareness+12);
+         for(const x of G.stores) x.rep=Math.max(1,x.rep-0.6);
+         news('💥 沈黙を選び、批判は長く尾を引きました。'); }},
+    ]);
+  } else if(r<0.028){ // 引き抜き
+    const m=G.managers.filter(x=>x.role==='store').sort((a,b)=>b.skill-a.skill)[0];
+    if(!m) return;
+    askChoice('💼 店長に引き抜きの打診',
+      '競合が<b>'+m.name+'</b>(スキル'+m.skill+')に破格の条件を提示しています。',[
+      {label:'給与を1.6倍にして引き止める', desc:'人件費は上がるが、優秀な人材を守れる。',
+       act:()=>{ m.salary=Math.round(m.salary*1.6);
+         news('🤝 '+m.name+'の待遇を引き上げて引き止めました。'); }},
+      {label:'昇進を約束する(本部へ抜擢)', desc:'空いている幹部ポストがあれば就任させる。',
+       act:()=>{ const free=EXEC_ROLES.find(r2=>!G.execs[r2.id]);
+         if(free){ act.assign(m.id,'exec:'+free.id);
+           news('🎖️ '+m.name+'を'+free.name+'に抜擢しました。'); }
+         else { news('😞 空きポストがなく、'+m.name+'は去っていきました。');
+           const st=G.stores.find(x=>x.managerId===m.id); if(st)st.managerId=null;
+           G.managers=G.managers.filter(x=>x.id!==m.id); } }},
+      {label:'引き止めない', desc:'コストはゼロ。店長を1人失う。',
+       act:()=>{ const st=G.stores.find(x=>x.managerId===m.id); if(st)st.managerId=null;
+         G.managers=G.managers.filter(x=>x.id!==m.id);
+         news('👋 '+m.name+'が競合へ移籍しました。'); }},
+    ]);
+  } else if(r<0.036){ // 豆の高騰
+    if(G.beanSpot<1.25) return;
+    askChoice('🌧️ 産地の不作でコーヒー豆が高騰',
+      '豆の相場が<b>×'+G.beanSpot.toFixed(2)+'</b>まで上がりました。原価を直撃します。',[
+      {label:'品質を守り、高値でも仕入れる', desc:'原価はそのまま。満足度は維持される。',
+       act:()=>{ news('☕ 品質を優先し、高値でも仕入れを継続しました。'); }},
+      {label:'一時的に安い豆へ切り替える', desc:'原価を抑えるが、味が落ちて評判が下がる。',
+       act:()=>{ G.beanId='robusta';
+         news('🫘 やむなく安価なロブスタ豆に切り替えました。'); }},
+      {label:'全商品を10%値上げする', desc:'利益は守れるが、価格に敏感な客層が離れる。',
+       act:()=>{ for(const p2 of PRODUCTS) G.prices[p2.id]=Math.round(price(p2.id)*1.1);
+         news('💰 豆高騰を理由に全商品を10%値上げしました。'); }},
+    ]);
+  } else if(r<0.044){ // 法人契約のオファー
+    const bonus=Math.round(rnd(150000,400000));
+    askChoice('🏢 大口の法人契約オファー',
+      '大手企業から「社内カフェの運営を任せたい」という打診がありました。',[
+      {label:'受注する(90日間の安定収入)', desc:'日次 '+yen(bonus)+' が入るが、スタッフが1人拘束される。',
+       act:()=>{ G.contract={days:90, income:bonus};
+         if(G.stores[0]&&G.stores[0].staff>1) G.stores[0].staff--;
+         news('🤝 法人契約を締結!90日間、日次'+yen(bonus)+'の収入が入ります。'); }},
+      {label:'断る', desc:'現場のリソースを守る。',
+       act:()=>{ news('🙅 法人契約の打診を辞退しました。'); }},
+    ]);
+  } else if(r<0.050){ // 家賃更新
+    const d=pick(DISTRICTS.filter(x=>myStoresIn(x.id)>0)); if(!d) return;
     G.rentMod[d.id]=((G.rentMod[d.id])||1)*1.15;
-    news('📄 <b>'+d.name+'の家賃が更新で15%引き上げ</b>られました(現在 '+yen(rentOf(d))+'/日)。');
-  } else if(r<0.042){ // 豆の不作
-    G.beanSpot=clamp(G.beanSpot*1.45,0.55,2.6);
-    news('🌧️ <b>産地が不作</b>!豆の相場が急騰しています'+(G.beanContract?'(長期契約で影響を回避)':''));
-    toast('🌧️ 豆の相場が急騰!',true);
-  } else if(r<0.050){ // 設備故障
-    const st=pick(G.stores);
+    news('📄 <b>'+d.name+'の家賃が15%引き上げ</b>られました(現在 '+yen(rentOf(d))+'/日)。');
+  } else if(r<0.056){ const st=pick(G.stores);
     const dmg=80000+Math.floor(Math.random()*180000); G.cash-=dmg;
     news('🔧 <b>'+st.name+'</b>のマシンが故障。修理費'+yen(dmg));
-  } else if(r<0.060){ // メディア
-    G.awareness=Math.min(100,G.awareness+6);
+  } else if(r<0.064){ G.awareness=Math.min(100,G.awareness+6);
     news('📰 地元メディアに好意的に紹介されました!認知度+6');
-  } else if(r<0.068){ // ケータリング
-    const bonus=80000+Math.floor(Math.random()*200000); G.cash+=bonus;
+  } else if(r<0.070){ const bonus=80000+Math.floor(Math.random()*200000); G.cash+=bonus;
     news('🎉 大口のケータリング注文! '+yen(bonus));
-  } else if(r<0.074){ // 賃上げ
-    G.wageDrift=(G.wageDrift||1)*1.05;
+  } else if(r<0.075){ G.wageDrift=(G.wageDrift||1)*1.05;
     news('📢 <b>最低賃金が引き上げ</b>られました。全店の人件費が5%上昇します。');
-    toast('📢 最低賃金の引き上げで人件費増',true);
+  } else if(r<0.079&&G.hidden>0){ // 隠蔽の発覚
+    G.hidden=0;
+    const f=Math.round(G.lastVal*0.03)+2000000; G.cash-=f;
+    for(const x of G.stores){ x.rep=Math.max(1,x.rep-1.2); x.closedDays=Math.max(x.closedDays,2); }
+    news('📛 <b>過去の衛生問題の隠蔽が発覚!</b>全店2日休業、課徴金'+fmtBig(f)+'、評判が暴落しました。');
+    toast('📛 隠蔽が発覚しました!',true);
   }
 }
 /* ---- 競合AI ---- */
@@ -968,7 +1475,7 @@ function compAI(){
         news('🫘 <b>'+c.name+'に店長「'+m.name+'」が引き抜かれました</b>!');
         toast('🫘 店長を引き抜かれました!',true);
       } else {
-        const open=DISTRICTS.filter(d=>freeSlots(d.id)>0);
+        const open=activeDistricts().filter(d=>freeSlots(d.id)>0);
         if(open.length){ const d=pick(open); c.stores[d.id]=(c.stores[d.id]||0)+1;
           news('🫘 '+c.name+'が'+d.name+'に出店しました。'); }
       }
@@ -980,7 +1487,7 @@ function compAI(){
 }
 function bestDistrictOfPlayer(){
   let best=null,bv=-1;
-  for(const d of DISTRICTS){
+  for(const d of activeDistricts()){
     const v=G.stores.filter(s=>s.districtId===d.id).reduce((s,x)=>s+(x.today?x.today.rev:0),0);
     if(v>bv){ bv=v; best=d; }
   }
@@ -999,16 +1506,20 @@ function checkMilestones(){
 
 /* =====================  ACTIONS  ===================== */
 function tryPay(cost){ if(G.cash<cost){ toast('💸 現金が足りません('+fmtBig(cost)+'必要)',true); return false; } G.cash-=cost; return true; }
-function openStore(did){
+function openStore(did,cid){
+  cid=cid||'std';
   const d=DISTRICTS.find(x=>x.id===did);
+  const c=CONCEPTS.find(x=>x.id===cid)||CONCEPTS[0];
   if(freeSlots(did)<=0){ toast('🚫 '+d.name+'に空き物件がありません',true); return; }
-  const cost=storeOpenCost(d);
+  if(!conceptAvailable(c,did)){ toast('🚫 その業態はここでは出店できません',true); return; }
+  const cost=storeOpenCost(d,cid);
   if(!tryPay(cost)) return;
-  const st={ id:'s'+(G.seq++), districtId:did, name:(G.stores.length+1)+'号店 ('+d.name+')',
+  const st={ id:'s'+(G.seq++), districtId:did, concept:cid, priceMode:0,
+    name:(G.stores.length+1)+'号店 ('+d.name+')',
     staff:2, skill:25, morale:70, managerId:null, equip:1, interior:1, rep:3.0, owned:false,
-    closedDays:0, lastPot:60, hist:[], today:{rev:0,profit:0,visitors:0,lost:0,sat:3,share:0} };
+    closedDays:0, lastPot:60, hist:[], today:{rev:0,profit:0,visitors:0,lost:0,sat:3,share:0,seg:{}} };
   G.stores.push(st);
-  news('🎊 <b>'+st.name+'</b>をオープンしました!');
+  news('🎊 <b>'+st.name+'</b>を'+c.e+c.name+'として開店しました!');
   toast('🎊 '+st.name+'オープン!');
   closeModal(); renderAll(); save();
 }
@@ -1044,6 +1555,40 @@ function absorb(c){
 const act={
   hire(sid){ const st=G.stores.find(x=>x.id===sid); if(st&&st.staff<12){ st.staff++; st.skill=Math.max(10,st.skill-3); renderAll(); save(); } },
   fire(sid){ const st=G.stores.find(x=>x.id===sid); if(st&&st.staff>1){ st.staff--; st.morale=Math.max(0,st.morale-6); renderAll(); save(); } },
+  priceMode(sid){ const st=G.stores.find(x=>x.id===sid); if(!st)return;
+    st.priceMode=st.priceMode>0?-1:(st.priceMode<0?0:1);
+    toast(st.priceMode>0?'💰 高価格戦略(+15%)':st.priceMode<0?'🏷️ 低価格戦略(-12%)':'⚖️ 標準価格');
+    renderStores(); save(); },
+  concept(sid){ const st=G.stores.find(x=>x.id===sid); if(!st)return;
+    const d=districtOf(st);
+    showModal('<h3>🏗️ '+st.name+' の業態変更</h3>'+
+      '<div class="card muted">改装費は新規出店費の6割です。業態は客層との相性を大きく変えます。</div>'+
+      CONCEPTS.map(c=>{
+        const ok=conceptAvailable(c,st.districtId), cost=Math.round(storeOpenCost(d,c.id)*0.6);
+        return '<div class="card"><div class="row"><div style="flex:1"><b>'+c.e+' '+c.name+'</b>'+
+          '<div class="muted">'+c.desc+'</div></div>'+
+          (st.concept===c.id?'<span class="tag good">現在</span>':
+           '<button class="btn" '+((!ok||G.cash<cost)?'disabled':'')+
+           ' onclick="act.doConcept(\''+sid+'\',\''+c.id+'\')">'+fmtBig(cost)+'</button>')+
+          '</div></div>';
+      }).join('')+'<button class="btn sub" style="width:100%" onclick="closeModal()">閉じる</button>'); },
+  doConcept(sid,cid){ const st=G.stores.find(x=>x.id===sid); if(!st)return;
+    const cost=Math.round(storeOpenCost(districtOf(st),cid)*0.6);
+    if(!tryPay(cost))return;
+    st.concept=cid; st.closedDays=2;
+    const c=CONCEPTS.find(x=>x.id===cid);
+    news('🏗️ <b>'+st.name+'</b>を'+c.e+c.name+'に改装しました(2日間休業)');
+    toast('🏗️ '+c.name+'に改装!'); closeModal(); renderAll(); save(); },
+  city2(){ if(G.city2)return;
+    if(!tryPay(500000000))return;
+    G.city2=true;
+    news('🌆 <b>第2都市への進出を決定!</b> 新たに4地区・16の出店枠が解禁されました。');
+    toast('🌆 第2都市に進出しました!'); renderAll(); save(); },
+  research(id){ const R=RESEARCH.find(x=>x.id===id); if(!R||hasR(id)||G.researching)return;
+    if(!tryPay(R.cost))return;
+    G.researching={id:id, daysLeft:R.days, total:R.days};
+    news('🔬 <b>'+R.name+'</b>の開発に着手しました('+R.days+'日)');
+    toast('🔬 '+R.name+'の開発を開始'); renderAll(); save(); },
   optStaff(sid){ const st=G.stores.find(x=>x.id===sid); if(!st)return;
     const t=idealStaff(st);
     if(t===st.staff){ toast('✅ すでに最適な人員です'); return; }
@@ -1145,7 +1690,7 @@ const act={
     renderAll(); save(); },
   buyback(){ if(!G.listed||G.ownerShare>=100)return;
     const cost=Math.round(G.lastVal*0.05*1.05); if(!tryPay(cost))return;
-    G.ownerShare=Math.min(100,G.ownerShare+5); shrinkHolders(5);
+    G.ownerShare=Math.min(100,G.ownerShare+5);
     news('🛡️ 自社株買いを実施 (持株'+Math.round(G.ownerShare)+'%)'); toast('🛡️ 自社株買い完了');
     renderAll(); save(); },
   buyStake(cid,mode){
@@ -1203,12 +1748,37 @@ const act={
     G.personalCash-=l.cost; G.luxOwned.push(id); G.awareness=Math.min(100,G.awareness+l.aw);
     news('🛍️ 社長が<b>'+l.name+'</b>を購入!話題になっています(認知度+'+l.aw+')');
     toast(l.e+' '+l.name+'を購入!'); renderAll(); save(); },
-  borrow(){ const lim=creditLimit(), step=Math.min(500000,Math.max(0,lim-G.loan));
-    if(step<=0){ toast('🏦 借入枠がいっぱいです',true); return; }
-    G.loan+=step; G.cash+=step; news('🏦 '+yen(step)+'を借入'); renderAll(); save(); },
-  repay(){ const step=Math.min(500000,G.loan,Math.max(0,G.cash));
-    if(step<=0)return; G.loan-=step; G.cash-=step; news('🏦 '+yen(step)+'を返済'); renderAll(); save(); },
-  reset(force){ if(force===true){ doReset(); return; }
+  applyLoan(pid,frac){
+    const prod=LOAN_PRODUCTS.find(x=>x.id===pid); if(!prod)return;
+    if(ratingIdx()<prod.minR){ toast('🚫 格付け'+G.rating+'では審査に通りません(要'+RATINGS[prod.minR]+'以上)',true); return; }
+    if(prod.listed&&!G.listed){ toast('🚫 社債の発行には上場が必要です',true); return; }
+    if(prod.needAsset&&totalAssets()<30000000){ toast('🚫 担保となる資産が不足しています',true); return; }
+    const capv=loanCapacity(prod);
+    const amt=Math.round(capv*((frac||100)/100)/100000)*100000;
+    if(amt<500000){ toast('🚫 借入可能額が残っていません',true); return; }
+    const rate=loanRateFor(prod);
+    G.loans.push({id:'l'+(G.lseq++), pid:pid, name:prod.name, principal:amt, balance:amt,
+      rate:rate, term:prod.term, daysLeft:prod.term, bullet:!!prod.bullet, missed:0});
+    G.cash+=amt; G.loan=totalDebt();
+    news('🏦 <b>'+prod.name+'</b> '+fmtBig(amt)+'を実行(金利'+(rate*100).toFixed(3)+'%/日・'+prod.term+'日)');
+    toast(prod.e+' '+fmtBig(amt)+'を調達しました');
+    closeModal(); renderAll(); save(); },
+  repayLoan(lid){
+    const l=G.loans.find(x=>x.id===lid); if(!l)return;
+    const amt=Math.min(l.balance,G.cash);
+    if(amt<1000){ toast('💸 返済に充てる現金がありません',true); return; }
+    G.cash-=amt; l.balance-=amt; l.missed=0;
+    if(l.balance<1){ G.loans=G.loans.filter(x=>x.id!==lid); news('✅ '+l.name+'を完済しました'); }
+    else news('🏦 '+l.name+'に'+fmtBig(amt)+'を繰上返済');
+    G.loan=totalDebt(); renderAll(); save(); },
+  vc(){
+    if(G.listed){ toast('🚫 上場企業はVC出資を受けられません',true); return; }
+    if(G.vcDone){ toast('🚫 VC出資は1回だけです',true); return; }
+    const amt=Math.round(G.lastVal*0.16);
+    G.vcDone=true; G.cash+=amt; G.vcShare=12;
+    news('💠 <b>ベンチャーキャピタルから'+fmtBig(amt)+'を調達</b>(株式12%を譲渡)');
+    toast('💠 VC出資を受けました'); renderAll(); save(); },
+    reset(force){ if(force===true){ doReset(); return; }
     showModal('<h3>⚠️ 新規ゲーム</h3><div class="card">セーブデータを消して最初からやり直しますか?</div>'+
       '<div class="btnrow"><button class="btn danger" onclick="act.reset(true)">最初から</button>'+
       '<button class="btn sub" onclick="closeModal()">やめる</button></div>'); },
@@ -1219,7 +1789,8 @@ function doReset(){ localStorage.removeItem(SAVE_KEY); G=newGame(); closeModal()
 /* =====================  RENDER  ===================== */
 function renderHeader(){
   $('day-label').textContent=dayLabel();
-  const w=weather(); $('weather').textContent=w.e+' '+w.name;
+  const w=weather(), se=seasonInfo();
+  $('weather').textContent=se.e+(se.ev?se.ev:se.name)+' '+w.e;
   $('cash').textContent=yen(G.cash); $('cash').className=G.cash<0?'neg':'';
   $('k-rep').textContent='★'+G.reputation.toFixed(1);
   $('k-aw').textContent=Math.round(G.awareness);
@@ -1241,7 +1812,8 @@ function collectAlerts(){
   const nomgr=G.stores.filter(s=>!s.managerId).length;
   if(nomgr>=3) out.push({pg:'org',msg:'👔 店長のいない店舗が'+nomgr+'店。管理負荷が高まっています。'});
   if(G.loan>creditLimit()) out.push({pg:'fin',msg:'🏦 <b>借入枠を超過</b>しています。返済しないと資産を強制売却されます。'});
-  if(G.listed&&(G.holders.fund+G.holders.stella)>=25) out.push({pg:'fin',msg:'⚠️ <b>敵対的な株主が'+Math.round(G.holders.fund+G.holders.stella)+'%</b>を保有。50%で経営権を失います。'});
+  if(G.tob) out.push({pg:'fin',msg:'🚨 <b>'+G.tob.raider.name+'によるTOBが進行中</b>(残り'+G.tob.days+'日・賛同率'+Math.round(G.tob.support)+'%)。防衛策を打ってください。'});
+  else if(G.listed&&G.pressure>=60) out.push({pg:'fin',msg:'⚠️ <b>買収の標的にされつつあります</b>(危険度'+Math.round(G.pressure)+'%)。業績と持株比率を見直してください。'});
   if(G.priceWar>0) out.push({pg:'menu',msg:'⚔️ 価格戦争中(残り'+G.priceWar+'日)。値下げを検討してください。'});
   if(G.beanSpot>1.45&&!G.beanContract) out.push({pg:'menu',msg:'🌱 豆の相場が高騰中(×'+G.beanSpot.toFixed(2)+')。原価を圧迫しています。'});
   return out;
@@ -1252,6 +1824,14 @@ function renderHome(){
   $('h-rev').textContent=yen(t.rev);
   const hp=$('h-profit'); hp.textContent=yen(t.profit); hp.className='v '+(t.profit>=0?'good':'bad');
   $('h-lost').textContent=t.lost.toLocaleString()+'人';
+  const mp=mgmtPenalty();
+  $('gauges').innerHTML=
+    '<div class="gaugecard">'+ringSvg(G.reputation/5,'#ffd27f','★'+G.reputation.toFixed(1))+
+      '<span class="gl">評判</span></div>'+
+    '<div class="gaugecard">'+ringSvg(G.awareness/100,'#7fb0c9',Math.round(G.awareness)+'')+
+      '<span class="gl">認知度</span></div>'+
+    '<div class="gaugecard">'+ringSvg(mgmtLoad()/Math.max(0.1,mgmtCap()),mp>0?'#e77c7c':'#7fc97f',
+      mgmtLoad().toFixed(1))+'<span class="gl">管理負荷/'+mgmtCap().toFixed(0)+'</span></div>';
   const al=collectAlerts();
   $('alerts').innerHTML=al.map(a=>'<div class="card warn"><div style="font-size:12.5px">'+a.msg+'</div></div>').join('');
   $('log').innerHTML=G.log.map(x=>'<div>'+x+'</div>').join('')||'<div>まだニュースはありません。</div>';
@@ -1268,6 +1848,7 @@ function renderHome(){
       const d=districtOf(s);
       const col=s.today.profit>=0?'var(--good)':'var(--bad)';
       return '<div class="rank" onclick="act.detail(\''+s.id+'\')">'+
+        '<span style="margin-right:4px">'+conceptOf(s).e+'</span>'+
         '<span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+
         (i+1)+'. '+s.name.replace(/\s*\(.*/,'')+' <span class="muted">'+d.name+'</span></span>'+
         spark(s.hist,50,16,col)+
@@ -1305,8 +1886,15 @@ function storeBadges(st){
 }
 function renderStores(){
   const free=totalFreeSlots();
-  $('slot-note').textContent='空き物件 '+free+'枠 / 全'+DISTRICTS.reduce((s,d)=>s+d.slots,0)+'枠';
+  $('slot-note').textContent='空き物件 '+free+'枠 / 全'+activeDistricts().reduce((s,d)=>s+d.slots,0)+'枠';
   $('btn-newstore').disabled=free<=0;
+  const map=$('district-map');
+  if(map) map.innerHTML='<div class="mapgrid">'+activeDistricts().map(d=>districtCell(d,false)).join('')+'</div>'+
+    (G.city2? '' : '<div class="card" style="margin-top:8px"><div class="row"><div style="flex:1">'+
+      '<b>🌆 第2都市への進出</b><div class="muted">新都心・ベイエリア・旧市街・新幹線駅の4地区(全16枠)が'+
+      '解禁されます。第1都市の枠が埋まったら次の街へ。</div></div>'+
+      '<button class="btn" '+(G.cash<500000000?'disabled':'')+
+      ' onclick="act.city2()">'+fmtBig(500000000)+'</button></div></div>');
   const el=$('store-list');
   if(!G.stores.length){ el.innerHTML='<div class="card muted">まだ店舗がありません。「＋出店」から1号店を開きましょう!</div>'; return; }
   el.innerHTML=G.stores.map(st=>{
@@ -1315,6 +1903,7 @@ function renderStores(){
     return '<div class="card">'+
       '<div class="store-head"><span class="nm">🏬 '+st.name+'</span>'+
         '<span class="star">★'+st.rep.toFixed(1)+'</span></div>'+
+      '<div class="shopwrap">'+storeSvg(st)+'</div>'+
       '<div style="margin:4px 0">'+storeBadges(st)+'</div>'+
       '<div class="stat-line">'+
         '<span>本日 <b>'+st.today.visitors+'人</b></span>'+
@@ -1336,6 +1925,8 @@ function renderStores(){
         '<button class="mini" onclick="act.fire(\''+st.id+'\')">➖削減</button>'+
         '<button class="mini'+(idealStaff(st)!==st.staff?' hot':'')+'" onclick="act.optStaff(\''+st.id+'\')">🧮 人員最適化</button>'+
         '<button class="mini" onclick="showAssign(\''+st.id+'\')">👔 店長</button>'+
+        '<button class="mini" onclick="act.priceMode(\''+st.id+'\')">'+
+          (st.priceMode>0?'💰 高価格':st.priceMode<0?'🏷️ 低価格':'⚖️ 標準価格')+'</button>'+
       '</div></div>';
   }).join('');
 }
@@ -1380,6 +1971,22 @@ function renderOrg(){
       '<button class="mini'+(i===G.wageIdx?' hot':'')+'" onclick="act.wage('+i+')">'+w.name+' ×'+w.mult+'</button>').join('')+'</div>'+
     '<div class="small-note">好待遇は士気が上がり離職を防ぎます。低賃金は人件費が下がりますが、士気が落ちて次々に辞めていきます。</div>';
   // 人材市場
+  const rs=$('research');
+  if(rs) rs.innerHTML=
+    (G.researching? (function(){ const R=RESEARCH.find(x=>x.id===G.researching.id);
+      const pg=1-G.researching.daysLeft/G.researching.total;
+      return '<div class="row"><b>'+R.e+' '+R.name+' 開発中</b><span class="muted">残り'+
+        G.researching.daysLeft+'日</span></div><div class="bar" style="height:10px"><i style="width:'+
+        Math.round(pg*100)+'%"></i></div><div class="small-note">'+R.desc+'</div><div class="sect"></div>';})()
+      : '<div class="small-note">研究は1件ずつ進みます。完成すると永続的な効果が得られます。</div>')+
+    RESEARCH.map(R=>{
+      const done=hasR(R.id);
+      return '<div class="prod"><div class="info"><div class="nm">'+R.e+' '+R.name+
+        (done?' <span class="tag good">導入済</span>':'')+'</div>'+
+        '<div class="sub">'+R.desc+' ／ '+R.days+'日</div></div>'+
+        (done?'':'<button class="btn" '+((G.researching||G.cash<R.cost)?'disabled':'')+
+          ' onclick="act.research(\''+R.id+'\')">'+fmtBig(R.cost)+'</button>')+'</div>';
+    }).join('');
   $('candidates').innerHTML=G.candidates.map(c=>{
     const t=traitOf(c);
     return '<div class="cand"><div class="row"><b>'+c.name+'</b><span class="skl">スキル '+c.skill+'</span></div>'+
@@ -1459,10 +2066,13 @@ function renderMarket(){
     .concat(G.comps.filter(c=>!c.acquired).map(c=>({name:c.name,e:c.e,cap:c.cap,
       stores:Object.values(c.stores).reduce((a,b)=>a+b,0),share:c.myShare})));
   rows.sort((a,b)=>b.cap-a.cap);
+  const mxc=Math.max.apply(null,rows.map(r=>r.cap));
   $('ranking').innerHTML=rows.map((r,i)=>
-    '<div class="rank" style="'+(r.me?'color:var(--gold);font-weight:800':'')+'">'+
-    '<span>'+(i+1)+'位 '+r.e+' '+r.name+(r.share?' <span class="tag">保有'+r.share+'%</span>':'')+'</span>'+
-    '<span>'+fmtBig(r.cap)+' <span class="muted">('+r.stores+'店)</span></span></div>').join('')+
+    '<div class="barrow'+(r.me?' me':'')+'">'+
+    '<span class="bn">'+(i+1)+'. '+r.e+' '+r.name.replace(' (あなた)','')+'</span>'+
+    '<span class="bb"><i style="width:'+Math.max(3,(r.cap/mxc)*100).toFixed(1)+'%"></i></span>'+
+    '<span class="bv">'+fmtBig(r.cap)+'</span></div>'+
+    (r.share?'<div class="small-note" style="margin:-2px 0 4px 100px">保有'+r.share+'%</div>':'')).join('')+
     (G.topStreak>0?'<div class="small-note" style="color:var(--gold)">👑 首位を'+G.topStreak+'日連続で維持中(30日でクリア)</div>':'');
   const sh=Math.round(industryStoreShare()*100);
   $('antitrust').innerHTML='<div class="row"><span class="muted">業界の店舗シェア</span><b>'+sh+'%</b></div>'+
@@ -1519,7 +2129,7 @@ function renderMarket(){
 }
 function renderFin(){
   $('f-cash').textContent=yen(G.cash); $('f-cash').className='v '+(G.cash>=0?'':'bad');
-  $('f-loan').textContent=yen(G.loan);
+  $('f-loan').innerHTML=yen(totalDebt())+' <span style="font-size:12px;color:var(--sub)">'+G.rating+'</span>';
   $('f-trev').textContent=yen(G.totalRev);
   const tp=$('f-tpf'); tp.textContent=yen(G.totalProfit); tp.className='v '+(G.totalProfit>=0?'good':'bad');
   const t=G.today;
@@ -1530,19 +2140,29 @@ function renderFin(){
     plRow('本部・幹部コスト',-t.mgmt)+(t.salary?plRow('役員報酬',-t.salary):'')+
     plRow('家賃',-t.rent)+plRow('支払利息',-t.interest)+
     '<div class="row" style="border-top:1px solid var(--line);margin-top:6px;padding-top:6px">'+
-    '<b>営業利益</b><b style="color:'+(t.profit>=0?'var(--good)':'var(--bad)')+'">'+yen(t.profit)+'</b></div>';
-  const lim=creditLimit();
+    '<b>営業利益</b><b style="color:'+(t.profit>=0?'var(--good)':'var(--bad)')+'">'+yen(t.profit)+'</b></div>'+
+    (t.princ?'<div class="row"><span class="muted">元本返済(現金支出)</span><span>'+yen(-t.princ)+'</span></div>':'');
+  const ri=ratingIdx();
+  const rcol=ri>=5?'var(--good)':ri>=3?'var(--gold)':'var(--bad)';
   $('bank').innerHTML=
-    '<div class="row"><span class="muted">借入枠(業績と資産に連動)</span><b>'+fmtBig(lim)+'</b></div>'+
-    '<div class="bar"><i style="width:'+Math.min(100,(G.loan/Math.max(1,lim))*100)+'%;background:'+
-      (G.loan>lim?'var(--bad)':'var(--accent)')+'"></i></div>'+
-    '<div class="row" style="margin-top:4px"><span class="muted">実効金利(レバレッジ連動)</span><b>'+
-      (loanRate()*100).toFixed(3)+'%/日</b></div>'+
-    (G.loan>lim?'<div class="small-note" style="color:var(--bad)">⚠️ 枠を超過('+G.covenantDays+
-      '日目)。15日で資産を強制売却されます。</div>':'')+
-    '<div class="btnrow"><button class="btn" onclick="act.borrow()">¥500,000 借りる</button>'+
-    '<button class="btn sub" onclick="act.repay()">¥500,000 返す</button></div>'+
-    '<div class="small-note">借入枠は直近30日の利益と資産で決まります。赤字が続くと枠が縮み、返済を迫られます。</div>';
+    '<div class="row"><div><b>信用格付け</b><div class="muted">収益力・負債比率・返済実績で決まります</div></div>'+
+    '<div style="font-size:26px;font-weight:800;color:'+rcol+'">'+G.rating+'</div></div>'+
+    '<div class="bar" style="height:8px"><i style="width:'+((ri+1)/8*100)+'%;background:'+rcol+'"></i></div>'+
+    '<div class="small-note">格付けが上がるほど金利が下がり、大型の融資に手が届きます'+
+      (G.missed?' ・<span style="color:var(--bad)">延滞'+G.missed+'回</span>':'')+'</div>'+
+    '<div class="sect"><b>借入残高 '+fmtBig(totalDebt())+'</b>'+
+    (G.loans.length? G.loans.map(l=>{
+      const prog=1-l.balance/l.principal;
+      return '<div class="prod"><div class="info"><div class="nm">'+l.name+
+        (l.missed?' <span class="tag bad">延滞'+l.missed+'</span>':'')+'</div>'+
+        '<div class="sub">残 '+fmtBig(l.balance)+' / 金利 '+(l.rate*100).toFixed(3)+'%日 / 残'+l.daysLeft+'日'+
+        (l.bullet?' <span class="tag warn">満期一括</span>':' <span class="tag">日割返済 '+yen(l.principal/l.term)+'</span>')+'</div>'+
+        '<div class="bar"><i style="width:'+Math.round(prog*100)+'%"></i></div></div>'+
+        '<button class="mini" onclick="act.repayLoan(\''+l.id+'\')">繰上返済</button></div>';
+    }).join('') : '<div class="muted">借入はありません</div>')+'</div>'+
+    '<div class="btnrow"><button class="btn" onclick="showLoanDesk()">🏦 融資を申し込む</button>'+
+    (!G.listed&&!G.vcDone?'<button class="btn sub" onclick="act.vc()">💠 VCから出資を受ける</button>':'')+
+    '</div>';
   renderStock();
 }
 function plRow(n,v,cls){
@@ -1561,24 +2181,41 @@ function renderStock(){
       '<button class="btn" '+((okS&&okP)?'':'disabled')+' onclick="act.ipo()">上場する</button></div>';
     return;
   }
-  const own=Math.round(G.ownerShare), fund=Math.round(G.holders.fund), stl=Math.round(G.holders.stella);
-  const pub=Math.max(0,100-own-fund-stl), threat=fund+stl;
+  const own=Math.round(G.ownerShare), pub=Math.max(0,100-own-(G.vcShare||0));
+  const pr=Math.round(G.pressure);
+  const pcol=pr>=70?'var(--bad)':pr>=40?'var(--warn)':'var(--good)';
+  const reasons=[];
+  if(G.ownerShare<50) reasons.push('持株が50%未満');
+  if(avgProfit(14)<0) reasons.push('直近が赤字');
+  if(G.lastVal<totalAssets()*0.8) reasons.push('資産に対して株価が割安');
+  if(G.cash>G.lastVal*0.35&&avgProfit(14)<G.lastVal*0.0002) reasons.push('現金を貯め込んで成長していない');
+  if(G.rating==='D'||G.rating==='CCC') reasons.push('信用格付けが低い');
   el.innerHTML=
     '<div class="row"><b>上場企業</b><b>'+fmtBig(G.lastVal)+'</b></div>'+
     '<div class="row muted"><span>株価(100万株)</span><span>'+yen(G.lastVal/1000000)+'</span></div>'+
     '<div style="margin:8px 0 2px" class="muted">株主構成</div>'+
     '<div class="bar" style="height:12px">'+
       '<i style="width:'+own+'%;background:var(--gold)"></i>'+
-      '<i style="width:'+fund+'%;background:var(--bad)"></i>'+
-      '<i style="width:'+stl+'%;background:#c76a3a"></i>'+
+      '<i style="width:'+(G.vcShare||0)+'%;background:#7a5ea8"></i>'+
       '<i style="width:'+pub+'%;background:#5a4a35"></i></div>'+
-    '<div class="small-note">👔 社長 '+own+'% / 🐻 ファンド '+fund+'% / 🌟 ステラ '+stl+'% / 市場 '+pub+'%</div>'+
-    (threat>=20?'<div class="small-note" style="color:var(--bad)">⚠️ 敵対的保有 '+threat+'%。50%で経営権を失います。</div>':'')+
-    (own<50?'<div class="small-note" style="color:var(--warn)">持株が50%未満です。赤字や株価下落が続くと買い進められます。</div>':'')+
+    '<div class="small-note">👔 社長 '+own+'%'+((G.vcShare||0)?' / 💠 VC '+G.vcShare+'%':'')+' / 市場 '+pub+'%</div>'+
+    (G.tob?
+      '<div class="card alert" style="margin-top:8px"><b>🚨 TOB進行中</b>'+
+      '<div class="small-note">'+G.tob.raider.name+' ・ 残り'+G.tob.days+'日 ・ 賛同率'+
+      Math.round(G.tob.support)+'%</div>'+
+      '<button class="btn danger" style="width:100%;margin-top:6px" onclick="showTobModal(false)">防衛戦へ</button></div>'
+      :
+      '<div class="sect"><div class="row"><span class="muted">買収の標的にされやすさ</span>'+
+      '<b style="color:'+pcol+'">'+pr+'%</b></div>'+
+      '<div class="bar" style="height:8px"><i style="width:'+pr+'%;background:'+pcol+'"></i></div>'+
+      '<div class="small-note">'+(G.ownerShare>=50?
+        '✅ 持株が過半数(50%以上)のため、TOBを仕掛けられることはありません':
+        (reasons.length? '狙われる理由: '+reasons.join('、'):'今のところ健全です'))+
+      (G.tobCool>0?' ・ TOB撃退の効果で'+G.tobCool+'日は安全':'')+'</div></div>')+
     '<div class="btnrow">'+
       '<button class="btn" onclick="act.raiseCap()">増資 +'+fmtBig(G.lastVal*0.05*0.95)+'</button>'+
       '<button class="btn" '+(G.ownerShare<15?'disabled':'')+' onclick="act.sellShares()">持株売却(社長へ)</button>'+
-      '<button class="btn sub" '+(G.cash<G.lastVal*0.05*1.05?'disabled':'')+' onclick="act.buyback()">自社株買い −'+fmtBig(G.lastVal*0.05*1.05)+'</button>'+
+      '<button class="btn sub" '+(G.cash<G.lastVal*0.05*1.05?'disabled':'')+' onclick="act.buyback()">自社株買い</button>'+
     '</div>';
 }
 function renderCeo(){
@@ -1606,26 +2243,61 @@ function closeModal(){ $('modal-wrap').classList.remove('show'); }
 window.closeModal=closeModal;
 $('modal-wrap').addEventListener('click',e=>{ if(e.target.id==='modal-wrap')closeModal(); });
 function showNewStore(){
-  showModal('<h3>🏬 出店する立地を選ぶ</h3>'+
-    '<div class="small-note" style="margin-bottom:8px">同じ地区に店を増やすほど、自店同士で客を奪い合います。'+
-    '枠も有限です。</div>'+
-    DISTRICTS.map(d=>{
-      const cost=storeOpenCost(d), free=freeSlots(d.id);
-      const mine=myStoresIn(d.id), comp=compStoresIn(d.id);
-      return '<div class="card"><div class="row"><div style="flex:1">'+
-        '<b>'+d.name+'</b> <span class="tag">来客プール '+d.pool+'</span>'+
-        '<span class="tag'+(free>0?'':' bad')+'">空き'+free+'/'+d.slots+'枠</span>'+
-        '<div class="muted">'+d.desc+'</div>'+
-        '<div class="muted">家賃 '+yen(d.rent)+'/日 ・ 自店'+mine+' / 競合'+comp+'</div></div>'+
-        '<button class="btn" '+((G.cash<cost||free<=0)?'disabled':'')+
-        ' onclick="openStore(\''+d.id+'\')">'+fmtBig(cost)+'</button></div></div>';
-    }).join('')+'<button class="btn sub" style="width:100%" onclick="closeModal()">閉じる</button>');
+  showModal('<h3>🗺️ 出店する街を選ぶ</h3>'+
+    '<div class="small-note" style="margin-bottom:8px">同じ地区に店を増やすほど自店同士で客を奪い合います。'+
+    '枠も有限です。<b>客層構成</b>に合った業態と価格を選びましょう。</div>'+
+    '<div class="mapgrid">'+activeDistricts().map(d=>districtCell(d,true)).join('')+'</div>'+
+    '<button class="btn sub" style="width:100%;margin-top:8px" onclick="closeModal()">閉じる</button>');
 }
+function districtCell(d,pick){
+  const free=freeSlots(d.id), mine=myStoresIn(d.id), comp=compStoresIn(d.id);
+  let pips='';
+  for(let i=0;i<mine;i++) pips+='<span class="pip me">☕</span>';
+  for(let i=0;i<comp;i++) pips+='<span class="pip rv">🏪</span>';
+  for(let i=0;i<free;i++) pips+='<span class="pip free">＋</span>';
+  const legend=SEGMENTS.filter(g=>(d.seg[g.id]||0)>=0.15)
+    .map(g=>'<i style="background:'+SEGCOL[g.id]+'"></i>'+g.name+Math.round(d.seg[g.id]*100)+'%').join(' ');
+  return '<div class="mapcell'+(mine?' mine':'')+'"'+
+    (pick?' onclick="showConceptPick(\''+d.id+'\')"':'')+'>'+
+    '<div class="mc-nm"><span>'+d.name+'</span><span class="muted">'+d.pool+'人</span></div>'+
+    '<div class="mc-sub">家賃 '+yen(d.rent)+'/日</div>'+
+    '<div class="donut" style="margin-top:5px">'+donutSvg(d.seg,44)+
+      '<div class="dlegend">'+legend+'</div></div>'+
+    '<div class="pips">'+pips+'</div>'+
+    (pick? '<div class="small-note" style="color:'+(free>0?'var(--accent)':'var(--bad)')+'">'+
+      (free>0?'タップして出店 →':'空き枠なし')+'</div>':'')+
+    '</div>';
+}
+function showConceptPick(did){
+  const d=DISTRICTS.find(x=>x.id===did);
+  if(freeSlots(did)<=0){ toast('🚫 空き物件がありません',true); return; }
+  showModal('<h3>🏗️ '+d.name+' — 業態を選ぶ</h3>'+
+    '<div class="donut card">'+donutSvg(d.seg,58)+'<div class="dlegend">'+
+      SEGMENTS.map(g=>'<div><i style="background:'+SEGCOL[g.id]+'"></i>'+g.e+g.name+' '+
+        Math.round((d.seg[g.id]||0)*100)+'%</div>').join('')+'</div></div>'+
+    CONCEPTS.map(c=>{
+      const ok=conceptAvailable(c,did), cost=storeOpenCost(d,c.id);
+      const hit=SEGMENTS.filter(g=>(c.seg[g.id]||1)>1.1&&(d.seg[g.id]||0)>=0.2)
+        .map(g=>g.e+g.name).join('・');
+      return '<div class="card"><div class="row"><div style="flex:1">'+
+        '<b>'+c.e+' '+c.name+'</b><div class="muted">'+c.desc+'</div>'+
+        '<div class="small-note">提供能力 ×'+c.cap.toFixed(2)+' / 家賃 ×'+c.rent.toFixed(2)+
+        ' / 集客 ×'+c.appeal.toFixed(2)+'</div>'+
+        (hit?'<div class="small-note" style="color:var(--good)">この街の '+hit+' に刺さる</div>':'')+
+        (!ok?'<div class="small-note" style="color:var(--bad)">'+(c.needs?'自家焙煎工場が必要':'この立地では不可')+'</div>':'')+
+        '</div>'+
+        '<button class="btn" '+((!ok||G.cash<cost)?'disabled':'')+
+        ' onclick="openStore(\''+did+'\',\''+c.id+'\')">'+fmtBig(cost)+'</button></div></div>';
+    }).join('')+
+    '<button class="btn sub" style="width:100%" onclick="showNewStore()">← 街を選び直す</button>');
+}
+window.showConceptPick=showConceptPick;
 function showStoreDetail(sid){
   const st=G.stores.find(x=>x.id===sid); if(!st)return;
   const d=districtOf(st), m=getMgr(st.managerId);
   const w=wageOf(st), cap=Math.round(storeCapacity(st));
   showModal('<h3>🏬 '+st.name+'</h3>'+
+    '<div class="shopwrap">'+storeSvg(st)+'</div>'+
     '<div class="card">'+storeBadges(st)+
       '<div class="stat-line" style="margin-top:6px">'+
       '<span>評判 <b>★'+st.rep.toFixed(1)+'</b></span>'+
@@ -1643,6 +2315,17 @@ function showStoreDetail(sid){
       '<div class="row" style="border-top:1px solid var(--line);margin-top:6px;padding-top:6px">'+
       '<b>店舗利益</b><b style="color:'+(st.today.profit>=0?'var(--good)':'var(--bad)')+'">'+
       yen(st.today.profit)+'</b></div></div>'+
+    '<div class="card"><b>👥 来店した客層</b>'+
+      '<div class="donut" style="margin-top:6px">'+donutSvg(st.today.seg||{},58)+
+      '<div class="dlegend">'+SEGMENTS.map(g=>{
+        const v=(st.today.seg||{})[g.id]||0;
+        return '<div><i style="background:'+SEGCOL[g.id]+'"></i>'+g.e+g.name+' '+Math.round(v*100)+'%</div>';
+      }).join('')+'</div></div>'+
+      '<div class="small-note">業態と価格でどの客層を取るかが変わります。'+
+      '現在: '+conceptOf(st).e+conceptOf(st).name+' / '+
+      (st.priceMode>0?'高価格':st.priceMode<0?'低価格':'標準価格')+'</div>'+
+      '<div class="btnrow"><button class="mini" onclick="act.concept(\''+st.id+'\')">🏗️ 業態を変更</button>'+
+      '<button class="mini" onclick="act.priceMode(\''+st.id+'\');showStoreDetail(\''+st.id+'\')">💱 価格戦略</button></div></div>'+
     '<div class="card"><b>👔 店長</b>'+
       '<div class="muted" style="margin:4px 0">'+(m? m.name+' / スキル'+m.skill+' / '+traitOf(m).e+traitOf(m).name+
         ' / 給与'+yen(m.salary)+'（日）' : '不在 — 管理負荷が高く、効率も落ちます')+'</div>'+
@@ -1691,6 +2374,35 @@ function showExecPick(role){
     '<button class="btn sub" style="width:100%" onclick="closeModal()">閉じる</button>');
 }
 window.showExecPick=showExecPick;
+function showLoanDesk(){
+  showModal('<h3>🏦 融資デスク</h3>'+
+    '<div class="card"><div class="row"><span class="muted">あなたの格付け</span>'+
+    '<b style="font-size:20px">'+G.rating+'</b></div>'+
+    '<div class="small-note">直近30日の平均利益 '+yen(avgProfit(30))+' ・ 総資産 '+fmtBig(totalAssets())+
+    ' ・ 負債 '+fmtBig(totalDebt())+'</div></div>'+
+    LOAN_PRODUCTS.map(pr=>{
+      const ok=ratingIdx()>=pr.minR && (!pr.listed||G.listed) && (!pr.needAsset||totalAssets()>=30000000);
+      const capv=loanCapacity(pr), rate=loanRateFor(pr);
+      let ng='';
+      if(ratingIdx()<pr.minR) ng='格付け'+RATINGS[pr.minR]+'以上が必要';
+      else if(pr.listed&&!G.listed) ng='上場が必要';
+      else if(pr.needAsset&&totalAssets()<30000000) ng='担保資産が不足';
+      else if(capv<500000) ng='与信枠に空きがありません';
+      return '<div class="card'+(ok&&capv>=500000?'':' warn')+'">'+
+        '<div class="row"><b>'+pr.e+' '+pr.name+'</b><span class="tag">'+RATINGS[pr.minR]+'以上</span></div>'+
+        '<div class="muted" style="margin:4px 0">'+pr.desc+'</div>'+
+        '<div class="stat-line"><span>金利 <b>'+(rate*100).toFixed(3)+'%/日</b></span>'+
+        '<span>期間 <b>'+pr.term+'日</b></span>'+
+        '<span>枠 <b>'+fmtBig(Math.max(0,capv))+'</b></span></div>'+
+        (ng? '<div class="small-note" style="color:var(--bad)">🚫 '+ng+'</div>'
+           : '<div class="btnrow">'+[25,50,100].map(f=>
+              '<button class="mini'+(f===100?' hot':'')+'" onclick="act.applyLoan(\''+pr.id+'\','+f+')">'+
+              fmtBig(Math.round(capv*f/100))+'</button>').join('')+'</div>')+
+        '</div>';
+    }).join('')+
+    '<button class="btn sub" style="width:100%" onclick="closeModal()">閉じる</button>');
+}
+window.showLoanDesk=showLoanDesk;
 function showTutorial(){
   showModal('<h3>☕ コーヒー帝国へようこそ</h3>'+
   '<div class="card">資金 <b>¥5,000,000</b> を元手に、街いちばんのコーヒーチェーンを目指します。'+
@@ -1749,7 +2461,18 @@ window.addEventListener('beforeunload',save);
 
 /* =====================  BOOT  ===================== */
 const loaded=load();
-if(loaded){ G=loaded; G.speed=0; renderAll();
+function migrate(g){
+  const d=newGame();
+  for(const k in d) if(g[k]===undefined) g[k]=d[k];
+  for(const k in d.today) if(g.today[k]===undefined) g.today[k]=d.today[k];
+  for(const st of g.stores){
+    if(!st.concept) st.concept='std';
+    if(st.priceMode===undefined) st.priceMode=0;
+    if(!st.today.seg) st.today.seg={};
+  }
+  return g;
+}
+if(loaded){ G=migrate(loaded); G.speed=0; renderAll();
   if(G.over) gameOver('前回のゲームは終了しています。'); else toast('💾 セーブデータを読み込みました');
 }else{ G=newGame(); renderAll(); showTutorial(); }
 </script>
