@@ -567,8 +567,9 @@ function newGame(){
     today:blankToday(),
     totalVisitors:0, totalRev:0, totalProfit:0, bestDayProfit:0,
     listed:false, ownerShare:100, holders:{fund:0,stella:0}, lastWarn:0,
+    shares:0, quartersPositive:0, deptOpen:{board:false}, quarterAcc:0,
     pressure:0, tob:null, tobCool:0, warned55:false, vcDone:false, vcShare:0,
-    pendingChoice:false, hidden:0, contract:null, city2:false,
+    pendingChoice:false, hidden:0, contract:null, city2:false, techFresh:1,
     lastVal:20000000, valHist:[], everTop:false, topStreak:0,
     antitrustWarned:false,
     personalCash:2000000, salaryIdx:0, luxOwned:[],
@@ -715,14 +716,14 @@ function wageOf(st){
 function rentOf(d){ return Math.round(d.rent*((G.rentMod&&G.rentMod[d.id])||1)); }
 function perStaffCapacity(st){
   const m=getMgr(st.managerId);
-  return (75+st.skill*0.9)*(1+(st.equip-1)*0.15)*(m?1+m.skill/250:0.90)*menuComplexity()*conceptOf(st).cap*(hasR('mobile')?1.18:1);
+  return (75+st.skill*0.9)*(1+(st.equip-1)*0.15)*(m?1+m.skill/250:0.90)*menuComplexity()*conceptOf(st).cap*(hasR('mobile')?1+0.18*(G.techFresh===undefined?1:G.techFresh):1);
 }
 function storeCapacity(st){ return st.staff*perStaffCapacity(st); }
 function idealStaff(st){ return clamp(Math.ceil((st.lastPot||60)/Math.max(1,perStaffCapacity(st))),1,12); }
 function storeAttract(st){
   if(st.closedDays>0) return 0;
   const m=getMgr(st.managerId);
-  let a=(40+st.equip*15+st.interior*10+st.skill*0.5+st.rep*12+(m?12+m.skill*0.22:0))*conceptOf(st).appeal*(hasR('sub')?1.12:1);
+  let a=(40+st.equip*15+st.interior*10+st.skill*0.5+st.rep*12+(m?12+m.skill*0.22:0))*conceptOf(st).appeal*(hasR('sub')?1+0.12*(G.techFresh===undefined?1:G.techFresh):1);
   if(m&&m.traitId==='magnet') a*=1.2;
   return Math.max(1,a);
 }
@@ -730,6 +731,13 @@ function compAttractIn(did){
   let a=0; for(const c of G.comps){ if(!c.acquired) a+=(c.stores[did]||0)*c.power; } return a;
 }
 function menuComplexity(){ return clamp(1-Math.max(0,G.enabled.length-6)*0.035, 0.6, 1); }
+function ipoOk(){
+  const board=!!G.deptOpen&&!!G.deptOpen.board;
+  const cfo=!!G.execs.cfo;
+  const q=(G.quartersPositive||0)>=3;
+  const sh=(G.shares||0)>=300000;
+  return {board:board,cfo:cfo,q:q,sh:sh,ok:board&&cfo&&q&&sh};
+}
 function calcValuation(){
   const avg=avgProfit(20);
   const per=11+G.reputation*1.7+G.awareness/22;
@@ -1057,6 +1065,10 @@ function simDay(){
   if(hasR('train')) for(const st of G.stores) st.skill=Math.min(100,st.skill+0.25);
   if(hasR('ai')) for(const st of G.stores) st.staff=idealStaff(st);
   if(hasR('brand')) G.reputation=Math.min(5,G.reputation);
+  // 技術は放置すると陳腐化する。定期的な更新が要る
+  if(hasR('mobile')||hasR('sub')||hasR('ai')){
+    G.techFresh=Math.max(0.55,(G.techFresh===undefined?1:G.techFresh)-0.0016);
+  }
   runDelegation();
   updateBeanMarket();
   updateTrends();
@@ -1127,7 +1139,7 @@ function simDay(){
       st.rep=st.rep*0.9+sat*0.1;
       // 士気と離職
       const util=served/Math.max(1,cap);
-      st.morale=clamp(st.morale+(m?0.6:-0.15)+WAGE_LEVELS[G.wageIdx].morale*0.5
+      st.morale=clamp(st.morale+(m?0.7:-1.1)+WAGE_LEVELS[G.wageIdx].morale*0.6
         +(util>0.98?-1.6:util>0.88?-0.3:0.6),0,100);
       if(st.morale<32 && st.staff>1 && Math.random()<0.07){
         st.staff--; st.morale+=8;
@@ -1167,6 +1179,15 @@ function simDay(){
   if(t.profit>G.bestDayProfit) G.bestDayProfit=t.profit;
   if(G.stores.length) G.reputation=G.stores.reduce((s,x)=>s+x.rep,0)/G.stores.length;
   G.hist.push({p:Math.round(t.profit)}); if(G.hist.length>30)G.hist.shift();
+  // 四半期(90日)ごとに純利益を判定
+  G.quarterAcc=(G.quarterAcc||0)+t.profit;
+  if(G.day%90===0){
+    if(G.quarterAcc>0){ G.quartersPositive=(G.quartersPositive||0)+1;
+      news('📈 第'+(G.day/90)+'四半期は純利益 '+fmtBig(G.quarterAcc)+' の黒字(連続'+G.quartersPositive+'期)'); }
+    else { G.quartersPositive=0;
+      news('📉 第'+(G.day/90)+'四半期は純利益 '+fmtBig(G.quarterAcc)+' の赤字。連続黒字はリセットされました'); }
+    G.quarterAcc=0;
+  }
 
   // 企業価値と市場
   for(const c of G.comps){ if(!c.acquired) c.cap=Math.round(c.cap*(1.0002+(Math.random()-0.5)*0.012)); }
@@ -1477,7 +1498,7 @@ function compAI(){
     if(c.acquired) continue;
     c.cd=(c.cd||0)-1;
     if(c.cd>0) continue;
-    c.cd=(c.myShare>=33? 45:22)+Math.floor(Math.random()*22);   // 33%取得で動きが鈍る
+    c.cd=(c.myShare>=33? 70:40)+Math.floor(Math.random()*35);   // 33%取得で動きが鈍る
     const myBest=bestDistrictOfPlayer();
     if(c.person==='capital'){
       if(myBest && freeSlots(myBest.id)>0){
@@ -1494,12 +1515,15 @@ function compAI(){
       toast('⚔️ 価格戦争が始まりました',true);
     } else if(c.person==='talent'){
       const assigned=G.managers.filter(m=>m.role==='store');
-      if(assigned.length && Math.random()<0.7){
+      // 引き抜きは稀にしか起きない。士気が高く待遇が良ければほぼ起きない
+      const wageOk=G.wageIdx>=1, hrDept=!!G.execs.hr;
+      let pk=0.16; if(wageOk)pk*=0.55; if(hrDept)pk*=0.45;
+      if(assigned.length && Math.random()<pk){
         const m=assigned.sort((a,b)=>b.skill-a.skill)[0];
         const st=G.stores.find(s=>s.managerId===m.id);
         if(st) st.managerId=null;
         G.managers=G.managers.filter(x=>x.id!==m.id);
-        news('🫘 <b>'+c.name+'に店長「'+m.name+'」が引き抜かれました</b>!');
+        news('🫘 <b>'+c.name+'に店長「'+m.name+'」が引き抜かれました</b>。組織タブで後任を配属してください。');
         toast('🫘 店長を引き抜かれました!',true);
       } else {
         const open=activeDistricts().filter(d=>freeSlots(d.id)>0);
@@ -1724,9 +1748,10 @@ const act={
     news('📣 <b>'+c.name+'</b>を開始しました!'); toast(c.e+' '+c.name+'開始!');
     renderMenu(); renderHeader(); save(); },
   /* --- 株式・M&A --- */
-  ipo(){ if(G.listed)return;
-    const proceeds=Math.round(G.lastVal*0.3*0.9);
+  ipo(){ if(G.listed||!ipoOk().ok)return;
+    const proceeds=Math.round(G.lastVal*0.28);
     G.listed=true; G.ownerShare=70; G.cash+=proceeds;
+    G.shares=Math.round((G.shares||300000)*1.3);
     news('🔔 <b>株式上場(IPO)!</b> '+fmtBig(proceeds)+'を調達しました!');
     toast('🔔 上場おめでとうございます!'); renderAll(); save(); },
   raiseCap(){ if(!G.listed||G.ownerShare<10)return;
@@ -1796,6 +1821,11 @@ const act={
     G.personalCash-=l.cost; G.luxOwned.push(id); G.awareness=Math.min(100,G.awareness+l.aw);
     news('🛍️ 社長が<b>'+l.name+'</b>を購入!話題になっています(認知度+'+l.aw+')');
     toast(l.e+' '+l.name+'を購入!'); renderAll(); save(); },
+  openBoard(){ if(G.deptOpen&&G.deptOpen.board)return;
+    if(!tryPay(8000000))return;
+    if(!G.deptOpen)G.deptOpen={}; G.deptOpen.board=true;
+    news('🏛 <b>取締役会を設置</b>しました。上場の要件を1つ満たしました。');
+    toast('🏛 取締役会を設置'); renderAll(); save(); },
   applyLoan(pid,frac){
     const prod=LOAN_PRODUCTS.find(x=>x.id===pid); if(!prod)return;
     if(ratingIdx()<prod.minR){ toast('🚫 格付け'+G.rating+'では審査に通りません(要'+RATINGS[prod.minR]+'以上)',true); return; }
@@ -1808,6 +1838,7 @@ const act={
     G.loans.push({id:'l'+(G.lseq++), pid:pid, name:prod.name, principal:amt, balance:amt,
       rate:rate, term:prod.term, daysLeft:prod.term, bullet:!!prod.bullet, missed:0});
     G.cash+=amt; G.loan=totalDebt();
+    G.shares=(G.shares||0)+Math.round(amt/150);
     news('🏦 <b>'+prod.name+'</b> '+fmtBig(amt)+'を実行(金利'+(rate*100).toFixed(3)+'%/日・'+prod.term+'日)');
     toast(prod.e+' '+fmtBig(amt)+'を調達しました');
     closeModal(); renderAll(); save(); },
@@ -1816,7 +1847,9 @@ const act={
     const amt=Math.min(l.balance,G.cash);
     if(amt<1000){ toast('💸 返済に充てる現金がありません',true); return; }
     G.cash-=amt; l.balance-=amt; l.missed=0;
-    if(l.balance<1){ G.loans=G.loans.filter(x=>x.id!==lid); news('✅ '+l.name+'を完済しました'); }
+    if(l.balance<1){ G.loans=G.loans.filter(x=>x.id!==lid);
+      G.shares=(G.shares||0)+Math.round(l.principal/300);
+      news('✅ '+l.name+'を完済しました(発行済株式が増えました)'); }
     else news('🏦 '+l.name+'に'+fmtBig(amt)+'を繰上返済');
     G.loan=totalDebt(); renderAll(); save(); },
   vc(){
@@ -2243,13 +2276,21 @@ function plRow(n,v,cls){
 function renderStock(){
   const el=$('stock');
   if(!G.listed){
-    const okS=G.stores.length>=3, okP=G.hist.length>=14&&avgProfit(14)>0;
-    const pr=Math.round(G.lastVal*0.3*0.9);
+    const K=ipoOk();
+    const row=(ok,label)=>'<div class="small-note" style="color:'+(ok?'var(--good)':'var(--sub)')+'">'+
+      (ok?'✅':'⬜')+' '+label+'</div>';
+    const pr=Math.round(G.lastVal*0.28);
     el.innerHTML='<b>未上場</b><div class="muted" style="margin:6px 0">'+
-      'IPOで企業価値の30%を調達できます。ただし持株比率が70%に下がり、以後は市場の目に晒されます。</div>'+
-      '<div class="small-note">'+(okS?'✅':'❌')+' 3店舗以上 / '+(okP?'✅':'❌')+' 直近14日の平均利益が黒字</div>'+
+      '上場すると企業価値の約28%を公募で調達できます。以下の4条件が必要です。</div>'+
+      row(K.board,'取締役会の設置')+
+      row(K.cfo,'CFO(財務本部長)の任命')+
+      row(K.q,'直近3四半期の純利益がプラス ('+(G.quartersPositive||0)+'/3)')+
+      row(K.sh,'発行済株式 30万株以上 ('+(G.shares||0).toLocaleString()+'株)')+
+      '<div class="small-note">※ 株式数は融資の実行と完済を重ねると増えます</div>'+
+      (!K.board? '<div class="btnrow"><button class="btn sub" '+(G.cash<8000000?'disabled':'')+
+        ' onclick="act.openBoard()">取締役会を設置 '+fmtBig(8000000)+'</button></div>':'')+
       '<div class="row" style="margin-top:8px"><span class="muted">想定調達額 '+fmtBig(pr)+'</span>'+
-      '<button class="btn" '+((okS&&okP)?'':'disabled')+' onclick="act.ipo()">上場する</button></div>';
+      '<button class="btn" '+(K.ok?'':'disabled')+' onclick="act.ipo()">上場する</button></div>';
     return;
   }
   const own=Math.round(G.ownerShare), pub=Math.max(0,100-own-(G.vcShare||0));
