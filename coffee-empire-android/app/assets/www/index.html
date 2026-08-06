@@ -393,13 +393,21 @@ const STARTUPS=[
  {n:'モバイルバリスタ', s:'移動販売DX', mul:[0,3,6.5]},
 ];
 const POLICIES=[
- {id:'wage', name:'最低賃金の引き上げ', e:'💴', desc:'全店の人件費が8%上昇します。'},
- {id:'sugar',name:'砂糖税の導入',       e:'🍬', desc:'材料費が10%増えます。'},
- {id:'dereg',name:'商業規制の緩和',     e:'🏗️', desc:'家賃が6%下がります。'},
- {id:'eq',   name:'男女機会均等法',     e:'⚖️', desc:'人材市場が活性化し良い候補者が増えます。'},
- {id:'sub',  name:'中小企業支援',       e:'🎁', desc:'補助金で本部コストが12%軽くなります。'},
-];
-const MKT_ITEMS=[
+ {id:'wage', name:'最低賃金の引き上げ', e:'💴', bad:true,
+  desc:'全店の人件費が18%上昇します。', short:'人件費+18%'},
+ {id:'sugar',name:'砂糖税の導入',       e:'🍬', bad:true,
+  desc:'甘い飲料に課税され、材料費が22%増えます。', short:'材料費+22%'},
+ {id:'dereg',name:'商業規制の緩和',     e:'🏗️', bad:false,
+  desc:'テナント規制が緩み、家賃が16%下がります。', short:'家賃-16%'},
+ {id:'eq',   name:'男女機会均等法',     e:'⚖️', bad:false,
+  desc:'人材市場が活性化し、候補者の能力が大きく上がります。', short:'人材の質+'},
+ {id:'sub',  name:'中小企業支援',       e:'🎁', bad:false,
+  desc:'補助金が出て、本部コストが25%軽くなります。', short:'本部費-25%'},
+ {id:'tax',  name:'法人減税',           e:'📉', bad:false,
+  desc:'税負担が下がり、日次利益が8%上乗せされます。', short:'利益+8%'},
+ {id:'health',name:'受動喫煙防止条例',   e:'🚭', bad:false,
+  desc:'カフェ需要が高まり、全店の集客が12%増えます。', short:'集客+12%'},
+];const MKT_ITEMS=[
  {id:'wifi',   name:'無料Wi-Fi',        e:'📶', cost:990,  visit:1.06, seg:{student:1.30,office:1.22}, desc:'長居する客層に効く。学生とビジネス客に強い。'},
  {id:'outlet', name:'テーブルコンセント',e:'🔌', cost:770,  visit:1.04, seg:{office:1.28,student:1.20}, desc:'作業客を呼び込む。オフィス街と大学前で効果的。'},
  {id:'b1g1',   name:'B1G1F(1つ買うと1つ無料)',e:'🎁', cost:495, visit:1.28, price:0.94, seg:{student:1.25,family:1.20}, desc:'客数は大きく増えるが客単価が下がる。'},
@@ -594,7 +602,7 @@ function newGame(){
     stores:[], managers:[], candidates:[], execs:{}, wageIdx:1,
     wageDrift:1, rentMod:{},
     deleg:{staffing:false,training:false,marketing:false,menu:false,hedging:false,defense:false},
-    mkt:{}, benefits:{}, invests:[], reviews:[], mayor:null, policies:{}, electionIn:180, iseq:1,
+    mkt:{}, benefits:{}, invests:[], reviews:[], mayor:null, policies:{}, electionIn:120, iseq:1,
     campaigns:[], comps:JSON.parse(JSON.stringify(COMPETITORS)),
     weather:'sun', hist:[], log:[], milestonesDone:[],
     today:blankToday(),
@@ -847,7 +855,8 @@ function loanRate(){ const lev=G.loan/Math.max(1,creditLimit()); return G.baseRa
 /* =====================  CANDIDATES  ===================== */
 function makeCandidate(g){
   g=g||G;
-  const skill=Math.round(clamp(rnd(28,72)+(Math.random()<0.15?rnd(10,25):0),25,95));
+  const bonus=(typeof G!=="undefined"&&G&&G.policies&&G.policies.eq)?16:0;
+  const skill=Math.round(clamp(bonus+rnd(28,72)+(Math.random()<0.15?rnd(10,25):0),25,95));
   const tr=pick(TRAITS);
   let sal=Math.round((3200+skill*140)/100)*100;
   if(tr.id==='steady') sal=Math.round(sal*0.75/100)*100;
@@ -1142,7 +1151,7 @@ function simDay(){
         pushStoreHist(st);
         return;
       }
-      const pot=Math.round(pots[i]*mktVisit());
+      const pot=Math.round(pots[i]*mktVisit()*((G.policies&&G.policies.health)?1.12:1));
       st.lastPot=pot;
       const cap=Math.round(storeCapacity(st));
       const served=Math.min(pot,cap), lost=Math.max(0,pot-cap);
@@ -1190,10 +1199,10 @@ function simDay(){
   G.campaigns=G.campaigns.filter(c=>c.daysLeft>0);
   t.mkt=mktCost();
   t.ben=benCost();
-  G.polWage=(G.policies&&G.policies.wage)?1.08:1;
-  G.polSugar=(G.policies&&G.policies.sugar)?1.10:1;
-  G.polRent=(G.policies&&G.policies.dereg)?0.94:1;
-  G.polSub=(G.policies&&G.policies.sub)?0.88:1;
+  G.polWage=(G.policies&&G.policies.wage)?1.18:1;
+  G.polSugar=(G.policies&&G.policies.sugar)?1.22:1;
+  G.polRent=(G.policies&&G.policies.dereg)?0.84:1;
+  G.polSub=(G.policies&&G.policies.sub)?0.75:1;
   G.awareness=Math.min(100,Math.max(8,G.awareness-(hasR('brand')?0.18:0.35)+mktAware()));
   // 事業・不動産
   for(const vid of G.ventures){ const v=VENTURES.find(x=>x.id===vid); if(v) t.biz+=v.income*(0.75+Math.random()*0.5); }
@@ -1211,6 +1220,7 @@ function simDay(){
   G.rating=calcRating();
   if(lp.default){ gameOver('返済不能に陥り、銀行団により会社は清算されました。'); return; }
   t.profit=t.rev-t.cogs-t.wage-t.rent-t.mgmt-t.mkt-(t.ben||0)-t.interest-t.salary-t.fine+t.biz+t.prop;
+  if(G.policies&&G.policies.tax&&t.profit>0) t.profit*=1.08;
   G.cash+=t.profit;
   G.today=t;
   G.totalVisitors+=t.visitors; G.totalRev+=t.rev; G.totalProfit+=t.profit;
@@ -1586,36 +1596,113 @@ function bestDistrictOfPlayer(){
   return bv>0? best:null;
 }
 
+function priceOf(pid,st){ return price(pid,st); }
+function priceStress(st){
+  let sum=0,n=0;
+  for(const id of G.enabled){
+    const p=PRODUCTS.find(x=>x.id===id); if(!p)continue;
+    const r=price(id,st)/p.fair;
+    if(r>1.12){ sum+=Math.min(0.6,r-1.12); n++; }
+  }
+  return n? sum/n : 0;
+}
 function weeklyReview(){
   if(G.day%7!==0 || !G.stores.length) return;
   const st=G.stores[Math.floor(Math.random()*G.stores.length)];
-  const c=[];
-  if(st.today.lost>st.today.visitors*0.2) c.push({t:'行列が長すぎて待たされた。人手が足りていない。',g:0});
-  if(st.skill<45) c.push({t:'店員さんの手際がまだ不慣れに見える。',g:0});
-  if(st.interior<3) c.push({t:'内装が古びていて落ち着かない。',g:0});
-  if(bean().q<=1) c.push({t:'豆の香りが弱い。もう少し良い豆だと嬉しい。',g:0});
-  if(st.morale<40) c.push({t:'店員の元気がない。働きやすい職場に見えない。',g:0});
-  if(!st.managerId) c.push({t:'責任者が見当たらず、対応がちぐはぐだった。',g:0});
-  if(!c.length){
-    c.push({t:'居心地がよくて、また来たくなる店。',g:1});
-    if(st.rep>4.3) c.push({t:'この街でいちばん好きなコーヒー屋です。',g:1});
+  const d=DISTRICTS.find(x=>x.id===st.districtId);
+  // その店に実際に来ている客層から語り手を選ぶ
+  const mix=st.today.seg||{};
+  let who=SEGMENTS[0], best=-1;
+  for(const g2 of SEGMENTS){ const v=(mix[g2.id]||0)*(0.6+Math.random()*0.8);
+    if(v>best){ best=v; who=g2; } }
+  const on=PRODUCTS.filter(p=>G.enabled.includes(p.id));
+  const item=on.length? on[Math.floor(Math.random()*on.length)] : PRODUCTS[0];
+  const price=item? Math.round(priceOf(item.id,st)) : 400;
+  const wait=Math.max(1,Math.round((st.today.lost/Math.max(1,st.today.visitors))*22));
+  const bad=[], good=[];
+  if(st.today.lost>st.today.visitors*0.18){
+    bad.push('レジに'+wait+'分並んだ。回転が追いついていない。');
+    bad.push('行列を見て入るのをやめた人が何人もいた。');
+    bad.push('注文してから'+wait+'分。急いでいる朝には厳しい。');
+    bad.push('席は空いているのに、提供が追いついていない。');
   }
-  const pick=c[Math.floor(Math.random()*c.length)];
-  G.reviews.unshift({store:st.name,text:pick.t,good:pick.g===1,day:G.day});
-  if(G.reviews.length>12)G.reviews.length=12;
+  if(priceStress(st)>0.10){
+    bad.push(item.name+'が'+yen(price)+'。この街の相場からすると強気だと思う。');
+    bad.push('味は悪くないが、'+yen(price)+'出すなら他の店に行く。');
+    bad.push('少しずつ値上がりしている気がする。通いにくくなった。');
+  }
+  if(st.skill<50){
+    bad.push('店員さんの手際がまだ不慣れで、注文が一度間違えられた。');
+    bad.push('新人ばかりなのか、動きがぎこちない。');
+    bad.push('ミルクの泡立てが荒い。もう少し練習してほしい。');
+  }
+  if(st.interior<3){
+    bad.push('椅子がくたびれていて、長居する気になれない。');
+    bad.push('照明が暗くて本が読みにくい。');
+    bad.push('内装が古びていて、写真を撮る気にならない。');
+  }
+  if(bean().q<=1){
+    bad.push('香りが弱い。豆をもう少し良いものにしてほしい。');
+    bad.push('酸味が立っていて、後味が薄い。');
+  }
+  if(st.morale<45){
+    bad.push('店員さんに笑顔がない。働きやすい職場に見えなかった。');
+    bad.push('スタッフ同士がピリピリしていて居心地が悪い。');
+  }
+  if(!st.managerId){
+    bad.push('責任者が見当たらず、トラブルの対応がちぐはぐだった。');
+    bad.push('誰に聞けばいいのか分からなかった。まとめ役が必要だと思う。');
+  }
+  if(st.equip<3) bad.push('マシンの音が大きくて会話が聞き取りにくい。');
+  if(G.enabled.length<5) bad.push('メニューの選択肢が少なくて、毎回同じものになる。');
+  if(mktOn&&!mktOn('wifi')&&(who.id==='student'||who.id==='office'))
+    bad.push('Wi-Fiがないので、作業目的だと使いづらい。');
+  // 良い声
+  good.push(item.name+'が'+yen(price)+'。この味でこの値段なら通う。');
+  good.push('店員さんの対応が気持ちよかった。また来ます。');
+  if(st.interior>=4) good.push('内装が落ち着いていて、つい長居してしまう。');
+  if(st.skill>=70) good.push('抽出が丁寧で、香りがしっかり立っている。');
+  if(bean().q>=3) good.push('豆が良い。近所にこの品質の店があるのは嬉しい。');
+  if(st.today.lost<st.today.visitors*0.05) good.push('混んでいるのに待たされなかった。オペレーションが上手い。');
+  if(st.rep>4.3) good.push('この街でいちばん好きなコーヒー屋です。');
+  const useBad=bad.length>0 && Math.random()<0.78;
+  const pool=useBad? bad : good;
+  const text=pool[Math.floor(Math.random()*pool.length)];
+  G.reviews.unshift({store:st.name, text:text, good:!useBad, day:G.day,
+    seg:who.e+who.name, area:d?d.name:''});
+  if(G.reviews.length>14)G.reviews.length=14;
 }
 function election(){
   if(!G.mayor) G.mayor={name:'現職市長'};
   G.electionIn--;
   if(G.electionIn>0) return;
-  G.electionIn=180;
+  G.electionIn=120;
   const want=G.lobbyFor||null;
   const winner=(want&&Math.random()<0.62)? POLICIES.find(x=>x.id===want)
     : POLICIES[Math.floor(Math.random()*POLICIES.length)];
   G.policies={}; G.policies[winner.id]=true;
   G.lobbyFor=null;
   news('🗳️ <b>市長選挙</b>の結果「'+winner.name+'」が施行されました。'+winner.desc);
-  toast('🗳️ '+winner.e+' '+winner.name+'が施行', winner.id==='wage'||winner.id==='sugar');
+  // 影響額を具体的に見せる
+  let impact='';
+  if(winner.id==='wage') impact='人件費が約'+yen(G.today.wage*0.18)+'/日 増えます';
+  else if(winner.id==='sugar') impact='材料費が約'+yen(G.today.cogs*0.22)+'/日 増えます';
+  else if(winner.id==='dereg') impact='家賃が約'+yen(G.today.rent*0.16)+'/日 減ります';
+  else if(winner.id==='sub') impact='本部コストが約'+yen(G.today.mgmt*0.25)+'/日 減ります';
+  else if(winner.id==='tax') impact='日次利益が約'+yen(Math.max(0,G.today.profit)*0.08)+' 増えます';
+  else if(winner.id==='health') impact='来客が約'+Math.round(G.today.visitors*0.12)+'人/日 増えます';
+  else impact='人材市場の候補者の能力が上がります';
+  G.speed=0; if(timer){clearInterval(timer);timer=null;}
+  showModal('<h3>🗳️ 市長選挙の結果</h3>'+
+    '<div class="card'+(winner.bad?' alert':' warn')+'">'+
+    '<div class="row"><b style="font-size:15px">'+winner.e+' '+winner.name+'</b>'+
+    '<span class="tag'+(winner.bad?' bad':' good')+'">'+winner.short+'</span></div>'+
+    '<div class="muted" style="margin-top:6px">'+winner.desc+'</div>'+
+    '<div class="small-note" style="color:'+(winner.bad?'var(--bad)':'var(--good)')+'">'+
+    'あなたの会社への影響: '+impact+'</div></div>'+
+    '<div class="card muted">次の選挙まで120日。市場タブのロビー活動で、望む政策が通る確率を上げられます。</div>'+
+    '<button class="btn" style="width:100%" onclick="closeModal()">了解</button>');
+  toast('🗳️ '+winner.e+' '+winner.name+'が施行', winner.bad);
 }
 function investTick(){
   for(const iv of G.invests){
@@ -1974,7 +2061,9 @@ function doReset(){ localStorage.removeItem(SAVE_KEY); G=newGame(); closeModal()
 function renderHeader(){
   $('day-label').textContent=dayLabel();
   const w=weather(), se=seasonInfo();
-  $('weather').textContent=se.e+(se.ev?se.ev:se.name)+' '+w.e;
+  const curPol=POLICIES.find(x=>G.policies&&G.policies[x.id]);
+  $('weather').innerHTML=se.e+(se.ev?se.ev:se.name)+' '+w.e+
+    (curPol?' <span style="color:'+(curPol.bad?'var(--bad)':'var(--good)')+'">'+curPol.e+curPol.short+'</span>':'');
   $('cash').textContent=yen(G.cash); $('cash').className=G.cash<0?'neg':'';
   $('k-rep').textContent='★'+G.reputation.toFixed(1);
   $('k-aw').textContent=Math.round(G.awareness);
@@ -2021,7 +2110,7 @@ function renderHome(){
   $('reviews').innerHTML=(G.reviews&&G.reviews.length)?
     G.reviews.slice(0,5).map(r=>'<div class="prod"><div class="info">'+
       '<div class="nm" style="color:'+(r.good?'var(--good)':'var(--warn)')+'">'+(r.good?'😊':'😕')+' '+r.text+'</div>'+
-      '<div class="sub">'+r.store+' / '+r.day+'日</div></div></div>').join('')
+      '<div class="sub">'+(r.seg?r.seg+' ・ ':'')+r.store+' / '+r.day+'日</div></div></div>').join('')
     : '<div class="muted">まだ声が届いていません。営業を続けると毎週レビューが入ります。</div>';
   $('log').innerHTML=G.log.map(x=>'<div>'+x+'</div>').join('')||'<div>まだニュースはありません。</div>';
   $('milestones').innerHTML=MILESTONES.map(m=>{
@@ -2395,6 +2484,9 @@ function renderFin(){
     plRow('原価(材料費)',-t.cogs)+plRow('店舗人件費',-t.wage)+
     plRow('本部・幹部コスト',-t.mgmt)+(t.mkt?plRow('マーケティング費',-t.mkt):'')+(t.salary?plRow('役員報酬',-t.salary):'')+
     plRow('家賃',-t.rent)+plRow('支払利息',-t.interest)+
+    (function(){ const c=POLICIES.find(x=>G.policies&&G.policies[x.id]);
+      return c? '<div class="row"><span class="muted">施行中の政策</span><span style="color:'+
+        (c.bad?'var(--bad)':'var(--good)')+'">'+c.e+c.name+' ('+c.short+')</span></div>':''; })()+
     '<div class="row" style="border-top:1px solid var(--line);margin-top:6px;padding-top:6px">'+
     '<b>営業利益</b><b style="color:'+(t.profit>=0?'var(--good)':'var(--bad)')+'">'+yen(t.profit)+'</b></div>'+
     (t.princ?'<div class="row"><span class="muted">元本返済(現金支出)</span><span>'+yen(-t.princ)+'</span></div>':'');
