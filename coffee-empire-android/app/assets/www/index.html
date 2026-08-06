@@ -212,6 +212,10 @@ canvas{width:100%;height:104px;display:block}
         <div><b>店舗一覧</b><div class="muted" id="slot-note">空き物件を探して出店しよう</div></div>
         <button class="btn" id="btn-newstore">＋ 出店</button>
       </div>
+      <div class="card row">
+        <div><b>🗂️ 地域ごとの一括管理</b><div class="muted">価格・内装・設備・人員をまとめて変更</div></div>
+        <button class="btn" id="btn-bulk">一括管理</button>
+      </div>
       <h2>🗺️ 街と出店枠</h2>
       <div id="district-map"></div>
       <h2>🏬 店舗</h2>
@@ -1555,6 +1559,25 @@ function absorb(c){
 const act={
   hire(sid){ const st=G.stores.find(x=>x.id===sid); if(st&&st.staff<12){ st.staff++; st.skill=Math.max(10,st.skill-3); renderAll(); save(); } },
   fire(sid){ const st=G.stores.find(x=>x.id===sid); if(st&&st.staff>1){ st.staff--; st.morale=Math.max(0,st.morale-6); renderAll(); save(); } },
+  bulkScope(sc,tgt){ BULK.scope=sc; BULK.target=tgt; showBulk(); },
+  bulkPrice(m){ const ls=bulkStores(); for(const s of ls) s.priceMode=m;
+    toast('💱 '+ls.length+'店の価格戦略を変更'); showBulk(); renderAll(); save(); },
+  bulkInterior(lv){ const ls=bulkStores(), c=bulkInteriorCost(ls,lv);
+    if(!tryPay(c))return; let n=0;
+    for(const s of ls) if(s.interior<lv){ s.interior=lv; n++; }
+    news('🛋️ '+n+'店舗の内装をLv'+lv+'に統一しました('+fmtBig(c)+')');
+    toast('🛋️ '+n+'店舗の内装を更新'); showBulk(); renderAll(); save(); },
+  bulkEquip(lv){ const ls=bulkStores(), c=bulkEquipCost(ls,lv);
+    if(!tryPay(c))return; let n=0;
+    for(const s of ls) if(s.equip<lv){ s.equip=lv; n++; }
+    news('⚙️ '+n+'店舗の設備をLv'+lv+'に統一しました('+fmtBig(c)+')');
+    toast('⚙️ '+n+'店舗の設備を更新'); showBulk(); renderAll(); save(); },
+  bulkStaff(){ const ls=bulkStores(); let n=0;
+    for(const s of ls){ const t=idealStaff(s); if(t!==s.staff){ s.staff=t; n++; } }
+    toast('🧮 '+n+'店舗の人員を最適化'); showBulk(); renderAll(); save(); },
+  bulkMenu(mul){ for(const p of PRODUCTS) G.prices[p.id]=Math.round(p.fair*mul);
+    news('💴 全商品の価格を適正価格の'+Math.round(mul*100)+'%に統一しました');
+    toast('💴 全商品の価格を統一'); showBulk(); renderAll(); save(); },
   priceMode(sid){ const st=G.stores.find(x=>x.id===sid); if(!st)return;
     st.priceMode=st.priceMode>0?-1:(st.priceMode<0?0:1);
     toast(st.priceMode>0?'💰 高価格戦略(+15%)':st.priceMode<0?'🏷️ 低価格戦略(-12%)':'⚖️ 標準価格');
@@ -2403,6 +2426,71 @@ function showLoanDesk(){
     '<button class="btn sub" style="width:100%" onclick="closeModal()">閉じる</button>');
 }
 window.showLoanDesk=showLoanDesk;
+
+/* =====================  一括管理(地域単位)  ===================== */
+var BULK={scope:'city', target:null};
+function bulkStores(){
+  if(!BULK.scope||BULK.scope==='all') return G.stores.slice();
+  if(BULK.scope==='city'){
+    const c=BULK.target||1;
+    return G.stores.filter(s=>(DISTRICTS.find(d=>d.id===s.districtId).city||1)===c);
+  }
+  return G.stores.filter(s=>s.districtId===BULK.target);
+}
+function bulkInteriorCost(ls,lv){ let c=0; for(const s of ls) if(s.interior<lv) c+=(lv-s.interior)*350000; return c; }
+function bulkEquipCost(ls,lv){ let c=0; for(const s of ls) if(s.equip<lv) c+=(lv-s.equip)*450000; return c; }
+function showBulk(){
+  if(!G.stores.length){ toast('店舗がありません',true); return; }
+  const ls=bulkStores();
+  const cities=[...new Set(DISTRICTS.filter(d=>d.city===1||G.city2).map(d=>d.city))];
+  const areas=[...new Set(G.stores.map(s=>s.districtId))];
+  const scopeBtn=(id,label,tgt)=>{
+    const on=BULK.scope===id&&(tgt===undefined||BULK.target===tgt);
+    return '<button class="mini'+(on?' hot':'')+'" onclick="act.bulkScope(\''+id+'\','+
+      (tgt===undefined?'null':(typeof tgt==='string'?'\''+tgt+'\'':tgt))+')">'+label+'</button>';
+  };
+  let sel='<div class="btnrow">'+scopeBtn('all','全社')+'</div>';
+  sel+='<div class="btnrow" style="margin-top:4px">'+
+    cities.map(c=>scopeBtn('city',c===1?'第1都市':'第2都市',c)).join('')+'</div>';
+  sel+='<div class="btnrow" style="margin-top:4px">'+
+    areas.map(a=>scopeBtn('area',DISTRICTS.find(d=>d.id===a).name,a)).join('')+'</div>';
+
+  const eqRows=[2,3,4,5].map(lv=>{
+    const c=bulkEquipCost(ls,lv);
+    if(c<=0) return '';
+    return '<button class="mini" '+(G.cash<c?'disabled':'')+
+      ' onclick="act.bulkEquip('+lv+')">Lv'+lv+'に統一 '+fmtBig(c)+'</button>';
+  }).join('');
+  const inRows=[2,3,4,5].map(lv=>{
+    const c=bulkInteriorCost(ls,lv);
+    if(c<=0) return '';
+    return '<button class="mini" '+(G.cash<c?'disabled':'')+
+      ' onclick="act.bulkInterior('+lv+')">Lv'+lv+'に統一 '+fmtBig(c)+'</button>';
+  }).join('');
+
+  showModal('<h3>🗂️ 地域ごとの一括管理</h3>'+
+    '<div class="card"><div class="muted">対象を選ぶ</div>'+sel+
+      '<div class="row" style="margin-top:8px"><b>対象店舗</b><b class="star">'+ls.length+'店</b></div>'+
+      '<div class="small-note">'+(ls.length?ls.map(s=>s.name.replace(/\s*\(.*/,'')).join('、'):'なし')+'</div></div>'+
+    '<div class="card"><b>💱 価格戦略</b>'+
+      '<div class="btnrow"><button class="mini" onclick="act.bulkPrice(-1)">低価格(-12%)</button>'+
+      '<button class="mini" onclick="act.bulkPrice(0)">標準</button>'+
+      '<button class="mini" onclick="act.bulkPrice(1)">高価格(+15%)</button></div>'+
+      '<div class="small-note">地区の客層に合わせて、まとめて価格の構えを変えられます。</div></div>'+
+    '<div class="card"><b>🛋️ 内装をまとめて引き上げる</b>'+
+      '<div class="btnrow">'+(inRows||'<span class="muted">すべて最高レベルです</span>')+'</div></div>'+
+    '<div class="card"><b>⚙️ 設備をまとめて更新</b>'+
+      '<div class="btnrow">'+(eqRows||'<span class="muted">すべて最高レベルです</span>')+'</div></div>'+
+    '<div class="card"><b>🧮 人員</b>'+
+      '<div class="btnrow"><button class="mini hot" onclick="act.bulkStaff()">需要に合わせて最適化</button></div>'+
+      '<div class="small-note">対象店舗の人員を、それぞれの需要にちょうど足りる人数に揃えます。</div></div>'+
+    '<div class="card"><b>💴 全商品の価格</b>'+
+      '<div class="btnrow">'+[['安売り',0.85],['標準',1.0],['強気',1.15],['高級',1.3]].map(
+        x=>'<button class="mini" onclick="act.bulkMenu('+x[1]+')">'+x[0]+' '+Math.round(x[1]*100)+'%</button>').join('')+
+      '</div><div class="small-note">全店舗の全商品を適正価格の指定%に統一します。</div></div>'+
+    '<button class="btn sub" style="width:100%" onclick="closeModal()">閉じる</button>');
+}
+window.showBulk=showBulk;
 function showTutorial(){
   showModal('<h3>☕ コーヒー帝国へようこそ</h3>'+
   '<div class="card">資金 <b>¥5,000,000</b> を元手に、街いちばんのコーヒーチェーンを目指します。'+
@@ -2448,6 +2536,7 @@ $('sp-pause').onclick=()=>setSpeed(0);
 $('sp-1').onclick=()=>setSpeed(1);
 $('sp-3').onclick=()=>setSpeed(3);
 $('btn-newstore').onclick=showNewStore;
+$('btn-bulk').onclick=showBulk;
 $('btn-reset').onclick=()=>act.reset();
 document.querySelectorAll('.tab').forEach(t=>{
   t.onclick=()=>{
