@@ -249,6 +249,9 @@ canvas{width:100%;height:104px;display:block}
       <div class="card" id="menu-rnd"></div>
       <h2>🌱 豆の相場と仕入れ</h2>
       <div class="card" id="beans"></div>
+      <h2>🎯 常設マーケティング施策</h2>
+      <div class="card" id="mkt-sum"></div>
+      <div class="card" id="mkt-list"></div>
       <h2>📣 販促キャンペーン</h2>
       <div class="card">
         <div class="row"><b>ブランド認知度</b><b id="m-aw" class="star">10</b></div>
@@ -364,6 +367,25 @@ const BEANS=[
  {id:'colombia', name:'コロンビア シングル',     q:3, mult:1.55, desc:'香り高く満足度が上がる。'},
  {id:'geisha',   name:'スペシャルティ ゲイシャ', q:4, mult:2.60, desc:'最高級。ブランド価値を押し上げる。'},
 ];
+const MKT_ITEMS=[
+ {id:'wifi',   name:'無料Wi-Fi',        e:'📶', cost:990,  visit:1.06, seg:{student:1.30,office:1.22}, desc:'長居する客層に効く。学生とビジネス客に強い。'},
+ {id:'outlet', name:'テーブルコンセント',e:'🔌', cost:770,  visit:1.04, seg:{office:1.28,student:1.20}, desc:'作業客を呼び込む。オフィス街と大学前で効果的。'},
+ {id:'b1g1',   name:'B1G1F(1つ買うと1つ無料)',e:'🎁', cost:495, visit:1.28, price:0.94, seg:{student:1.25,family:1.20}, desc:'客数は大きく増えるが客単価が下がる。'},
+ {id:'cater',  name:'ケータリング',      e:'🚚', cost:1870, visit:1.05, price:1.10, seg:{office:1.30,family:1.15}, desc:'法人需要を取り込み客単価が上がる。'},
+ {id:'sns',    name:'SNS運用',          e:'📱', cost:1375, visit:1.05, aware:0.40, seg:{trend:1.35,student:1.15}, desc:'認知度が継続的に上がる。感度層に刺さる。'},
+ {id:'search', name:'ローカル検索広告',  e:'🔍', cost:1320, visit:1.14, desc:'近隣からの来店を安定して増やす。'},
+ {id:'music',  name:'無料音楽ストリーミング',e:'🎵',cost:1210, visit:1.02, seg:{student:1.10}, desc:'効果は限定的。コストに見合いにくい。'},
+ {id:'eco',    name:'リサイクル容器',    e:'♻️', cost:1430, rep:0.10, seg:{trend:1.12}, desc:'評判は上がるが集客への効果は薄い。'},
+ {id:'dm',     name:'DM(ダイレクトメール)',e:'✉️',cost:1650, visit:1.04, seg:{senior:1.15}, desc:'シニアに届くが費用対効果は低め。'},
+ {id:'civic',  name:'地域振興',          e:'🏘️', cost:2145, rep:0.14, aware:0.15, seg:{family:1.12,senior:1.12}, desc:'地域に根づくが、効果が出るまで時間がかかる。'},
+];
+function mktOn(id){ return !!(G.mkt&&G.mkt[id]); }
+function mktCost(){ let c=0; for(const m of MKT_ITEMS) if(mktOn(m.id)) c+=m.cost*Math.max(1,G.stores.length); return c; }
+function mktVisit(){ let v=1; for(const m of MKT_ITEMS) if(mktOn(m.id)&&m.visit) v*=m.visit; return v; }
+function mktPrice(){ let v=1; for(const m of MKT_ITEMS) if(mktOn(m.id)&&m.price) v*=m.price; return v; }
+function mktSeg(gid){ let v=1; for(const m of MKT_ITEMS) if(mktOn(m.id)&&m.seg&&m.seg[gid]) v*=m.seg[gid]; return v; }
+function mktAware(){ let v=0; for(const m of MKT_ITEMS) if(mktOn(m.id)&&m.aware) v+=m.aware; return v; }
+function mktRep(){ let v=0; for(const m of MKT_ITEMS) if(mktOn(m.id)&&m.rep) v+=m.rep; return v; }
 const CAMPAIGNS=[
  {id:'flyer', name:'チラシ配布',           e:'📄', cost:60000,   days:5,  power:4,  desc:'ご近所に地道にアピール。'},
  {id:'sns',   name:'SNSキャンペーン',      e:'📱', cost:150000,  days:7,  power:9,  desc:'話題化を狙う定番施策。'},
@@ -540,7 +562,7 @@ function newGame(){
     stores:[], managers:[], candidates:[], execs:{}, wageIdx:1,
     wageDrift:1, rentMod:{},
     deleg:{staffing:false,training:false,marketing:false,menu:false,hedging:false,defense:false},
-    campaigns:[], comps:JSON.parse(JSON.stringify(COMPETITORS)),
+    mkt:{}, campaigns:[], comps:JSON.parse(JSON.stringify(COMPETITORS)),
     weather:'sun', hist:[], log:[], milestonesDone:[],
     today:blankToday(),
     totalVisitors:0, totalRev:0, totalProfit:0, bestDayProfit:0,
@@ -1062,7 +1084,7 @@ function simDay(){
         const ms=segData[i][g.id];
         // その客層にとってのメニュー魅力(価格感度込み)を正規化して反映
         const fit=clamp(ms.appeal/Math.max(1,g.base),0.25,1.6);
-        return storeAttract(st)*menu.variety*(1-pen)*cm*fit;
+        return storeAttract(st)*menu.variety*(1-pen)*cm*fit*mktSeg(g.id);
       });
       const tot=at.reduce((a,x)=>a+x,0)+compA+35;
       mine.forEach((st,i)=>{ const v=segPool*(at[i]/tot); potBy[i][g.id]=v; pots[i]+=v; });
@@ -1075,7 +1097,7 @@ function simDay(){
         pushStoreHist(st);
         return;
       }
-      const pot=Math.round(pots[i]);
+      const pot=Math.round(pots[i]*mktVisit());
       st.lastPot=pot;
       const cap=Math.round(storeCapacity(st));
       const served=Math.min(pot,cap), lost=Math.max(0,pot-cap);
@@ -1085,7 +1107,7 @@ function simDay(){
       for(const g of SEGMENTS){
         const v=(potBy[i][g.id]||0)*ratio; if(v<=0) continue;
         const ms=segData[i][g.id];
-        rev+=v*ms.price; cogs+=v*ms.cost; mix[g.id]=v; mixTot+=v;
+        rev+=v*ms.price*mktPrice(); cogs+=v*ms.cost; mix[g.id]=v; mixTot+=v;
       }
       for(const k in mix) mix[k]=mix[k]/Math.max(1,mixTot);
       st.today={seg:mix};
@@ -1100,7 +1122,7 @@ function simDay(){
       let sat=1.9+b.q*0.42+st.skill/100*1.0+st.interior*0.12+st.equip*0.08+(st.morale-60)/160;
       if(m){ sat+=0.15+m.skill/250; if(m.traitId==='service') sat+=0.4; }
       sat-=lost>0? Math.min(0.9,(lost/Math.max(pot,1))*1.2):0;
-      sat-=tolPen*0.9; sat-=pen*1.2;
+      sat-=tolPen*0.9; sat-=pen*1.2; sat+=mktRep();
       sat=clamp(sat,1,5);
       st.rep=st.rep*0.9+sat*0.1;
       // 士気と離職
@@ -1121,7 +1143,8 @@ function simDay(){
   // キャンペーン
   for(const c of G.campaigns){ G.awareness=Math.min(100,G.awareness+c.perDay); c.daysLeft--; }
   G.campaigns=G.campaigns.filter(c=>c.daysLeft>0);
-  G.awareness=Math.max(8,G.awareness-(hasR('brand')?0.18:0.35));
+  t.mkt=mktCost();
+  G.awareness=Math.min(100,Math.max(8,G.awareness-(hasR('brand')?0.18:0.35)+mktAware()));
   // 事業・不動産
   for(const vid of G.ventures){ const v=VENTURES.find(x=>x.id===vid); if(v) t.biz+=v.income*(0.75+Math.random()*0.5); }
   if(G.contract){ t.biz+=G.contract.income; G.contract.days--;
@@ -1137,7 +1160,7 @@ function simDay(){
   t.princ=lp.princ;
   G.rating=calcRating();
   if(lp.default){ gameOver('返済不能に陥り、銀行団により会社は清算されました。'); return; }
-  t.profit=t.rev-t.cogs-t.wage-t.rent-t.mgmt-t.interest-t.salary-t.fine+t.biz+t.prop;
+  t.profit=t.rev-t.cogs-t.wage-t.rent-t.mgmt-t.mkt-t.interest-t.salary-t.fine+t.biz+t.prop;
   G.cash+=t.profit;
   G.today=t;
   G.totalVisitors+=t.visitors; G.totalRev+=t.rev; G.totalProfit+=t.profit;
@@ -1559,6 +1582,8 @@ function absorb(c){
 const act={
   hire(sid){ const st=G.stores.find(x=>x.id===sid); if(st&&st.staff<12){ st.staff++; st.skill=Math.max(10,st.skill-3); renderAll(); save(); } },
   fire(sid){ const st=G.stores.find(x=>x.id===sid); if(st&&st.staff>1){ st.staff--; st.morale=Math.max(0,st.morale-6); renderAll(); save(); } },
+  mkt(id){ if(!G.mkt)G.mkt={}; G.mkt[id]=!G.mkt[id];
+    toast((G.mkt[id]?'✅ ':'⏸ ')+MKT_ITEMS.find(m=>m.id===id).name); renderMenu(); save(); },
   bulkScope(sc,tgt){ BULK.scope=sc; BULK.target=tgt; showBulk(); },
   bulkPrice(m){ const ls=bulkStores(); for(const s of ls) s.priceMode=m;
     toast('💱 '+ls.length+'店の価格戦略を変更'); showBulk(); renderAll(); save(); },
@@ -2073,6 +2098,29 @@ function renderMenu(){
       '<div class="sub">'+b.desc+' (基準原価×'+b.mult.toFixed(2)+')</div></div>'+
       (G.beanId===b.id?'<span class="tag">使用中</span>':
         '<button class="btn sub" onclick="act.bean(\''+b.id+'\')">切替</button>')+'</div>').join('');
+  const on=MKT_ITEMS.filter(m=>mktOn(m.id));
+  $('mkt-sum').innerHTML=
+    '<div class="row"><b>実施中 '+on.length+'/'+MKT_ITEMS.length+'施策</b>'+
+    '<b style="color:'+(mktCost()>Math.max(1,G.today.rev)*0.25?'var(--bad)':'var(--text)')+'">'+
+    yen(mktCost())+'/日</b></div>'+
+    '<div class="stat-line"><span>集客 <b>×'+mktVisit().toFixed(2)+'</b></span>'+
+    '<span>客単価 <b>×'+mktPrice().toFixed(2)+'</b></span>'+
+    '<span>認知度 <b>+'+mktAware().toFixed(2)+'/日</b></span>'+
+    '<span>評判 <b>+'+mktRep().toFixed(2)+'</b></span></div>'+
+    '<div class="small-note">費用は<b>店舗数に比例</b>します。全部載せると利益が飛ぶので、'+
+    '立地の客層に合うものだけを選ぶのが定石です。</div>';
+  $('mkt-list').innerHTML=MKT_ITEMS.map(m=>{
+    const o=mktOn(m.id);
+    const segs=m.seg? Object.keys(m.seg).map(k=>{
+      const g2=SEGMENTS.find(x=>x.id===k); return g2? g2.e+g2.name+'×'+m.seg[k].toFixed(2):'';
+    }).join(' '):'';
+    return '<div class="prod">'+
+      '<div class="toggle'+(o?' on':'')+'" onclick="act.mkt(\''+m.id+'\')"><i></i></div>'+
+      '<div class="info"><div class="nm">'+m.e+' '+m.name+'</div>'+
+      '<div class="sub">'+m.desc+'</div>'+
+      (segs?'<div class="sub" style="color:var(--accent)">'+segs+'</div>':'')+'</div>'+
+      '<span class="tag">'+yen(m.cost)+'/店</span></div>';
+  }).join('');
   $('m-aw').textContent=Math.round(G.awareness);
   $('m-awbar').style.width=Math.round(G.awareness)+'%';
   $('campaigns').innerHTML=CAMPAIGNS.map(c=>{
@@ -2160,7 +2208,7 @@ function renderFin(){
     plRow('売上',t.rev,'good')+(t.biz?plRow('事業収入',t.biz,'good'):'')+
     (t.prop?plRow('不動産収入',t.prop,'good'):'')+
     plRow('原価(材料費)',-t.cogs)+plRow('店舗人件費',-t.wage)+
-    plRow('本部・幹部コスト',-t.mgmt)+(t.salary?plRow('役員報酬',-t.salary):'')+
+    plRow('本部・幹部コスト',-t.mgmt)+(t.mkt?plRow('マーケティング費',-t.mkt):'')+(t.salary?plRow('役員報酬',-t.salary):'')+
     plRow('家賃',-t.rent)+plRow('支払利息',-t.interest)+
     '<div class="row" style="border-top:1px solid var(--line);margin-top:6px;padding-top:6px">'+
     '<b>営業利益</b><b style="color:'+(t.profit>=0?'var(--good)':'var(--bad)')+'">'+yen(t.profit)+'</b></div>'+
