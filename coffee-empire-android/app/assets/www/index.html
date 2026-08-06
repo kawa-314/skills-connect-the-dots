@@ -121,6 +121,29 @@ canvas{width:100%;height:104px;display:block}
 .cand{border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin-bottom:7px;background:var(--card2)}
 .skl{font-weight:800;color:var(--gold)}
 .sect{border-top:1px solid var(--line);margin-top:8px;padding-top:8px}
+.segbar{display:flex;gap:2px;height:11px;flex:1}
+.segbar i{flex:1;border-radius:2px;background:#1c1309;border:1px solid #2e2114}
+.segbar i.on{border-color:transparent}
+.abrow{display:flex;align-items:center;gap:7px;margin:5px 0}
+.abrow .ab-n{width:52px;font-size:11px;color:var(--sub)}
+.abrow .ab-v{width:26px;text-align:right;font-size:11.5px;font-weight:800}
+.stepper2{display:flex;align-items:center;gap:0;margin-top:6px;border-radius:10px;overflow:hidden}
+.stepper2 button{width:46px;height:36px;border:0;font-size:20px;font-weight:700;
+  background:var(--accent2);color:#fff}
+.stepper2 .v{flex:1;text-align:center;background:#120c06;height:36px;line-height:36px;
+  font-size:15px;font-weight:800;color:var(--text)}
+.stepper2 .sub{font-size:9.5px;color:var(--sub);display:block;line-height:0;margin-top:-8px}
+.dlg{display:flex;align-items:center;gap:9px;padding:9px 0;border-bottom:1px dashed var(--line)}
+.dlg:last-child{border-bottom:0}
+.dlg .t{flex:1;font-size:12.5px}
+.badge{display:inline-flex;align-items:center;gap:4px;background:#1c2a1c;border:1px solid #3f6b3f;
+  color:#c6e9c6;border-radius:8px;padding:3px 9px;font-size:11.5px;font-weight:700}
+.badge.warn{background:#2e2412;border-color:#7a6030;color:#ffe0a8}
+.mgrcard{display:flex;gap:10px}
+.mgrface{width:64px;height:78px;border-radius:9px;flex:0 0 auto;
+  background:linear-gradient(160deg,#3a2b1c,#241a10);border:1px solid var(--line);
+  display:flex;align-items:center;justify-content:center;font-size:30px}
+
 /* ---------- ビジュアル ---------- */
 .shopwrap{background:linear-gradient(180deg,#20170e,#2b1f13);border:1px solid var(--line);
   border-radius:10px;overflow:hidden;margin:6px 0}
@@ -757,14 +780,14 @@ function wageOf(st){
 function rentOf(d){ return Math.round(d.rent*((G.rentMod&&G.rentMod[d.id])||1)*(G.polRent||1)); }
 function perStaffCapacity(st){
   const m=getMgr(st.managerId);
-  return (75+st.skill*0.9)*(1+(st.equip-1)*0.15)*(m?1+m.skill/250:0.90)*menuComplexity()*conceptOf(st).cap*(hasR('mobile')?1+0.18*(G.techFresh===undefined?1:G.techFresh):1);
+  return (75+st.skill*0.9)*(1+(st.equip-1)*0.15)*(m?1+abilOf(m,'product')/250:0.90)*menuComplexity()*conceptOf(st).cap*(hasR('mobile')?1+0.18*(G.techFresh===undefined?1:G.techFresh):1);
 }
 function storeCapacity(st){ return st.staff*perStaffCapacity(st); }
 function idealStaff(st){ return clamp(Math.ceil((st.lastPot||60)/Math.max(1,perStaffCapacity(st))),1,12); }
 function storeAttract(st){
   if(st.closedDays>0) return 0;
   const m=getMgr(st.managerId);
-  let a=(40+st.equip*15+st.interior*10+st.skill*0.5+st.rep*12+(m?12+m.skill*0.22:0))*conceptOf(st).appeal*(hasR('sub')?1+0.12*(G.techFresh===undefined?1:G.techFresh):1);
+  let a=(40+st.equip*15+st.interior*10+st.skill*0.5+st.rep*12+(m?12+abilOf(m,'product')*0.14+(dlgOn(st,'promo')?abilOf(m,'promo')*0.18:0):0))*conceptOf(st).appeal*(hasR('sub')?1+0.12*(G.techFresh===undefined?1:G.techFresh):1);
   if(m&&m.traitId==='magnet') a*=1.2;
   return Math.max(1,a);
 }
@@ -873,6 +896,12 @@ function refreshCandidates(){
 /* =====================  DELEGATION (自動化)  ===================== */
 function runDelegation(){
   const D=G.deleg;
+  // 店長への委任(店舗ごと)
+  for(const st of G.stores){
+    const m=getMgr(st.managerId); if(!m) continue;
+    if(dlgOn(st,'staff')){ const t=idealStaff(st); if(st.staff<t)st.staff++; else if(st.staff>t)st.staff--; }
+    if(dlgOn(st,'price')){ st.priceMode=0; }
+  }
   // 人員配置
   if(D.staffing && getExec('ops')){
     for(const st of G.stores){
@@ -1174,14 +1203,14 @@ function simDay(){
       const m=getMgr(st.managerId);
       // 満足度
       let sat=1.9+b.q*0.42+st.skill/100*1.0+st.interior*0.12+st.equip*0.08+(st.morale-60)/160;
-      if(m){ sat+=0.15+m.skill/250; if(m.traitId==='service') sat+=0.4; }
+      if(m){ sat+=0.15+abilOf(m,'product')/250; if(m.traitId==='service') sat+=0.4; }
       sat-=lost>0? Math.min(0.9,(lost/Math.max(pot,1))*1.2):0;
       sat-=tolPen*0.9; sat-=pen*1.2; sat+=mktRep();
       sat=clamp(sat,1,5);
       st.rep=st.rep*0.9+sat*0.1;
       // 士気と離職
       const util=served/Math.max(1,cap);
-      st.morale=clamp(st.morale+(m?0.7:-1.1)+benMorale()+WAGE_LEVELS[G.wageIdx].morale*0.6
+      st.morale=clamp(st.morale+(m?0.4+abilOf(m,'hr')/120:-1.1)+benMorale()+WAGE_LEVELS[G.wageIdx].morale*0.6
         +(util>0.98?-1.6:util>0.88?-0.3:0.6),0,100);
       if(st.morale<32 && st.staff>1 && Math.random()<0.07){
         st.staff--; st.morale+=8;
@@ -1567,8 +1596,11 @@ function compAI(){
     } else if(c.person==='talent'){
       const assigned=G.managers.filter(m=>m.role==='store');
       // 引き抜きは稀にしか起きない。士気が高く待遇が良ければほぼ起きない
-      const wageOk=G.wageIdx>=1, hrDept=!!G.execs.hr;
-      let pk=0.16; if(wageOk)pk*=0.55; if(hrDept)pk*=0.45;
+      const hrDept=!!G.execs.hr;
+      let pk=0.16; if(hrDept)pk*=0.45;
+      // 相場より高い年俸を払っていれば引き抜かれにくい
+      const paid=assigned.length? assigned.reduce((a,x)=>a+x.salary/marketRate(x),0)/assigned.length : 1;
+      pk*= paid>=1.15? 0.25 : paid>=1.0? 0.55 : 1.4;
       if(assigned.length && Math.random()<pk){
         const m=assigned.sort((a,b)=>b.skill-a.skill)[0];
         const st=G.stores.find(s=>s.managerId===m.id);
@@ -1745,6 +1777,7 @@ function openStore(did,cid){
   const st={ id:'s'+(G.seq++), districtId:did, concept:cid, priceMode:0,
     name:(G.stores.length+1)+'号店 ('+d.name+')',
     staff:2, skill:25, morale:70, managerId:null, equip:1, interior:1, rep:3.0, owned:false,
+    deleg:{staff:false,price:false,promo:false,issue:false},
     closedDays:0, lastPot:60, hist:[], today:{rev:0,profit:0,visitors:0,lost:0,sat:3,share:0,seg:{}} };
   G.stores.push(st);
   news('🎊 <b>'+st.name+'</b>を'+c.e+c.name+'として開店しました!');
@@ -1783,6 +1816,15 @@ function absorb(c){
 const act={
   hire(sid){ const st=G.stores.find(x=>x.id===sid); if(st&&st.staff<12){ st.staff++; st.skill=Math.max(10,st.skill-3); renderAll(); save(); } },
   fire(sid){ const st=G.stores.find(x=>x.id===sid); if(st&&st.staff>1){ st.staff--; st.morale=Math.max(0,st.morale-6); renderAll(); save(); } },
+  pay(sid,dir){ const st=G.stores.find(x=>x.id===sid); const m=getMgr(st&&st.managerId); if(!m)return;
+    m.salary=Math.max(2000,Math.round(m.salary*(dir>0?1.08:0.94)/100)*100);
+    toast('💴 年俸を'+yen(m.salary*365)+'に変更'); showAssign(sid); renderAll(); save(); },
+  deleg(sid,k){ const st=G.stores.find(x=>x.id===sid); if(!st)return;
+    if(!st.deleg) st.deleg={};
+    if(!st.managerId){ toast('🚫 先に店長を配属してください',true); return; }
+    st.deleg[k]=!st.deleg[k];
+    toast((st.deleg[k]?'✅ ':'⏸ ')+DELEG_ITEMS.find(d=>d.k===k).n);
+    showAssign(sid); save(); },
   benefit(id){ if(!G.benefits)G.benefits={}; G.benefits[id]=!G.benefits[id];
     toast((G.benefits[id]?'✅ ':'⏸ ')+BENEFITS.find(b=>b.id===id).name); renderOrg(); save(); },
   lobby(id){ if(G.lobbyFor===id){ G.lobbyFor=null; renderMarket(); save(); return; }
@@ -2283,6 +2325,39 @@ function renderOrg(){
       '<button class="mini" '+(G.cash<c.salary*8?'disabled':'')+' onclick="act.hireMgr(\''+c.id+'\')">採用</button></div></div>';
   }).join('');
 }
+
+const ABIL=[
+ {k:'hr',     n:'人事能力', c:'#7fc97f', d:'店員の士気を保ち、離職を減らす'},
+ {k:'product',n:'商品能力', c:'#d99a4e', d:'提供の速さと品質が上がる'},
+ {k:'promo',  n:'宣伝能力', c:'#7fb0c9', d:'その店の集客が上がる'},
+ {k:'ethics', n:'倫理能力', c:'#c98ac9', d:'トラブルの被害を抑える'},
+];
+function abilOf(m,k){ if(m[k]===undefined) m[k]=clamp(Math.round((m.skill||50)+rnd(-18,18)),15,99); return m[k]; }
+function abilAvg(m){ let t=0; for(const a of ABIL) t+=abilOf(m,a.k); return t/ABIL.length; }
+function segBar(v,color){
+  let h='<span class="segbar">';
+  for(let i=0;i<5;i++){
+    const lo=i*20, on=v>lo;
+    const frac=clamp((v-lo)/20,0,1);
+    h+='<i class="'+(on?'on':'')+'" style="'+(on?'background:linear-gradient(90deg,'+color+' '+
+      Math.round(frac*100)+'%, #1c1309 '+Math.round(frac*100)+'%)':'')+'"></i>';
+  }
+  return h+'</span>';
+}
+function abilRows(m){
+  return ABIL.map(a=>{ const v=abilOf(m,a.k);
+    return '<div class="abrow"><span class="ab-n">'+a.n+'</span>'+segBar(v,a.c)+
+      '<span class="ab-v" style="color:'+a.c+'">'+v+'</span></div>';
+  }).join('');
+}
+const DELEG_ITEMS=[
+ {k:'staff', n:'店員と時給管理を委任する', d:'需要に合わせて人員を自動調整します', ab:'hr'},
+ {k:'price', n:'商品メニューと値段設定を委任する', d:'適正価格に自動で寄せます', ab:'product'},
+ {k:'promo', n:'店舗のマーケティングを委任する', d:'その店の集客施策を店長が回します', ab:'promo'},
+ {k:'issue', n:'店舗のトラブル解決を委任する', d:'危機イベントの被害を抑えます', ab:'ethics'},
+];
+function dlgOn(st,k){ return !!(st.deleg&&st.deleg[k]); }
+function marketRate(m){ return Math.round(3000+abilAvg(m)*260); }
 function traitOf(m){ return TRAITS.find(t=>t.id===m.traitId)||TRAITS[0]; }
 function renderMenu(){
   const m=menuStats();
@@ -2698,18 +2773,53 @@ function showStoreDetail(sid){
 window.showStoreDetail=showStoreDetail;
 function showAssign(sid){
   const st=G.stores.find(x=>x.id===sid); if(!st)return;
-  const free=G.managers.filter(m=>!m.assign||m.assign===sid);
-  showModal('<h3>👔 '+st.name+' の店長</h3>'+
-    (free.length? free.map(m=>{
-      const t=traitOf(m);
-      return '<div class="card"><div class="row"><div style="flex:1"><b>'+m.name+'</b> '+
-        '<span class="skl">スキル'+m.skill+'</span><div class="muted">'+t.e+' '+t.name+' — '+t.desc+
-        '<br>給与 '+yen(m.salary)+'/日</div></div>'+
-        (st.managerId===m.id? '<span class="tag good">配属中</span>':
-        '<button class="btn" onclick="act.assign(\''+m.id+'\',\''+sid+'\')">配属</button>')+'</div></div>';
-    }).join('') : '<div class="card muted">待機中の人材がいません。組織タブの人材市場で採用してください。</div>')+
-    (st.managerId?'<button class="btn sub" style="width:100%;margin-bottom:6px" onclick="act.assign(\''+st.managerId+'\',\'none\')">店長を外す</button>':'')+
-    '<button class="btn sub" style="width:100%" onclick="closeModal()">閉じる</button>');
+  const m=getMgr(st.managerId);
+  const free=G.managers.filter(x=>!x.assign);
+  let html='<h3>👔 '+st.name+' の店長</h3>';
+  if(m){
+    const t=traitOf(m);
+    const mk=marketRate(m);
+    const diff=Math.round((m.salary/mk-1)*100);
+    html+='<div class="card">'+
+      '<div class="mgrcard"><div class="mgrface">🧑‍💼</div>'+
+      '<div style="flex:1"><b style="font-size:15px">'+m.name+'</b>'+
+      '<div class="muted" style="margin:2px 0 6px">'+t.e+' '+t.name+' ・ 勤続'+(m.days||0)+'日</div>'+
+      abilRows(m)+'</div></div>'+
+      '<div class="sect"><div class="muted">年俸</div>'+
+      '<div class="stepper2">'+
+        '<button onclick="act.pay(\''+sid+'\',-1)">−</button>'+
+        '<span class="v">'+yen(m.salary*365)+'<span class="sub">相場比 '+(diff>=0?'+':'')+diff+'%</span></span>'+
+        '<button onclick="act.pay(\''+sid+'\',1)">＋</button>'+
+      '</div>'+
+      '<div class="small-note">相場を下回ると引き抜かれやすく、上回ると定着します。日額 '+yen(m.salary)+'</div></div>'+
+      '<div class="sect"><div class="muted" style="margin-bottom:4px">店長への業務委任</div>'+
+      DELEG_ITEMS.map(d=>{
+        const on=dlgOn(st,d.k);
+        const ab=ABIL.find(a=>a.k===d.ab);
+        return '<div class="dlg">'+
+          '<div class="toggle'+(on?' on':'')+'" onclick="act.deleg(\''+sid+'\',\''+d.k+'\')"><i></i></div>'+
+          '<div class="t"><b>'+d.n+'</b><div class="muted">'+d.d+'</div></div>'+
+          '<span class="badge'+(abilOf(m,d.ab)>=60?'':' warn')+'">'+ab.n.replace('能力','')+' '+abilOf(m,d.ab)+'</span>'+
+          '</div>';
+      }).join('')+'</div>'+
+      '<div class="btnrow"><button class="btn sub" onclick="act.assign(\''+m.id+'\',\'none\')">店長を外す</button></div>'+
+      '</div>';
+  } else {
+    html+='<div class="card warn"><b>店長が不在です</b>'+
+      '<div class="muted">店員は店長がいないだけで不満を溜めます。早めに配属しましょう。</div></div>';
+  }
+  html+='<h3 style="font-size:13.5px;margin:10px 0 6px">待機中の人材</h3>';
+  html+= free.length? free.map(x=>{
+    const t=traitOf(x);
+    return '<div class="card"><div class="mgrcard"><div class="mgrface">🧑‍💼</div>'+
+      '<div style="flex:1"><div class="row"><b>'+x.name+'</b>'+
+      '<span class="tag">年俸 '+yen(x.salary*365)+'</span></div>'+
+      '<div class="muted" style="margin:2px 0 4px">'+t.e+' '+t.name+'</div>'+
+      abilRows(x)+'</div></div>'+
+      '<button class="btn" style="width:100%;margin-top:6px" onclick="act.assign(\''+x.id+'\',\''+sid+'\')">この人を配属する</button></div>';
+  }).join('') : '<div class="card muted">待機中の人材がいません。組織タブの人材市場で採用してください。</div>';
+  html+='<button class="btn sub" style="width:100%" onclick="closeModal()">閉じる</button>';
+  showModal(html);
 }
 window.showAssign=showAssign;
 function showExecPick(role){
